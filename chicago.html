@@ -3,130 +3,111 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Climate Guide — Chicago</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <title>Climate — chicago</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --ink:#1c1c2e;--paper:#f7f5f0;--gold:#c8a44a;--green:#27573f;
-      --red:#7d3535;--muted:#888;--border:#ddd8cf;
+      --ink:#1c1c2e;--gold:#c8a44a;--green:#27573f;--red:#7d3535;
+      --muted:#888;--border:#ddd8cf;--bg:#fff;
       --row-best:#eef6f1;--row-worst:#fdf0f0;
-      --chart-hi:#e07b39;--chart-avg:#c8a44a;--chart-lo:#5b8fa8;--chart-rain:#4a7fa8;
+      --chart-hi:#e07b39;--chart-avg:#c8a44a;--chart-lo:#5b8fa8;
     }
-    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;font-size:15px}
-    /* ── Hero ── */
-    .hero{background:var(--ink);color:#fff;padding:3rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden}
-    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 0%,rgba(200,164,74,.2) 0%,transparent 65%);pointer-events:none}
-    .eyebrow{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
-    .hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,3.8rem);font-weight:700;line-height:1.1;margin-bottom:.5rem}
-    .hero-sub{color:rgba(255,255,255,.45);font-size:.82rem;font-weight:300}
-    /* ── Layout ── */
-    .container{max-width:860px;margin:0 auto;padding:2rem 1.25rem 4rem}
+    .clim-widget{font-family:system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.5}
     /* ── Strips ── */
-    .strips{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem}
-    .strip{flex:1 1 220px;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;border-radius:8px;padding:.9rem 1.1rem}
+    .strips{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.25rem}
+    .strip{flex:1 1 180px;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;border-radius:7px;padding:.7rem 1rem}
     .strip-best{background:var(--green);color:#fff}
     .strip-avoid{background:var(--red);color:#fff}
-    .strip strong{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;opacity:.65;flex-shrink:0}
-    .pill{border-radius:20px;padding:.22rem .75rem;font-size:.78rem;font-weight:500;background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.28)}
+    .strip strong{font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;opacity:.65;flex-shrink:0}
+    .pill{border-radius:20px;padding:.18rem .65rem;font-size:.75rem;font-weight:500;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28)}
     /* ── Narrative ── */
-    .narrative{font-size:.92rem;line-height:1.85;color:#3a3a50;margin-bottom:1.75rem;padding:1.2rem 1.4rem;background:#fff;border-left:3px solid var(--gold);border-radius:0 7px 7px 0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-    /* ── Section label ── */
-    .section-label{font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
-    /* ── Charts ── */
-    .charts{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.75rem}
-    @media(max-width:580px){.charts{grid-template-columns:1fr}}
-    .chart-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:1rem 1rem .75rem}
-    .chart-title{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem}
-    .chart-card canvas{width:100%!important}
+    .narrative{font-size:.88rem;line-height:1.8;color:#3a3a50;margin-bottom:1.25rem;padding:1rem 1.2rem;background:#f9f7f2;border-left:3px solid var(--gold);border-radius:0 6px 6px 0}
     /* ── Unit toggle ── */
-    .unit-row{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;margin-bottom:.9rem}
-    .unit-row span{font-size:.75rem;color:var(--muted)}
-    .toggle{position:relative;display:inline-block;width:38px;height:20px;cursor:pointer}
+    .unit-row{display:flex;align-items:center;justify-content:flex-end;gap:.45rem;margin-bottom:.8rem}
+    .unit-row span{font-size:.72rem;color:var(--muted)}
+    .unit-lbl{font-weight:600;color:var(--ink)!important;min-width:1.8rem;text-align:right}
+    .toggle{position:relative;display:inline-block;width:36px;height:19px;cursor:pointer;flex-shrink:0}
     .toggle input{opacity:0;width:0;height:0}
-    .slider{position:absolute;inset:0;background:#ccc;border-radius:20px;transition:.25s}
-    .slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s}
+    .slider{position:absolute;inset:0;background:#ccc;border-radius:20px;transition:.22s}
+    .slider::before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.22s}
     input:checked+.slider{background:var(--gold)}
-    input:checked+.slider::before{transform:translateX(18px)}
+    input:checked+.slider::before{transform:translateX(17px)}
+    /* ── Charts ── */
+    .charts{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1.25rem}
+    @media(max-width:520px){.charts{grid-template-columns:1fr}}
+    .chart-card{background:#f9f7f2;border:1px solid var(--border);border-radius:8px;padding:.8rem .9rem .6rem}
+    .chart-title{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
     /* ── Collapsible table ── */
-    .collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;margin-bottom:.6rem}
+    .collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:.4rem 0;border-top:1px solid var(--border)}
     .collapsible-header:hover .chevron{color:var(--ink)}
-    .chevron{font-size:.9rem;color:var(--muted);transition:transform .25s}
+    .col-label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+    .chevron{font-size:.8rem;color:var(--muted);transition:transform .22s;line-height:1}
     .chevron.open{transform:rotate(180deg)}
-    .table-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;display:none}
+    .table-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none;margin-top:.5rem}
     .table-wrap.open{display:block}
-    table{width:100%;border-collapse:collapse;font-size:.83rem}
+    table{width:100%;border-collapse:collapse;font-size:.8rem}
     thead{background:var(--ink);color:rgba(255,255,255,.72)}
-    thead th{padding:.7rem .9rem;text-align:left;font-weight:500;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase}
+    thead th{padding:.6rem .8rem;text-align:left;font-weight:500;font-size:.62rem;letter-spacing:.07em;text-transform:uppercase}
     tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
     tbody tr:last-child{border-bottom:none}
     tbody tr:hover{background:#f3efe8}
     tbody tr.row-best{background:var(--row-best)}
     tbody tr.row-worst{background:var(--row-worst)}
-    td{padding:.65rem .9rem;vertical-align:middle}
+    td{padding:.55rem .8rem;vertical-align:middle}
     .col-month{font-weight:500;white-space:nowrap}
-    .badge{display:inline-block;margin-left:.45rem;font-size:.58rem;font-weight:700;letter-spacing:.04em;padding:.12rem .38rem;border-radius:3px;vertical-align:middle}
+    .badge{display:inline-block;margin-left:.4rem;font-size:.56rem;font-weight:700;padding:.1rem .32rem;border-radius:3px;vertical-align:middle}
     .badge-best{background:var(--gold);color:#fff}
     .badge-avoid{background:var(--red);color:#fff}
     /* ── Footer ── */
-    .meta{margin-top:1.5rem;text-align:center;font-size:.7rem;color:var(--muted);line-height:2}
+    .meta{margin-top:.9rem;font-size:.67rem;color:var(--muted);line-height:1.8}
     .meta a{color:var(--green);text-decoration:none}
   </style>
 </head>
 <body>
-<div class="hero">
-  <p class="eyebrow">Climate &amp; Travel Guide</p>
-  <h1>Chicago</h1>
-  <p class="hero-sub">City overview &middot; 25-year historical data &middot; NOAA GSOM</p>
-</div>
-
-<div class="container">
+<div class="clim-widget">
 
   <!-- Best / Avoid strips -->
-  <div class="strips" style="margin-top:1.75rem">
+  <div class="strips">
     <div class="strip strip-best"><strong>Best months</strong><span class="pill pill-best">September</span><span class="pill pill-best">June</span><span class="pill pill-best">July</span></div>
     <div class="strip strip-avoid"><strong>Avoid</strong><span class="pill pill-avoid">March</span><span class="pill pill-avoid">December</span><span class="pill pill-avoid">April</span></div>
   </div>
 
   <!-- Narrative -->
-  <p class="narrative">The best time to visit Chicago is September, June and July, when temperatures are comfortable and rainfall is relatively low. Try to avoid March, December and April, when conditions are at their least comfortable. Chicago experiences a wide temperature swing across the year, from a cold January averaging around 24.1F (-4.4C) to a hot July averaging around 74.5F (23.6C). In a warm July, average temperatures can reach 78.1F (25.6C), while a cold July may only average 70.9F (21.6C). Similarly, January averages range from 17.6F (-8.0C) in a cold year to 31.3F (-0.4C) in a mild one. Rainfall peaks in May and is lowest in February.</p>
+  <p class="narrative">The best time to visit chicago is September, June and July, when temperatures are comfortable and rainfall is relatively low. Try to avoid March, December and April, when conditions are at their least comfortable. chicago experiences a wide temperature swing across the year, from a cold January averaging around 24.1F (-4.4C) to a hot July averaging around 74.5F (23.6C). In a warm July, average temperatures can reach 78.1F (25.6C), while a cold July may only average 70.9F (21.6C). Similarly, January averages range from 17.6F (-8.0C) in a cold year to 31.3F (-0.4C) in a mild one. Rainfall peaks in May and is lowest in February.</p>
 
   <!-- °C / °F toggle -->
   <div class="unit-row">
-    <span id="unit-label">°C</span>
-    <label class="toggle" title="Switch between °C and °F">
-      <input type="checkbox" id="unit-toggle" onchange="switchUnits(this.checked)"/>
+    <span class="unit-lbl" id="unit-lbl-c">°C</span>
+    <label class="toggle" title="Switch °C / °F">
+      <input type="checkbox" id="unit-toggle" checked onchange="switchUnits(this.checked)"/>
       <span class="slider"></span>
     </label>
-    <span>°F</span>
+    <span class="unit-lbl" id="unit-lbl-f">°F</span>
   </div>
 
   <!-- Charts -->
   <div class="charts">
     <div class="chart-card">
       <div class="chart-title">Temperature</div>
-      <canvas id="tempChart" height="180"></canvas>
+      <canvas id="tempChart" height="170"></canvas>
     </div>
     <div class="chart-card">
       <div class="chart-title">Precipitation</div>
-      <canvas id="prcpChart" height="180"></canvas>
+      <canvas id="prcpChart" height="170"></canvas>
     </div>
   </div>
 
   <!-- Collapsible monthly table -->
   <div class="collapsible-header" onclick="toggleTable()">
-    <p class="section-label" style="margin:0">Monthly breakdown</p>
+    <span class="col-label">Monthly breakdown</span>
     <span class="chevron" id="chev">&#9660;</span>
   </div>
   <div class="table-wrap" id="monthTable">
     <table>
       <thead>
         <tr>
-          <th>Month</th>
-          <th>Daily High</th><th>Avg Temp</th><th>Daily Low</th>
-          <th>Avg Rainfall</th>
+          <th>Month</th><th>High</th><th>Avg</th><th>Low</th><th>Rainfall</th>
         </tr>
       </thead>
       <tbody>
@@ -218,174 +199,128 @@
   </div>
 
   <p class="meta">
-    Source: <a href="https://www.ncei.noaa.gov/cdo-web/" target="_blank">NOAA Climate Data Online</a>
-    &middot; Station(s): CHICAGO MIDWAY AIRPORT, IL US, CHICAGO OHARE INTERNATIONAL AIRPORT, IL US, ROMEOVILLE WEATHER FORECAST OFFICE, IL US &middot; Generated April 18, 2026
+    Source: <a href="https://www.ncei.noaa.gov/cdo-web/" target="_blank">NOAA CDO</a>
+    &middot; Station(s): CHICAGO MIDWAY AIRPORT, IL US, CHICAGO OHARE INTERNATIONAL AIRPORT, IL US, ROMEOVILLE WEATHER FORECAST OFFICE, IL US &middot; April 18, 2026
   </p>
 </div>
 
 <script>
-// ── Data ─────────────────────────────────────────────────────────────
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const HI_C   = [-0.3,1.9,9.5,16.0,21.9,27.4,28.9,28.0,25.0,17.4,9.5,2.7];
-const AVG_C  = [-4.4,-2.7,4.3,10.2,16.1,21.7,23.6,22.7,19.3,12.1,4.8,-1.2];
-const LO_C   = [-8.5,-7.4,-0.9,4.4,10.3,15.9,18.2,17.4,13.7,6.7,0.2,-5.2];
-const HI_F   = [31.5,35.4,49.1,60.8,71.4,81.3,84.0,82.4,77.0,63.3,49.1,36.9];
-const AVG_F  = [24.1,27.1,39.7,50.4,61.0,71.1,74.5,72.9,66.7,53.8,40.6,29.8];
-const LO_F   = [16.7,18.7,30.4,39.9,50.5,60.6,64.8,63.3,56.7,44.1,32.4,22.6];
+const MONTHS  = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const HI_C    = [-0.3,1.9,9.5,16.0,21.9,27.4,28.9,28.0,25.0,17.4,9.5,2.7];
+const AVG_C   = [-4.4,-2.7,4.3,10.2,16.1,21.7,23.6,22.7,19.3,12.1,4.8,-1.2];
+const LO_C    = [-8.5,-7.4,-0.9,4.4,10.3,15.9,18.2,17.4,13.7,6.7,0.2,-5.2];
+const HI_F    = [31.5,35.4,49.1,60.8,71.4,81.3,84.0,82.4,77.0,63.3,49.1,36.9];
+const AVG_F   = [24.1,27.1,39.7,50.4,61.0,71.1,74.5,72.9,66.7,53.8,40.6,29.8];
+const LO_F    = [16.7,18.7,30.4,39.9,50.5,60.6,64.8,63.3,56.7,44.1,32.4,22.6];
 const PRCP_MM = [52.4,49.7,80.7,103.5,118.8,118.0,113.8,115.0,80.0,93.9,59.6,61.6];
 const PRCP_IN = [2.06,1.96,3.18,4.07,4.68,4.65,4.48,4.53,3.15,3.7,2.35,2.43];
 
-let useFahrenheit = false;
+// Default: °F (toggle starts checked)
+let useF = true;
 
-// ── Shared tooltip config ─────────────────────────────────────────────
-const tooltipPlugin = {
-  callbacks: {
-    title: ctx => MONTHS[ctx[0].dataIndex],
-  }
-};
-
-// ── Temperature chart ────────────────────────────────────────────────
-const tempCtx = document.getElementById('tempChart').getContext('2d');
-const tempChart = new Chart(tempCtx, {
+// ── Temperature chart ─────────────────────────────────────────────
+const tempChart = new Chart(document.getElementById('tempChart'), {
   type: 'line',
   data: {
     labels: MONTHS,
     datasets: [
-      {
-        label: 'High',
-        data: HI_C,
-        borderColor: 'var(--chart-hi)',
-        backgroundColor: 'rgba(224,123,57,.08)',
-        borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        tension: 0.35,
-        fill: false,
-      },
-      {
-        label: 'Avg',
-        data: AVG_C,
-        borderColor: 'var(--chart-avg)',
-        backgroundColor: 'rgba(200,164,74,.1)',
-        borderWidth: 2.5,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        tension: 0.35,
-        fill: false,
-      },
-      {
-        label: 'Low',
-        data: LO_C,
-        borderColor: 'var(--chart-lo)',
-        backgroundColor: 'rgba(91,143,168,.08)',
-        borderWidth: 2,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        tension: 0.35,
-        fill: false,
-      },
+      { label:'High', data:HI_F,  borderColor:'#e07b39', backgroundColor:'rgba(224,123,57,.08)', borderWidth:2,   pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
+      { label:'Avg',  data:AVG_F, borderColor:'#c8a44a', backgroundColor:'rgba(200,164,74,.1)',  borderWidth:2.5, pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
+      { label:'Low',  data:LO_F,  borderColor:'#5b8fa8', backgroundColor:'rgba(91,143,168,.08)', borderWidth:2,   pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
     ]
   },
   options: {
-    responsive: true,
-    interaction: { mode: 'index', intersect: false },
-    plugins: {
-      tooltip: {
-        ...tooltipPlugin,
-        callbacks: {
+    responsive:true,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ labels:{ boxWidth:10, font:{ size:11 } } },
+      tooltip:{
+        callbacks:{
           title: ctx => MONTHS[ctx[0].dataIndex],
-          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y !== null ? ctx.parsed.y + (useFahrenheit ? '°F' : '°C') : '—'}`,
-        }
-      },
-      legend: { labels: { boxWidth: 10, font: { size: 11 } } },
-    },
-    scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-      y: {
-        grid: { color: 'rgba(0,0,0,.06)' },
-        ticks: {
-          font: { size: 11 },
-          callback: v => v + (useFahrenheit ? '°F' : '°C'),
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y + (useF?'°F':'°C') : '—'}`,
         }
       }
+    },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ font:{ size:11 } } },
+      y:{ grid:{ color:'rgba(0,0,0,.06)' }, ticks:{ font:{ size:11 }, callback: v => v+(useF?'°F':'°C') } }
     }
   }
 });
 
-// ── Precipitation chart ──────────────────────────────────────────────
-const prcpCtx = document.getElementById('prcpChart').getContext('2d');
-const prcpChart = new Chart(prcpCtx, {
+// ── Precipitation chart ───────────────────────────────────────────
+const prcpChart = new Chart(document.getElementById('prcpChart'), {
   type: 'bar',
   data: {
     labels: MONTHS,
     datasets: [{
-      label: 'Rainfall',
-      data: PRCP_MM,
-      backgroundColor: 'rgba(74,127,168,.55)',
-      borderColor: 'rgba(74,127,168,.85)',
-      borderWidth: 1,
-      borderRadius: 3,
-      hoverBackgroundColor: 'rgba(74,127,168,.8)',
+      label:'Rainfall', data:PRCP_IN,
+      backgroundColor:'rgba(74,127,168,.55)', borderColor:'rgba(74,127,168,.85)',
+      borderWidth:1, borderRadius:3, hoverBackgroundColor:'rgba(74,127,168,.8)',
     }]
   },
   options: {
-    responsive: true,
-    interaction: { mode: 'index', intersect: false },
-    plugins: {
-      tooltip: {
-        callbacks: {
+    responsive:true,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ display:false },
+      tooltip:{
+        callbacks:{
           title: ctx => MONTHS[ctx[0].dataIndex],
           label: ctx => {
-            const mm = PRCP_MM[ctx.dataIndex];
-            const inch = PRCP_IN[ctx.dataIndex];
-            if (mm === null) return ' —';
-            return useFahrenheit
-              ? ` ${inch !== null ? inch + '′′' : '—'}`
-              : ` ${mm} mm (${inch !== null ? inch + '′′' : '—'})`;
+            const i = ctx.dataIndex;
+            const mm = PRCP_MM[i], inch = PRCP_IN[i];
+            if (mm == null) return ' —';
+            return useF
+              ? ` ${inch != null ? inch+'′′' : '—'}`
+              : ` ${mm} mm (${inch != null ? inch+'′′' : '—'})`;
           }
         }
-      },
-      legend: { display: false },
+      }
     },
-    scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-      y: {
-        grid: { color: 'rgba(0,0,0,.06)' },
-        ticks: {
-          font: { size: 11 },
-          callback: v => useFahrenheit ? v / 25.4 + '′′' : v + 'mm',
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ font:{ size:11 } } },
+      y:{
+        grid:{ color:'rgba(0,0,0,.06)' },
+        ticks:{
+          font:{ size:11 },
+          callback: v => useF ? v+'′′' : v+'mm'
         }
       }
     }
   }
 });
 
-// ── Unit toggle ───────────────────────────────────────────────────────
+// ── Switch units ──────────────────────────────────────────────────
 function switchUnits(toF) {
-  useFahrenheit = toF;
-  document.getElementById('unit-label').textContent = toF ? '°C' : '°C';
-
-  // Update temp chart datasets
+  useF = toF;
+  // Temp chart
   tempChart.data.datasets[0].data = toF ? HI_F  : HI_C;
   tempChart.data.datasets[1].data = toF ? AVG_F : AVG_C;
   tempChart.data.datasets[2].data = toF ? LO_F  : LO_C;
+  tempChart.options.scales.y.ticks.callback = v => v+(toF?'°F':'°C');
   tempChart.update();
-
-  // Update precip chart (mm vs inches)
+  // Precip chart — swap between inches and mm datasets
   prcpChart.data.datasets[0].data = toF ? PRCP_IN : PRCP_MM;
+  prcpChart.options.scales.y.ticks.callback = v => toF ? v+'′′' : v+'mm';
   prcpChart.update();
-
-  // Update table cells
-  document.querySelectorAll('.val-c').forEach(el => el.style.display = toF ? 'none' : '');
-  document.querySelectorAll('.val-f').forEach(el => el.style.display = toF ? '' : 'none');
+  // Table cells
+  document.querySelectorAll('.val-c').forEach(el => el.style.display = toF?'none':'');
+  document.querySelectorAll('.val-f').forEach(el => el.style.display = toF?'':'none');
+  // Label highlight
+  document.getElementById('unit-lbl-c').style.opacity = toF ? '0.45' : '1';
+  document.getElementById('unit-lbl-f').style.opacity = toF ? '1'    : '0.45';
 }
 
-// ── Collapsible table ─────────────────────────────────────────────────
+// Run on load so °F is active from the start
+switchUnits(true);
+
+// ── Collapsible table ─────────────────────────────────────────────
 function toggleTable() {
   const wrap = document.getElementById('monthTable');
   const chev = document.getElementById('chev');
-  const isOpen = wrap.classList.toggle('open');
-  chev.classList.toggle('open', isOpen);
+  wrap.classList.toggle('open');
+  chev.classList.toggle('open');
 }
 </script>
 </body>
