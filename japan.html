@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Climate Guide — Japan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--ink:#1a1a2e;--paper:#faf8f4;--gold:#c9a84c;--green:#2a6049;--red:#8b3a3a;--muted:#7a7a8a;--border:#e2ddd5;--row-best:#f0f7f4;--row-worst:#fdf3f3}
+    body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+    .hero{background:var(--ink);color:#fff;padding:4rem 2rem 3.5rem;text-align:center;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 65% 0%,rgba(201,168,76,.22) 0%,transparent 68%);pointer-events:none}
+    .hero-eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+    .hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.6rem,7vw,4.4rem);font-weight:700;line-height:1.08;margin-bottom:.6rem}
+    .hero-sub{color:rgba(255,255,255,.5);font-size:.88rem;font-weight:300}
+    .container{max-width:900px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+    .strips{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem}
+    .strip{flex:1 1 260px;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;border-radius:10px;padding:1.1rem 1.4rem}
+    .strip-best{background:var(--green);color:#fff}
+    .strip-avoid{background:var(--red);color:#fff}
+    .strip strong{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7;flex-shrink:0}
+    .pill{border-radius:20px;padding:.28rem .85rem;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3)}
+    .narrative{font-size:.97rem;line-height:1.8;color:#3a3a4a;margin-bottom:2.5rem;padding:1.4rem 1.6rem;background:#fff;border-left:3px solid var(--gold);border-radius:0 8px 8px 0}
+    .section-label{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+    .table-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1.5rem}
+    table{width:100%;border-collapse:collapse;font-size:.88rem}
+    thead{background:var(--ink);color:rgba(255,255,255,.75)}
+    thead th{padding:.85rem 1rem;text-align:left;font-weight:500;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase}
+    tbody tr{border-bottom:1px solid var(--border);transition:background .12s}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:#f5f2ec}
+    tbody tr.row-best{background:var(--row-best)}
+    tbody tr.row-worst{background:var(--row-worst)}
+    td{padding:.8rem 1rem;vertical-align:middle}
+    .col-month{font-weight:500;white-space:nowrap}
+    .badge{display:inline-block;margin-left:.5rem;font-size:.6rem;font-weight:700;letter-spacing:.05em;padding:.14rem .42rem;border-radius:4px;vertical-align:middle}
+    .badge-best{background:var(--gold);color:#fff}
+    .badge-avoid{background:var(--red);color:#fff}
+    .meta{text-align:center;font-size:.73rem;color:var(--muted);line-height:2}
+    .meta a{color:var(--green);text-decoration:none}
+  </style>
+</head>
+<body>
+<div class="hero">
+  <p class="hero-eyebrow">Climate &amp; Travel Guide</p>
+  <h1>Japan</h1>
+  <p class="hero-sub">Country overview · 25-year historical data · NOAA GSOM</p>
+</div>
+<div class="container">
+  <div class="strips">
+    <div class="strip strip-best"><strong>Best months</strong></div>
+    <div class="strip strip-avoid"><strong>Avoid</strong></div>
+  </div>
+  <p class="narrative">No usable climate data was found for Japan. NOAA station coverage may be limited for this country. Try querying a specific city instead.</p>
+  <p class="section-label">Monthly breakdown</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Month</th><th>Daily High</th><th>Avg Temp</th><th>Daily Low</th><th>Avg Rainfall</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="meta">
+    Source: <a href="https://www.ncei.noaa.gov/cdo-web/" target="_blank">NOAA Climate Data Online</a>
+     · Generated April 18, 2026
+  </p>
+</div>
+</body>
+</html>
