@@ -3,325 +3,351 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Climate — chicago</title>
+  <title>Climate — Chicago</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --ink:#1c1c2e;--gold:#c8a44a;--green:#27573f;--red:#7d3535;
-      --muted:#888;--border:#ddd8cf;--bg:#fff;
-      --row-best:#eef6f1;--row-worst:#fdf0f0;
-      --chart-hi:#e07b39;--chart-avg:#c8a44a;--chart-lo:#5b8fa8;
+      --forest:#1E4034;
+      --canopy:#2D6A4F;
+      --moss:#52B788;
+      --stone:#5C5346;
+      --driftwood:#A8896A;
+      --fog:#C9D4C5;
+      --ink:#0F0F0F;
+      --graphite:#3D3D3D;
+      --ash:#8C8C8C;
+      --cloud:#EFEFEF;
+      --paper:#F7F5F0;
+      --white:#FFFFFF;
+      --forest-8:#F1F4F3;
+      --forest-20:#DCDEDD;
+      --moss-12:#E9F4EE;
+      --moss-20:#DCEEE4;
     }
-    .clim-widget{font-family:system-ui,sans-serif;color:var(--ink);font-size:14px;line-height:1.5}
+    .ht-widget{font-family:'DM Sans',sans-serif;color:var(--graphite);font-size:14px;line-height:1.6;background:transparent}
+
     /* ── Strips ── */
-    .strips{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.25rem}
-    .strip{flex:1 1 180px;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;border-radius:7px;padding:.7rem 1rem}
-    .strip-best{background:var(--green);color:#fff}
-    .strip-avoid{background:var(--red);color:#fff}
-    .strip strong{font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;opacity:.65;flex-shrink:0}
-    .pill{border-radius:20px;padding:.18rem .65rem;font-size:.75rem;font-weight:500;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28)}
+    .strips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .strip{flex:1 1 180px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-radius:6px;padding:10px 14px}
+    .strip-best{background:var(--forest);color:var(--white)}
+    .strip-avoid{background:var(--stone);color:var(--white)}
+    .strip strong{font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.6;flex-shrink:0;font-weight:500}
+    .pill{border-radius:20px;padding:3px 10px;font-size:12px;font-weight:500;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25)}
+
     /* ── Narrative ── */
-    .narrative{font-size:.88rem;line-height:1.8;color:#3a3a50;margin-bottom:1.25rem;padding:1rem 1.2rem;background:#f9f7f2;border-left:3px solid var(--gold);border-radius:0 6px 6px 0}
-    /* ── Unit toggle ── */
-    .unit-row{display:flex;align-items:center;justify-content:flex-end;gap:.45rem;margin-bottom:.8rem}
-    .unit-row span{font-size:.72rem;color:var(--muted)}
-    .unit-lbl{font-weight:600;color:var(--ink)!important;min-width:1.8rem;text-align:right}
-    .toggle{position:relative;display:inline-block;width:36px;height:19px;cursor:pointer;flex-shrink:0}
+    .narrative{font-size:13px;line-height:1.85;color:var(--graphite);margin-bottom:16px;padding:14px 16px;background:var(--white);border-left:3px solid var(--driftwood);border-radius:0 5px 5px 0}
+
+    /* ── Unit toggle row ── */
+    .unit-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:12px}
+    .unit-lbl{font-size:12px;font-weight:500;color:var(--ash);min-width:22px;text-align:center;transition:color .18s}
+    .unit-lbl.active{color:var(--forest)}
+    .toggle{position:relative;display:inline-block;width:34px;height:18px;cursor:pointer;flex-shrink:0}
     .toggle input{opacity:0;width:0;height:0}
-    .slider{position:absolute;inset:0;background:#ccc;border-radius:20px;transition:.22s}
-    .slider::before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.22s}
-    input:checked+.slider{background:var(--gold)}
-    input:checked+.slider::before{transform:translateX(17px)}
+    .slider{position:absolute;inset:0;background:var(--fog);border-radius:18px;transition:.2s}
+    .slider::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:var(--white);border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    input:checked+.slider{background:var(--canopy)}
+    input:checked+.slider::before{transform:translateX(16px)}
+
     /* ── Charts ── */
-    .charts{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1.25rem}
-    @media(max-width:520px){.charts{grid-template-columns:1fr}}
-    .chart-card{background:#f9f7f2;border:1px solid var(--border);border-radius:8px;padding:.8rem .9rem .6rem}
-    .chart-title{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+    .charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    @media(max-width:500px){.charts{grid-template-columns:1fr}}
+    .chart-card{background:var(--white);border:1px solid var(--cloud);border-radius:8px;padding:12px 12px 8px}
+    .chart-title{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:8px}
+
     /* ── Collapsible table ── */
-    .collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:.4rem 0;border-top:1px solid var(--border)}
-    .collapsible-header:hover .chevron{color:var(--ink)}
-    .col-label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-    .chevron{font-size:.8rem;color:var(--muted);transition:transform .22s;line-height:1}
+    .collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:10px 0 8px;border-top:1px solid var(--cloud);margin-top:4px}
+    .collapsible-header:hover .col-label{color:var(--canopy)}
+    .col-label{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);transition:color .15s}
+    .chevron{font-size:10px;color:var(--ash);transition:transform .2s;line-height:1}
     .chevron.open{transform:rotate(180deg)}
-    .table-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none;margin-top:.5rem}
+    .table-wrap{border:1px solid var(--cloud);border-radius:8px;overflow:hidden;display:none;margin-top:6px}
     .table-wrap.open{display:block}
-    table{width:100%;border-collapse:collapse;font-size:.8rem}
-    thead{background:var(--ink);color:rgba(255,255,255,.72)}
-    thead th{padding:.6rem .8rem;text-align:left;font-weight:500;font-size:.62rem;letter-spacing:.07em;text-transform:uppercase}
-    tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    thead{background:var(--forest)}
+    thead th{padding:8px 10px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+    tbody tr{border-bottom:1px solid var(--cloud);transition:background .1s}
     tbody tr:last-child{border-bottom:none}
-    tbody tr:hover{background:#f3efe8}
-    tbody tr.row-best{background:var(--row-best)}
-    tbody tr.row-worst{background:var(--row-worst)}
-    td{padding:.55rem .8rem;vertical-align:middle}
-    .col-month{font-weight:500;white-space:nowrap}
-    .badge{display:inline-block;margin-left:.4rem;font-size:.56rem;font-weight:700;padding:.1rem .32rem;border-radius:3px;vertical-align:middle}
-    .badge-best{background:var(--gold);color:#fff}
-    .badge-avoid{background:var(--red);color:#fff}
-    /* ── Footer ── */
-    .meta{margin-top:.9rem;font-size:.67rem;color:var(--muted);line-height:1.8}
-    .meta a{color:var(--green);text-decoration:none}
+    tbody tr:hover{background:var(--paper)}
+    tbody tr.row-best{background:var(--moss-20)}
+    tbody tr.row-worst{background:#FFF7D2}
+    td{padding:7px 10px;vertical-align:middle}
+    .col-month{font-weight:500;white-space:nowrap;color:var(--ink)}
+    .badge{display:inline-block;margin-left:6px;font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 5px;border-radius:3px;vertical-align:middle}
+    .badge-best{background:var(--moss);color:var(--white)}
+    .badge-avoid{background:var(--driftwood);color:var(--white)}
+
+    /* ── Meta ── */
+    .meta{margin-top:12px;font-size:11px;color:var(--ash);line-height:1.8}
+    .meta a{color:var(--canopy);text-decoration:none}
+    .meta a:hover{text-decoration:underline}
   </style>
 </head>
 <body>
-<div class="clim-widget">
+<div class="ht-widget">
 
-  <!-- Best / Avoid strips -->
+  <!-- Best / Avoid -->
   <div class="strips">
-    <div class="strip strip-best"><strong>Best months</strong><span class="pill pill-best">September</span><span class="pill pill-best">June</span><span class="pill pill-best">July</span></div>
-    <div class="strip strip-avoid"><strong>Avoid</strong><span class="pill pill-avoid">March</span><span class="pill pill-avoid">December</span><span class="pill pill-avoid">April</span></div>
+    <div class="strip strip-best"><strong>Best months to visit</strong><span class="pill pill-best">September</span><span class="pill pill-best">June</span><span class="pill pill-best">July</span></div>
+    <div class="strip strip-avoid"><strong>Months to avoid</strong><span class="pill pill-avoid">March</span><span class="pill pill-avoid">December</span><span class="pill pill-avoid">April</span></div>
   </div>
 
   <!-- Narrative -->
-  <p class="narrative">The best time to visit chicago is September, June and July, when temperatures are comfortable and rainfall is relatively low. Try to avoid March, December and April, when conditions are at their least comfortable. chicago experiences a wide temperature swing across the year, from a cold January averaging around 24.1F (-4.4C) to a hot July averaging around 74.5F (23.6C). In a warm July, average temperatures can reach 78.1F (25.6C), while a cold July may only average 70.9F (21.6C). Similarly, January averages range from 17.6F (-8.0C) in a cold year to 31.3F (-0.4C) in a mild one. Rainfall peaks in May and is lowest in February.</p>
+  <p class="narrative">The best time to visit Chicago is September, June and July, when temperatures are comfortable and rainfall is relatively low. Try to avoid March, December and April, when conditions are at their least comfortable. Chicago experiences a wide temperature swing across the year, from a cold January averaging around 24.1F (-4.4C) to a hot July averaging around 74.5F (23.6C). In a warm July, average temperatures can reach 78.1F (25.6C), while a cold July may only average 70.9F (21.6C). Similarly, January averages range from 17.6F (-8.0C) in a cold year to 31.3F (-0.4C) in a mild one. Rainfall peaks in May and is lowest in February.</p>
 
-  <!-- °C / °F toggle -->
+  <!-- Unit toggle -->
   <div class="unit-row">
-    <span class="unit-lbl" id="unit-lbl-c">°C</span>
-    <label class="toggle" title="Switch °C / °F">
-      <input type="checkbox" id="unit-toggle" checked onchange="switchUnits(this.checked)"/>
+    <span class="unit-lbl" id="lbl-c">°C</span>
+    <label class="toggle">
+      <input type="checkbox" id="unit-toggle" checked onchange="htSwitchUnits(this.checked)"/>
       <span class="slider"></span>
     </label>
-    <span class="unit-lbl" id="unit-lbl-f">°F</span>
+    <span class="unit-lbl active" id="lbl-f">°F</span>
   </div>
 
   <!-- Charts -->
   <div class="charts">
     <div class="chart-card">
       <div class="chart-title">Temperature</div>
-      <canvas id="tempChart" height="170"></canvas>
+      <canvas id="htTempChart" height="175"></canvas>
     </div>
     <div class="chart-card">
       <div class="chart-title">Precipitation</div>
-      <canvas id="prcpChart" height="170"></canvas>
+      <canvas id="htPrcpChart" height="175"></canvas>
     </div>
   </div>
 
   <!-- Collapsible monthly table -->
-  <div class="collapsible-header" onclick="toggleTable()">
+  <div class="collapsible-header" onclick="htToggleTable()">
     <span class="col-label">Monthly breakdown</span>
-    <span class="chevron" id="chev">&#9660;</span>
+    <span class="chevron" id="htChev">&#9660;</span>
   </div>
-  <div class="table-wrap" id="monthTable">
+  <div class="table-wrap" id="htMonthTable">
     <table>
       <thead>
-        <tr>
-          <th>Month</th><th>High</th><th>Avg</th><th>Low</th><th>Rainfall</th>
-        </tr>
+        <tr><th>Month</th><th>High</th><th>Avg</th><th>Low</th><th>Rainfall</th></tr>
       </thead>
       <tbody>
         <tr>
           <td class="col-month">January</td>
-          <td><span class="val-c">-0.3°C</span><span class="val-f" style="display:none">31.5°F</span></td>
-          <td><span class="val-c">-4.4°C</span><span class="val-f" style="display:none">24.1°F</span></td>
-          <td><span class="val-c">-8.5°C</span><span class="val-f" style="display:none">16.7°F</span></td>
-          <td>52.4 mm / 2.06′′</td>
+          <td><span class="vc">-0.3°C</span><span class="vf" style="display:none">31.5°F</span></td>
+          <td><span class="vc">-4.4°C</span><span class="vf" style="display:none">24.1°F</span></td>
+          <td><span class="vc">-8.5°C</span><span class="vf" style="display:none">16.7°F</span></td>
+          <td><span class="pmm">52.4 mm</span><span class="pin" style="display:none">2.06"</span></td>
         </tr>
         <tr>
           <td class="col-month">February</td>
-          <td><span class="val-c">1.9°C</span><span class="val-f" style="display:none">35.4°F</span></td>
-          <td><span class="val-c">-2.7°C</span><span class="val-f" style="display:none">27.1°F</span></td>
-          <td><span class="val-c">-7.4°C</span><span class="val-f" style="display:none">18.7°F</span></td>
-          <td>49.7 mm / 1.96′′</td>
+          <td><span class="vc">1.9°C</span><span class="vf" style="display:none">35.4°F</span></td>
+          <td><span class="vc">-2.7°C</span><span class="vf" style="display:none">27.1°F</span></td>
+          <td><span class="vc">-7.4°C</span><span class="vf" style="display:none">18.7°F</span></td>
+          <td><span class="pmm">49.7 mm</span><span class="pin" style="display:none">1.96"</span></td>
         </tr>
         <tr class="row-worst">
           <td class="col-month">March<span class="badge badge-avoid">Avoid</span></td>
-          <td><span class="val-c">9.5°C</span><span class="val-f" style="display:none">49.1°F</span></td>
-          <td><span class="val-c">4.3°C</span><span class="val-f" style="display:none">39.7°F</span></td>
-          <td><span class="val-c">-0.9°C</span><span class="val-f" style="display:none">30.4°F</span></td>
-          <td>80.7 mm / 3.18′′</td>
+          <td><span class="vc">9.5°C</span><span class="vf" style="display:none">49.1°F</span></td>
+          <td><span class="vc">4.3°C</span><span class="vf" style="display:none">39.7°F</span></td>
+          <td><span class="vc">-0.9°C</span><span class="vf" style="display:none">30.4°F</span></td>
+          <td><span class="pmm">80.7 mm</span><span class="pin" style="display:none">3.18"</span></td>
         </tr>
         <tr class="row-worst">
           <td class="col-month">April<span class="badge badge-avoid">Avoid</span></td>
-          <td><span class="val-c">16.0°C</span><span class="val-f" style="display:none">60.8°F</span></td>
-          <td><span class="val-c">10.2°C</span><span class="val-f" style="display:none">50.4°F</span></td>
-          <td><span class="val-c">4.4°C</span><span class="val-f" style="display:none">39.9°F</span></td>
-          <td>103.5 mm / 4.07′′</td>
+          <td><span class="vc">16.0°C</span><span class="vf" style="display:none">60.8°F</span></td>
+          <td><span class="vc">10.2°C</span><span class="vf" style="display:none">50.4°F</span></td>
+          <td><span class="vc">4.4°C</span><span class="vf" style="display:none">39.9°F</span></td>
+          <td><span class="pmm">103.5 mm</span><span class="pin" style="display:none">4.07"</span></td>
         </tr>
         <tr>
           <td class="col-month">May</td>
-          <td><span class="val-c">21.9°C</span><span class="val-f" style="display:none">71.4°F</span></td>
-          <td><span class="val-c">16.1°C</span><span class="val-f" style="display:none">61.0°F</span></td>
-          <td><span class="val-c">10.3°C</span><span class="val-f" style="display:none">50.5°F</span></td>
-          <td>118.8 mm / 4.68′′</td>
+          <td><span class="vc">21.9°C</span><span class="vf" style="display:none">71.4°F</span></td>
+          <td><span class="vc">16.1°C</span><span class="vf" style="display:none">61.0°F</span></td>
+          <td><span class="vc">10.3°C</span><span class="vf" style="display:none">50.5°F</span></td>
+          <td><span class="pmm">118.8 mm</span><span class="pin" style="display:none">4.68"</span></td>
         </tr>
         <tr class="row-best">
           <td class="col-month">June<span class="badge badge-best">✦ Best</span></td>
-          <td><span class="val-c">27.4°C</span><span class="val-f" style="display:none">81.3°F</span></td>
-          <td><span class="val-c">21.7°C</span><span class="val-f" style="display:none">71.1°F</span></td>
-          <td><span class="val-c">15.9°C</span><span class="val-f" style="display:none">60.6°F</span></td>
-          <td>118.0 mm / 4.65′′</td>
+          <td><span class="vc">27.4°C</span><span class="vf" style="display:none">81.3°F</span></td>
+          <td><span class="vc">21.7°C</span><span class="vf" style="display:none">71.1°F</span></td>
+          <td><span class="vc">15.9°C</span><span class="vf" style="display:none">60.6°F</span></td>
+          <td><span class="pmm">118.0 mm</span><span class="pin" style="display:none">4.65"</span></td>
         </tr>
         <tr class="row-best">
           <td class="col-month">July<span class="badge badge-best">✦ Best</span></td>
-          <td><span class="val-c">28.9°C</span><span class="val-f" style="display:none">84.0°F</span></td>
-          <td><span class="val-c">23.6°C</span><span class="val-f" style="display:none">74.5°F</span></td>
-          <td><span class="val-c">18.2°C</span><span class="val-f" style="display:none">64.8°F</span></td>
-          <td>113.8 mm / 4.48′′</td>
+          <td><span class="vc">28.9°C</span><span class="vf" style="display:none">84.0°F</span></td>
+          <td><span class="vc">23.6°C</span><span class="vf" style="display:none">74.5°F</span></td>
+          <td><span class="vc">18.2°C</span><span class="vf" style="display:none">64.8°F</span></td>
+          <td><span class="pmm">113.8 mm</span><span class="pin" style="display:none">4.48"</span></td>
         </tr>
         <tr>
           <td class="col-month">August</td>
-          <td><span class="val-c">28.0°C</span><span class="val-f" style="display:none">82.4°F</span></td>
-          <td><span class="val-c">22.7°C</span><span class="val-f" style="display:none">72.9°F</span></td>
-          <td><span class="val-c">17.4°C</span><span class="val-f" style="display:none">63.3°F</span></td>
-          <td>115.0 mm / 4.53′′</td>
+          <td><span class="vc">28.0°C</span><span class="vf" style="display:none">82.4°F</span></td>
+          <td><span class="vc">22.7°C</span><span class="vf" style="display:none">72.9°F</span></td>
+          <td><span class="vc">17.4°C</span><span class="vf" style="display:none">63.3°F</span></td>
+          <td><span class="pmm">115.0 mm</span><span class="pin" style="display:none">4.53"</span></td>
         </tr>
         <tr class="row-best">
           <td class="col-month">September<span class="badge badge-best">✦ Best</span></td>
-          <td><span class="val-c">25.0°C</span><span class="val-f" style="display:none">77.0°F</span></td>
-          <td><span class="val-c">19.3°C</span><span class="val-f" style="display:none">66.7°F</span></td>
-          <td><span class="val-c">13.7°C</span><span class="val-f" style="display:none">56.7°F</span></td>
-          <td>80.0 mm / 3.15′′</td>
+          <td><span class="vc">25.0°C</span><span class="vf" style="display:none">77.0°F</span></td>
+          <td><span class="vc">19.3°C</span><span class="vf" style="display:none">66.7°F</span></td>
+          <td><span class="vc">13.7°C</span><span class="vf" style="display:none">56.7°F</span></td>
+          <td><span class="pmm">80.0 mm</span><span class="pin" style="display:none">3.15"</span></td>
         </tr>
         <tr>
           <td class="col-month">October</td>
-          <td><span class="val-c">17.4°C</span><span class="val-f" style="display:none">63.3°F</span></td>
-          <td><span class="val-c">12.1°C</span><span class="val-f" style="display:none">53.8°F</span></td>
-          <td><span class="val-c">6.7°C</span><span class="val-f" style="display:none">44.1°F</span></td>
-          <td>93.9 mm / 3.7′′</td>
+          <td><span class="vc">17.4°C</span><span class="vf" style="display:none">63.3°F</span></td>
+          <td><span class="vc">12.1°C</span><span class="vf" style="display:none">53.8°F</span></td>
+          <td><span class="vc">6.7°C</span><span class="vf" style="display:none">44.1°F</span></td>
+          <td><span class="pmm">93.9 mm</span><span class="pin" style="display:none">3.7"</span></td>
         </tr>
         <tr>
           <td class="col-month">November</td>
-          <td><span class="val-c">9.5°C</span><span class="val-f" style="display:none">49.1°F</span></td>
-          <td><span class="val-c">4.8°C</span><span class="val-f" style="display:none">40.6°F</span></td>
-          <td><span class="val-c">0.2°C</span><span class="val-f" style="display:none">32.4°F</span></td>
-          <td>59.6 mm / 2.35′′</td>
+          <td><span class="vc">9.5°C</span><span class="vf" style="display:none">49.1°F</span></td>
+          <td><span class="vc">4.8°C</span><span class="vf" style="display:none">40.6°F</span></td>
+          <td><span class="vc">0.2°C</span><span class="vf" style="display:none">32.4°F</span></td>
+          <td><span class="pmm">59.6 mm</span><span class="pin" style="display:none">2.35"</span></td>
         </tr>
         <tr class="row-worst">
           <td class="col-month">December<span class="badge badge-avoid">Avoid</span></td>
-          <td><span class="val-c">2.7°C</span><span class="val-f" style="display:none">36.9°F</span></td>
-          <td><span class="val-c">-1.2°C</span><span class="val-f" style="display:none">29.8°F</span></td>
-          <td><span class="val-c">-5.2°C</span><span class="val-f" style="display:none">22.6°F</span></td>
-          <td>61.6 mm / 2.43′′</td>
+          <td><span class="vc">2.7°C</span><span class="vf" style="display:none">36.9°F</span></td>
+          <td><span class="vc">-1.2°C</span><span class="vf" style="display:none">29.8°F</span></td>
+          <td><span class="vc">-5.2°C</span><span class="vf" style="display:none">22.6°F</span></td>
+          <td><span class="pmm">61.6 mm</span><span class="pin" style="display:none">2.43"</span></td>
         </tr></tbody>
     </table>
   </div>
 
   <p class="meta">
-    Source: <a href="https://www.ncei.noaa.gov/cdo-web/" target="_blank">NOAA CDO</a>
-    &middot; Station(s): CHICAGO MIDWAY AIRPORT, IL US, CHICAGO OHARE INTERNATIONAL AIRPORT, IL US, ROMEOVILLE WEATHER FORECAST OFFICE, IL US &middot; April 18, 2026
+    Source: <a href="https://www.ncei.noaa.gov/cdo-web/" target="_blank">NOAA Climate Data Online</a>
+    &middot; Stations: CHICAGO MIDWAY AIRPORT, IL US, CHICAGO OHARE INTERNATIONAL AIRPORT, IL US, ROMEOVILLE WEATHER FORECAST OFFICE, IL US &middot; April 18, 2026
   </p>
 </div>
 
 <script>
-const MONTHS  = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const HI_C    = [-0.3,1.9,9.5,16.0,21.9,27.4,28.9,28.0,25.0,17.4,9.5,2.7];
-const AVG_C   = [-4.4,-2.7,4.3,10.2,16.1,21.7,23.6,22.7,19.3,12.1,4.8,-1.2];
-const LO_C    = [-8.5,-7.4,-0.9,4.4,10.3,15.9,18.2,17.4,13.7,6.7,0.2,-5.2];
-const HI_F    = [31.5,35.4,49.1,60.8,71.4,81.3,84.0,82.4,77.0,63.3,49.1,36.9];
-const AVG_F   = [24.1,27.1,39.7,50.4,61.0,71.1,74.5,72.9,66.7,53.8,40.6,29.8];
-const LO_F    = [16.7,18.7,30.4,39.9,50.5,60.6,64.8,63.3,56.7,44.1,32.4,22.6];
-const PRCP_MM = [52.4,49.7,80.7,103.5,118.8,118.0,113.8,115.0,80.0,93.9,59.6,61.6];
-const PRCP_IN = [2.06,1.96,3.18,4.07,4.68,4.65,4.48,4.53,3.15,3.7,2.35,2.43];
+(function() {
+  const MONTHS  = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const HI_C    = [-0.3,1.9,9.5,16.0,21.9,27.4,28.9,28.0,25.0,17.4,9.5,2.7];
+  const AVG_C   = [-4.4,-2.7,4.3,10.2,16.1,21.7,23.6,22.7,19.3,12.1,4.8,-1.2];
+  const LO_C    = [-8.5,-7.4,-0.9,4.4,10.3,15.9,18.2,17.4,13.7,6.7,0.2,-5.2];
+  const HI_F    = [31.5,35.4,49.1,60.8,71.4,81.3,84.0,82.4,77.0,63.3,49.1,36.9];
+  const AVG_F   = [24.1,27.1,39.7,50.4,61.0,71.1,74.5,72.9,66.7,53.8,40.6,29.8];
+  const LO_F    = [16.7,18.7,30.4,39.9,50.5,60.6,64.8,63.3,56.7,44.1,32.4,22.6];
+  const PRCP_MM = [52.4,49.7,80.7,103.5,118.8,118.0,113.8,115.0,80.0,93.9,59.6,61.6];
+  const PRCP_IN = [2.06,1.96,3.18,4.07,4.68,4.65,4.48,4.53,3.15,3.7,2.35,2.43];
 
-// Default: °F (toggle starts checked)
-let useF = true;
+  // Brand colours
+  const C_HI   = '#1E4034';
+  const C_AVG  = '#2D6A4F';
+  const C_LO   = '#52B788';
+  const C_RAIN = '#A8896A';
 
-// ── Temperature chart ─────────────────────────────────────────────
-const tempChart = new Chart(document.getElementById('tempChart'), {
-  type: 'line',
-  data: {
-    labels: MONTHS,
-    datasets: [
-      { label:'High', data:HI_F,  borderColor:'#e07b39', backgroundColor:'rgba(224,123,57,.08)', borderWidth:2,   pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
-      { label:'Avg',  data:AVG_F, borderColor:'#c8a44a', backgroundColor:'rgba(200,164,74,.1)',  borderWidth:2.5, pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
-      { label:'Low',  data:LO_F,  borderColor:'#5b8fa8', backgroundColor:'rgba(91,143,168,.08)', borderWidth:2,   pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
-    ]
-  },
-  options: {
-    responsive:true,
-    interaction:{ mode:'index', intersect:false },
-    plugins:{
-      legend:{ labels:{ boxWidth:10, font:{ size:11 } } },
-      tooltip:{
-        callbacks:{
-          title: ctx => MONTHS[ctx[0].dataIndex],
-          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y + (useF?'°F':'°C') : '—'}`,
-        }
-      }
+  let useF = true;
+
+  // ── Temperature chart ──────────────────────────────────────────
+  const tempChart = new Chart(document.getElementById('htTempChart'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        { label:'High', data:HI_F,  borderColor:C_HI,  backgroundColor:'rgba(30,64,52,.07)',  borderWidth:2,   pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
+        { label:'Avg',  data:AVG_F, borderColor:C_AVG, backgroundColor:'rgba(45,106,79,.08)', borderWidth:2.5, pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
+        { label:'Low',  data:LO_F,  borderColor:C_LO,  backgroundColor:'rgba(82,183,136,.07)',borderWidth:2,   pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
+      ]
     },
-    scales:{
-      x:{ grid:{ display:false }, ticks:{ font:{ size:11 } } },
-      y:{ grid:{ color:'rgba(0,0,0,.06)' }, ticks:{ font:{ size:11 }, callback: v => v+(useF?'°F':'°C') } }
-    }
-  }
-});
-
-// ── Precipitation chart ───────────────────────────────────────────
-const prcpChart = new Chart(document.getElementById('prcpChart'), {
-  type: 'bar',
-  data: {
-    labels: MONTHS,
-    datasets: [{
-      label:'Rainfall', data:PRCP_IN,
-      backgroundColor:'rgba(74,127,168,.55)', borderColor:'rgba(74,127,168,.85)',
-      borderWidth:1, borderRadius:3, hoverBackgroundColor:'rgba(74,127,168,.8)',
-    }]
-  },
-  options: {
-    responsive:true,
-    interaction:{ mode:'index', intersect:false },
-    plugins:{
-      legend:{ display:false },
-      tooltip:{
-        callbacks:{
-          title: ctx => MONTHS[ctx[0].dataIndex],
-          label: ctx => {
-            const i = ctx.dataIndex;
-            const mm = PRCP_MM[i], inch = PRCP_IN[i];
-            if (mm == null) return ' —';
-            return useF
-              ? ` ${inch != null ? inch+'′′' : '—'}`
-              : ` ${mm} mm (${inch != null ? inch+'′′' : '—'})`;
+    options: {
+      responsive:true,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{ labels:{ boxWidth:10, font:{ size:11, family:"'DM Sans',sans-serif" }, color:'#3D3D3D' } },
+        tooltip:{
+          backgroundColor:'#1E4034', titleColor:'rgba(255,255,255,.7)',
+          bodyColor:'#fff', padding:10, cornerRadius:6,
+          callbacks:{
+            title: ctx => MONTHS[ctx[0].dataIndex],
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y + (useF?'°F':'°C') : '—'}`,
           }
         }
-      }
-    },
-    scales:{
-      x:{ grid:{ display:false }, ticks:{ font:{ size:11 } } },
-      y:{
-        grid:{ color:'rgba(0,0,0,.06)' },
-        ticks:{
-          font:{ size:11 },
-          callback: v => useF ? v+'′′' : v+'mm'
-        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ font:{ size:11 }, color:'#8C8C8C' } },
+        y:{ grid:{ color:'#EFEFEF' }, ticks:{ font:{ size:11 }, color:'#8C8C8C', callback: v => v+(useF?'°F':'°C') } }
       }
     }
-  }
-});
+  });
 
-// ── Switch units ──────────────────────────────────────────────────
-function switchUnits(toF) {
-  useF = toF;
-  // Temp chart
-  tempChart.data.datasets[0].data = toF ? HI_F  : HI_C;
-  tempChart.data.datasets[1].data = toF ? AVG_F : AVG_C;
-  tempChart.data.datasets[2].data = toF ? LO_F  : LO_C;
-  tempChart.options.scales.y.ticks.callback = v => v+(toF?'°F':'°C');
-  tempChart.update();
-  // Precip chart — swap between inches and mm datasets
-  prcpChart.data.datasets[0].data = toF ? PRCP_IN : PRCP_MM;
-  prcpChart.options.scales.y.ticks.callback = v => toF ? v+'′′' : v+'mm';
-  prcpChart.update();
-  // Table cells
-  document.querySelectorAll('.val-c').forEach(el => el.style.display = toF?'none':'');
-  document.querySelectorAll('.val-f').forEach(el => el.style.display = toF?'':'none');
-  // Label highlight
-  document.getElementById('unit-lbl-c').style.opacity = toF ? '0.45' : '1';
-  document.getElementById('unit-lbl-f').style.opacity = toF ? '1'    : '0.45';
-}
+  // ── Precipitation chart ────────────────────────────────────────
+  const prcpChart = new Chart(document.getElementById('htPrcpChart'), {
+    type: 'bar',
+    data: {
+      labels: MONTHS,
+      datasets: [{
+        label:'Rainfall', data:PRCP_IN,
+        backgroundColor:'rgba(168,137,106,.55)', borderColor:'rgba(168,137,106,.85)',
+        borderWidth:1, borderRadius:3, hoverBackgroundColor:'rgba(168,137,106,.8)',
+      }]
+    },
+    options: {
+      responsive:true,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          backgroundColor:'#1E4034', titleColor:'rgba(255,255,255,.7)',
+          bodyColor:'#fff', padding:10, cornerRadius:6,
+          callbacks:{
+            title: ctx => MONTHS[ctx[0].dataIndex],
+            label: ctx => {
+              const i   = ctx.dataIndex;
+              const mm  = PRCP_MM[i];
+              const inc = PRCP_IN[i];
+              if (mm == null) return ' —';
+              return useF
+                ? ` ${inc != null ? inc+'″' : '—'}`
+                : ` ${mm} mm (${inc != null ? inc+'″' : '—'})`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ font:{ size:11 }, color:'#8C8C8C' } },
+        y:{ grid:{ color:'#EFEFEF' }, ticks:{ font:{ size:11 }, color:'#8C8C8C', callback: v => useF ? v+'″' : v+'mm' } }
+      }
+    }
+  });
 
-// Run on load so °F is active from the start
-switchUnits(true);
+  // ── Switch units ───────────────────────────────────────────────
+  window.htSwitchUnits = function(toF) {
+    useF = toF;
+    // Temp chart
+    tempChart.data.datasets[0].data = toF ? HI_F  : HI_C;
+    tempChart.data.datasets[1].data = toF ? AVG_F : AVG_C;
+    tempChart.data.datasets[2].data = toF ? LO_F  : LO_C;
+    tempChart.options.scales.y.ticks.callback = v => v+(toF?'°F':'°C');
+    tempChart.update();
+    // Precip chart — swap full dataset so Y axis scale is correct
+    prcpChart.data.datasets[0].data = toF ? PRCP_IN : PRCP_MM;
+    prcpChart.options.scales.y.ticks.callback = v => toF ? v+'″' : v+'mm';
+    prcpChart.update();
+    // Table temp cells
+    document.querySelectorAll('.vc').forEach(el => el.style.display = toF?'none':'');
+    document.querySelectorAll('.vf').forEach(el => el.style.display = toF?'':'none');
+    // Table precip cells
+    document.querySelectorAll('.pmm').forEach(el => el.style.display = toF?'none':'');
+    document.querySelectorAll('.pin').forEach(el => el.style.display = toF?'':'none');
+    // Label highlight
+    document.getElementById('lbl-c').classList.toggle('active', !toF);
+    document.getElementById('lbl-f').classList.toggle('active', toF);
+  };
 
-// ── Collapsible table ─────────────────────────────────────────────
-function toggleTable() {
-  const wrap = document.getElementById('monthTable');
-  const chev = document.getElementById('chev');
-  wrap.classList.toggle('open');
-  chev.classList.toggle('open');
-}
+  // ── Collapsible table ──────────────────────────────────────────
+  window.htToggleTable = function() {
+    document.getElementById('htMonthTable').classList.toggle('open');
+    document.getElementById('htChev').classList.toggle('open');
+  };
+
+  // Init at °F
+  htSwitchUnits(true);
+})();
 </script>
 </body>
 </html>
