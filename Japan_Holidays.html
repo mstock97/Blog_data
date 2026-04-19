@@ -383,14 +383,14 @@ body {
 }
 .list-body.open { display: block; }
 
-.list-yr {
-  padding: 4px 12px;
-  background: var(--forest-10);
-  border-bottom: 1px solid var(--cloud);
+.list-yr-row { background: var(--forest-10) !important; }
+.list-yr-cell {
+  padding: 5px 10px 4px;
   font-family: var(--f-display);
   font-size: 12px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: var(--ash);
+  border-bottom: 1px solid var(--cloud);
 }
 
 .list-tbl {
@@ -637,6 +637,12 @@ window.addEventListener('scroll', function() {
 window.addEventListener('resize', function() {
   if (tipTarget) positionTip(tipTarget);
 });
+/* dismiss tooltip on touch outside a holiday cell */
+document.addEventListener('touchstart', function(e) {
+  if (tipTarget && !tipTarget.contains(e.target)) {
+    hideTip();
+  }
+}, { passive: true });
 
 /* ── fetch ── */
 function fetchYear(code, yr) {
@@ -741,8 +747,19 @@ function buildMonthCard(year, mo, holidays, actMap, obsMap) {
       });
 
       (function(c, h) {
+        /* mouse */
         c.addEventListener('mouseenter', function() { tipTarget = c; showTip(c, h); });
         c.addEventListener('mouseleave', function() { hideTip(); });
+        /* touch — tap to show; tapping anywhere else hides (see global touchstart below) */
+        c.addEventListener('touchstart', function(e) {
+          e.preventDefault(); /* stop synthetic mouse events firing too */
+          if (tipTarget === c) {
+            hideTip();         /* second tap on same cell = dismiss */
+          } else {
+            tipTarget = c;
+            showTip(c, h);
+          }
+        }, { passive: false });
       })(cell, html);
     }
 
@@ -955,26 +972,40 @@ function renderAllCals(years) {
   });
 }
 
-/* ── render list ── */
+/* ── render list — single table so columns align across years ── */
 function renderList(years) {
   var body = $('list-body');
   body.innerHTML = '';
+
+  var tbl = document.createElement('table');
+  tbl.className = 'list-tbl';
+
+  /* fixed column widths so they never drift between year sections */
+  var colgroup = document.createElement('colgroup');
+  colgroup.innerHTML =
+    '<col style="width:92px">' +   /* Date */
+    '<col>' +                       /* Holiday — takes remaining space */
+    '<col style="width:80px">' +   /* Day */
+    '<col style="width:92px">';    /* Observed */
+  tbl.appendChild(colgroup);
+
+  tbl.createTHead().innerHTML =
+    '<tr><th>Date</th><th>Holiday</th><th>Day</th><th>Observed</th></tr>';
+
+  var tb = tbl.createTBody();
 
   years.forEach(function(yr) {
     var hols = store[yr] || [];
     if (!hols.length) return;
 
-    var yh = document.createElement('div');
-    yh.className   = 'list-yr';
-    yh.textContent = yr;
-    body.appendChild(yh);
+    /* year separator row spanning all columns */
+    var sepRow = tb.insertRow();
+    sepRow.className = 'list-yr-row';
+    var sepCell = sepRow.insertCell();
+    sepCell.colSpan = 4;
+    sepCell.className = 'list-yr-cell';
+    sepCell.textContent = yr;
 
-    var tbl = document.createElement('table');
-    tbl.className = 'list-tbl';
-    tbl.createTHead().innerHTML =
-      '<tr><th>Date</th><th>Holiday</th><th>Day</th><th>Observed</th></tr>';
-
-    var tb = tbl.createTBody();
     hols.forEach(function(h) {
       var sh = h.is_observed_shifted;
       var tr = tb.insertRow();
@@ -984,9 +1015,9 @@ function renderList(years) {
         '<td class="td-day">'  + dayName(h.observed_date || h.date) + '</td>' +
         '<td class="td-obs">'  + (sh ? fmtDate(h.observed_date) : '—') + '</td>';
     });
-
-    body.appendChild(tbl);
   });
+
+  body.appendChild(tbl);
 }
 
 /* ── toggle list ── */
