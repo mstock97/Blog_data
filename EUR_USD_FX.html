@@ -585,7 +585,22 @@ function updateChartSection() {
 // seenLabel stops duplicate strings appearing when range spans >12 months.
 function series() {
   var f = $el("from").value, t = $el("to").value;
-  var n = per >= 9999 ? DATES.length : Math.min(per, DATES.length);
+  // per is calendar days. Find how many DATES entries (ECB trading days)
+  // fall within the last `per` calendar days from the most recent date.
+  // This ensures 180D = 6 calendar months, not 180 trading days (~8.5 months).
+  var n;
+  if (per >= 9999) {
+    n = DATES.length;
+  } else {
+    var lastDate  = new Date(DATES[DATES.length - 1]);
+    var cutoffMs  = lastDate.getTime() - per * 86400000;
+    n = 0;
+    for (var k = DATES.length - 1; k >= 0; k--) {
+      if (new Date(DATES[k]).getTime() >= cutoffMs) n++;
+      else break;
+    }
+    if (n === 0) n = 1;
+  }
   var fH = HIST[f], tH = HIST[t];
   if (!fH || !tH || n === 0) return { data: [], n: 0 };
 
