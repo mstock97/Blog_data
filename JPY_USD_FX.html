@@ -674,9 +674,7 @@ function updateChartSection() {
 // ── Chart series ──────────────────────────────────────────────────
 function series() {
   var f  = $el("from").value, t = $el("to").value;
-  // per is in trading days; DATES is daily so use directly.
-  // per=9999 means "all data".
-  var n = per >= 9999 ? DATES.length : Math.min(per, DATES.length);
+  var n  = per >= 9999 ? DATES.length : Math.min(per, DATES.length);
   var fH = HIST[f], tH = HIST[t];
   if (!fH || !tH || n === 0) return { data: [], n: 0 };
 
@@ -687,26 +685,61 @@ function series() {
     return (v != null && ts[i] != null) ? +((ts[i] / v).toFixed(5)) : null;
   });
 
-  var tMap = {}, lastYr = -1, lastMo = -1;
+  // ── X-axis tick labels ──────────────────────────────────────────
+  // Strict consistency per period — one label type only, no mixing:
+  //   5Y   → years only       e.g. "2021" "2022"
+  //   1Y   → months only      every 2 months, stops before repeating
+  //   180D → months only      every month, stops before repeating
+  //   90D  → months only      every month, stops before repeating
+  //   30D  → "Mon DD" dates   every Monday
+  //
+  // seenLabel prevents the same display string appearing twice
+  // (months repeat after 12 months so we stop at the first repeat).
+
+  var tMap      = {};
+  var lastYr    = -1;
+  var lastWeek  = -1;
+  var seenLabel = {};   // label string -> true
+
   for (var i = 0; i < n; i++) {
     var dt  = new Date(ds[i]);
-    var yr  = dt.getFullYear();
-    var mo  = dt.getMonth();
-    var dom = dt.getDate();
-    var ms  = dt.toLocaleString("en-US", { month: "short" });
+    var yr  = dt.getUTCFullYear();
+    var mo  = dt.getUTCMonth();
+    var dom = dt.getUTCDate();
+    var day = dt.getUTCDay();   // 0=Sun 1=Mon
+    var ms  = dt.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+    var absW = Math.floor((dt.getTime() - Date.UTC(1970,0,1)) / 604800000);
+
     if (per >= 9999) {
-      if (yr !== lastYr) { tMap[i] = String(yr); lastYr = yr; }
-    } else if (per >= 365) {
-      if (mo !== lastMo) { tMap[i] = ms; lastMo = mo; }
-    } else if (per >= 180) {
-      if (mo !== lastMo && mo % 2 === 0) {
-        tMap[i] = ms + " '" + String(yr).slice(2); lastMo = mo;
+      // 5Y: year number, once per calendar year
+      if (yr !== lastYr) {
+        tMap[i] = String(yr);
+        lastYr = yr;
       }
+
+    } else if (per >= 365) {
+      // 1Y: month abbrev, every other month, stop at first duplicate
+      if (mo % 2 === 0 && !seenLabel[ms]) {
+        tMap[i] = ms;
+        seenLabel[ms] = true;
+      }
+
+    } else if (per >= 90) {
+      // 180D + 90D: month abbrev, every month, stop at first duplicate
+      if (!seenLabel[ms]) {
+        tMap[i] = ms;
+        seenLabel[ms] = true;
+      }
+
     } else {
-      var steps = [0, Math.round(n/3), Math.round(2*n/3), n-1];
-      if (steps.indexOf(i) !== -1) tMap[i] = ms + " " + dom;
+      // 30D: "Mon DD", every Monday by absolute week
+      if (day === 1 && absW !== lastWeek) {
+        tMap[i] = ms + " " + dom;
+        lastWeek = absW;
+      }
     }
   }
+
   _tMap = tMap;
   _rawDates = ds;
   return { data: data, n: n };
