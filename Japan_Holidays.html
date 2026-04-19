@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>National Holidays — Horizon Trails</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ── Brand tokens ───────────────────────────────── */
+  :root {
+    --forest:    #1E4034;
+    --canopy:    #2D6A4F;
+    --moss:      #52B788;
+    --stone:     #5C5346;
+    --driftwood: #A8896A;
+    --fog:       #C9D4C5;
+    --ink:       #0F0F0F;
+    --graphite:  #3D3D3D;
+    --ash:       #8C8C8C;
+    --cloud:     #EFEFEF;
+    --paper:     #F7F5F0;
+    --white:     #FFFFFF;
+
+```
+/* alert */
+--okay:     #34C759;
+--caution:  #FFD60A;
+--warning:  #FF9500;
+--critical: #FF3B30;
+
+/* tints */
+--forest-12: #EAEEED;
+--forest-8:  #F1F4F3;
+--moss-20:   #DCEEE4;
+--moss-12:   #E9F4EE;
+--canopy-8:  #EEF3F1;
+
+/* spacing */
+--xs: 4px; --sm: 8px; --md: 16px; --lg: 24px;
+--xl: 40px; --2xl: 64px; --3xl: 100px;
+```
+
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+background: var(–paper);
+color: var(–graphite);
+font-family: ‘DM Sans’, sans-serif;
+font-weight: 400;
+font-size: 17px;
+line-height: 1.6;
+min-height: 100vh;
+}
+
+/* ── Nav ──────────────────────────────────────────── */
+nav {
+background: var(–ink);
+padding: var(–md) var(–xl);
+display: flex;
+align-items: center;
+justify-content: space-between;
+position: sticky;
+top: 0;
+z-index: 100;
+border-bottom: 1px solid var(–forest);
+}
+
+.nav-wordmark {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1.4rem;
+letter-spacing: 0.12em;
+color: var(–white);
+}
+
+.nav-tagline {
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.6875rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–ash);
+}
+
+/* ── Hero ──────────────────────────────────────────── */
+.hero {
+background: var(–forest);
+padding: var(–2xl) var(–xl);
+position: relative;
+overflow: hidden;
+}
+
+.hero::before {
+content: ‘EXPLORE’;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(8rem, 22vw, 18rem);
+letter-spacing: 0.05em;
+color: var(–canopy);
+opacity: 0.35;
+position: absolute;
+right: -2rem;
+top: 50%;
+transform: translateY(-50%) rotate(90deg);
+transform-origin: center center;
+pointer-events: none;
+line-height: 1;
+white-space: nowrap;
+}
+
+.hero-label {
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.6875rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(–moss);
+margin-bottom: var(–md);
+}
+
+.hero h1 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(3rem, 8vw, 6rem);
+letter-spacing: 0.04em;
+color: var(–white);
+line-height: 1;
+margin-bottom: var(–md);
+}
+
+.hero-sub {
+font-family: ‘Playfair Display’, serif;
+font-style: italic;
+font-size: 1.1rem;
+color: var(–fog);
+max-width: 480px;
+}
+
+/* ── Search card ──────────────────────────────────── */
+.search-section {
+padding: var(–xl) var(–xl) 0;
+max-width: 900px;
+margin: 0 auto;
+}
+
+.search-card {
+background: var(–white);
+border: 1px solid var(–cloud);
+border-top: 3px solid var(–moss);
+padding: var(–xl);
+margin-top: calc(-1 * var(–xl));
+position: relative;
+box-shadow: 0 4px 24px rgba(15,15,15,0.08);
+}
+
+.search-card h2 {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.3rem;
+color: var(–forest);
+margin-bottom: var(–lg);
+font-weight: 700;
+}
+
+.form-row {
+display: grid;
+grid-template-columns: 1fr 1fr auto;
+gap: var(–md);
+align-items: end;
+}
+
+@media (max-width: 640px) {
+.form-row { grid-template-columns: 1fr; }
+}
+
+.field label {
+display: block;
+font-size: 0.6875rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–ash);
+margin-bottom: var(–sm);
+font-weight: 500;
+}
+
+.field select,
+.field input {
+width: 100%;
+padding: 10px var(–md);
+border: 1px solid var(–cloud);
+background: var(–paper);
+color: var(–ink);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.95rem;
+outline: none;
+transition: border-color 0.2s, box-shadow 0.2s;
+-webkit-appearance: none;
+appearance: none;
+border-radius: 0;
+}
+
+.field select {
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘8’ viewBox=‘0 0 12 8’%3E%3Cpath d=‘M1 1l5 5 5-5’ stroke=’%238C8C8C’ stroke-width=‘1.5’ fill=‘none’ stroke-linecap=‘round’/%3E%3C/svg%3E”);
+background-repeat: no-repeat;
+background-position: right 12px center;
+padding-right: 36px;
+}
+
+.field select:focus,
+.field input:focus {
+border-color: var(–canopy);
+box-shadow: 0 0 0 3px var(–canopy-8);
+}
+
+.btn-search {
+padding: 11px var(–xl);
+background: var(–forest);
+color: var(–white);
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1.1rem;
+letter-spacing: 0.1em;
+border: none;
+cursor: pointer;
+transition: background 0.2s, transform 0.1s;
+white-space: nowrap;
+}
+
+.btn-search:hover { background: var(–canopy); }
+.btn-search:active { transform: scale(0.98); }
+.btn-search:disabled { background: var(–ash); cursor: not-allowed; }
+
+/* year range pickers */
+.year-fields {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: var(–sm);
+}
+
+/* ── Results ──────────────────────────────────────── */
+.results-section {
+padding: var(–xl);
+max-width: 900px;
+margin: 0 auto;
+}
+
+/* status banner */
+.status-banner {
+padding: var(–md) var(–lg);
+font-size: 0.875rem;
+font-weight: 500;
+margin-bottom: var(–lg);
+display: none;
+border-left: 3px solid;
+align-items: center;
+gap: var(–sm);
+}
+.status-banner.visible { display: flex; }
+.status-banner.loading {
+background: var(–forest-12);
+border-color: var(–canopy);
+color: var(–forest);
+}
+.status-banner.error {
+background: #FFF5EA;
+border-color: var(–warning);
+color: #2B1500;
+}
+
+/* results header */
+.results-header {
+display: none;
+margin-bottom: var(–lg);
+padding-bottom: var(–lg);
+border-bottom: 1px solid var(–cloud);
+align-items: flex-end;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: var(–md);
+}
+.results-header.visible { display: flex; }
+
+.results-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(2rem, 5vw, 3.5rem);
+letter-spacing: 0.04em;
+color: var(–ink);
+line-height: 1;
+}
+
+.results-meta {
+text-align: right;
+}
+
+.badge {
+display: inline-block;
+padding: 2px 10px;
+font-size: 0.6875rem;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+font-weight: 500;
+}
+.badge-count { background: var(–moss-20); color: var(–canopy); }
+.badge-shifted { background: #FFF5EA; color: #7a3800; margin-left: var(–sm); }
+
+/* year divider */
+.year-group { margin-bottom: var(–xl); }
+
+.year-label {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1.4rem;
+letter-spacing: 0.1em;
+color: var(–ash);
+padding: var(–sm) 0;
+margin-bottom: var(–md);
+border-bottom: 1px solid var(–cloud);
+}
+
+/* table */
+.holiday-table {
+width: 100%;
+border-collapse: collapse;
+}
+
+.holiday-table thead tr {
+background: var(–forest);
+}
+
+.holiday-table thead th {
+padding: var(–sm) var(–md);
+text-align: left;
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.6875rem;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(–fog);
+font-weight: 500;
+}
+
+.holiday-table tbody tr {
+border-bottom: 1px solid var(–cloud);
+transition: background 0.15s;
+}
+
+.holiday-table tbody tr:hover { background: var(–forest-8); }
+
+.holiday-table tbody td {
+padding: var(–md);
+font-size: 0.9375rem;
+color: var(–graphite);
+vertical-align: middle;
+}
+
+.holiday-table tbody td:first-child {
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.8125rem;
+color: var(–ash);
+white-space: nowrap;
+font-weight: 300;
+}
+
+.holiday-name {
+font-weight: 500;
+color: var(–ink);
+}
+
+.observed-diff {
+font-size: 0.75rem;
+color: var(–driftwood);
+display: block;
+margin-top: 2px;
+}
+
+.day-pill {
+display: inline-block;
+padding: 2px 8px;
+background: var(–canopy-8);
+color: var(–canopy);
+font-size: 0.75rem;
+font-weight: 500;
+letter-spacing: 0.04em;
+white-space: nowrap;
+}
+
+.shifted-tag {
+display: inline-block;
+margin-left: var(–sm);
+padding: 1px 7px;
+background: #FFF1DF;
+color: #7a3800;
+font-size: 0.6875rem;
+font-weight: 500;
+letter-spacing: 0.06em;
+text-transform: uppercase;
+vertical-align: middle;
+}
+
+/* empty / initial */
+.empty-state {
+text-align: center;
+padding: var(–3xl) var(–xl);
+}
+
+.empty-icon {
+font-size: 3rem;
+margin-bottom: var(–md);
+opacity: 0.35;
+}
+
+.empty-state p {
+font-family: ‘Playfair Display’, serif;
+font-style: italic;
+color: var(–ash);
+font-size: 1.05rem;
+}
+
+/* ── Footer ───────────────────────────────────────── */
+footer {
+background: var(–ink);
+color: var(–ash);
+padding: var(–lg) var(–xl);
+margin-top: var(–3xl);
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+gap: var(–md);
+font-size: 0.75rem;
+letter-spacing: 0.08em;
+}
+
+.footer-brand {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1rem;
+letter-spacing: 0.12em;
+color: var(–white);
+}
+
+footer a { color: var(–moss); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* ── Spinner ──────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+width: 16px; height: 16px;
+border: 2px solid var(–fog);
+border-top-color: var(–canopy);
+border-radius: 50%;
+animation: spin 0.7s linear infinite;
+flex-shrink: 0;
+}
+
+/* ── Fade in ──────────────────────────────────────── */
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(12px); }
+to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.35s ease forwards; }
+
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+
+<nav>
+  <span class="nav-wordmark">HORIZON TRAILS</span>
+  <span class="nav-tagline">National Holiday Lookup</span>
+</nav>
+
+<!-- Hero -->
+
+<div class="hero">
+  <div class="hero-label">Travel Intelligence</div>
+  <h1>NATIONAL<br>HOLIDAYS</h1>
+  <p class="hero-sub">Plan your journey around the world's rhythms. Know before you go.</p>
+</div>
+
+<!-- Search -->
+
+<div class="search-section">
+  <div class="search-card">
+    <h2>Look up holidays by country &amp; year</h2>
+    <div class="form-row">
+      <div class="field">
+        <label for="country-select">Country</label>
+        <select id="country-select">
+          <option value="">— Select a country —</option>
+          <option value="US">United States</option>
+          <option value="GB">United Kingdom</option>
+          <option value="CA">Canada</option>
+          <option value="AU">Australia</option>
+          <option value="DE">Germany</option>
+          <option value="FR">France</option>
+          <option value="JP">Japan</option>
+          <option value="CN">China</option>
+          <option value="IN">India</option>
+          <option value="BR">Brazil</option>
+          <option value="MX">Mexico</option>
+          <option value="KR">South Korea</option>
+          <option value="IT">Italy</option>
+          <option value="ES">Spain</option>
+          <option value="NL">Netherlands</option>
+          <option value="SG">Singapore</option>
+          <option value="NZ">New Zealand</option>
+          <option value="ZA">South Africa</option>
+          <option value="NG">Nigeria</option>
+          <option value="AR">Argentina</option>
+          <option value="SE">Sweden</option>
+          <option value="NO">Norway</option>
+          <option value="DK">Denmark</option>
+          <option value="CH">Switzerland</option>
+          <option value="PT">Portugal</option>
+          <option value="PL">Poland</option>
+          <option value="TR">Turkey</option>
+          <option value="EG">Egypt</option>
+          <option value="SA">Saudi Arabia</option>
+          <option value="AE">United Arab Emirates</option>
+          <option value="IL">Israel</option>
+          <option value="PH">Philippines</option>
+          <option value="ID">Indonesia</option>
+          <option value="TH">Thailand</option>
+          <option value="MY">Malaysia</option>
+          <option value="VN">Vietnam</option>
+          <option value="PK">Pakistan</option>
+          <option value="BD">Bangladesh</option>
+          <option value="KE">Kenya</option>
+          <option value="GH">Ghana</option>
+          <option value="UA">Ukraine</option>
+          <option value="RU">Russia</option>
+          <option value="CO">Colombia</option>
+          <option value="CL">Chile</option>
+          <option value="PE">Peru</option>
+          <option value="IE">Ireland</option>
+          <option value="BE">Belgium</option>
+          <option value="AT">Austria</option>
+          <option value="GR">Greece</option>
+          <option value="FI">Finland</option>
+          <option value="CZ">Czechia</option>
+          <option value="HU">Hungary</option>
+          <option value="RO">Romania</option>
+          <option value="SK">Slovakia</option>
+          <option value="HR">Croatia</option>
+          <option value="RS">Serbia</option>
+          <option value="BG">Bulgaria</option>
+          <option value="LU">Luxembourg</option>
+          <option value="IS">Iceland</option>
+          <option value="EE">Estonia</option>
+          <option value="LV">Latvia</option>
+          <option value="LT">Lithuania</option>
+          <option value="SI">Slovenia</option>
+          <option value="CY">Cyprus</option>
+          <option value="MT">Malta</option>
+          <option value="MA">Morocco</option>
+          <option value="TN">Tunisia</option>
+          <option value="ET">Ethiopia</option>
+          <option value="TZ">Tanzania</option>
+          <option value="UG">Uganda</option>
+          <option value="ZW">Zimbabwe</option>
+          <option value="CM">Cameroon</option>
+          <option value="CI">Ivory Coast</option>
+          <option value="SN">Senegal</option>
+          <option value="DZ">Algeria</option>
+          <option value="AO">Angola</option>
+          <option value="MZ">Mozambique</option>
+          <option value="ZM">Zambia</option>
+          <option value="EC">Ecuador</option>
+          <option value="VE">Venezuela</option>
+          <option value="BO">Bolivia</option>
+          <option value="PY">Paraguay</option>
+          <option value="UY">Uruguay</option>
+          <option value="PA">Panama</option>
+          <option value="CR">Costa Rica</option>
+          <option value="GT">Guatemala</option>
+          <option value="HN">Honduras</option>
+          <option value="SV">El Salvador</option>
+          <option value="NI">Nicaragua</option>
+          <option value="CU">Cuba</option>
+          <option value="DO">Dominican Republic</option>
+          <option value="JM">Jamaica</option>
+          <option value="HT">Haiti</option>
+          <option value="LK">Sri Lanka</option>
+          <option value="NP">Nepal</option>
+          <option value="MM">Myanmar</option>
+          <option value="KH">Cambodia</option>
+          <option value="LA">Laos</option>
+          <option value="TW">Taiwan</option>
+          <option value="HK">Hong Kong</option>
+          <option value="MN">Mongolia</option>
+          <option value="KZ">Kazakhstan</option>
+          <option value="UZ">Uzbekistan</option>
+          <option value="AZ">Azerbaijan</option>
+          <option value="GE">Georgia</option>
+          <option value="AM">Armenia</option>
+          <option value="JO">Jordan</option>
+          <option value="LB">Lebanon</option>
+          <option value="IQ">Iraq</option>
+          <option value="IR">Iran</option>
+          <option value="KW">Kuwait</option>
+          <option value="QA">Qatar</option>
+          <option value="BH">Bahrain</option>
+          <option value="OM">Oman</option>
+          <option value="YE">Yemen</option>
+          <option value="LY">Libya</option>
+          <option value="SD">Sudan</option>
+        </select>
+      </div>
+
+```
+  <div class="field">
+    <label>Year Range (2026–2030)</label>
+    <div class="year-fields">
+      <select id="year-from">
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+        <option value="2029">2029</option>
+        <option value="2030">2030</option>
+      </select>
+      <select id="year-to">
+        <option value="2026">2026</option>
+        <option value="2027" selected>2027</option>
+        <option value="2028">2028</option>
+        <option value="2029">2029</option>
+        <option value="2030">2030</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn-search" id="btn-search" onclick="handleSearch()">LOOK UP</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- Results -->
+
+<div class="results-section" id="results-section">
+  <div class="status-banner" id="status-banner">
+    <div class="spinner" id="spinner"></div>
+    <span id="status-text">Fetching holiday data…</span>
+  </div>
+
+  <div class="results-header" id="results-header">
+    <div>
+      <div class="results-title" id="results-title">—</div>
+      <div style="margin-top:var(--sm); color:var(--ash); font-size:0.8125rem; letter-spacing:0.05em;">
+        NATIONAL PUBLIC HOLIDAYS
+      </div>
+    </div>
+    <div class="results-meta">
+      <span class="badge badge-count" id="badge-count">— holidays</span>
+      <span class="badge badge-shifted" id="badge-shifted" style="display:none;"></span>
+    </div>
+  </div>
+
+  <div id="results-body">
+    <div class="empty-state">
+      <div class="empty-icon">🧭</div>
+      <p>Select a country and year range above to explore its holidays.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+
+<footer>
+  <span class="footer-brand">HORIZON TRAILS</span>
+  <span>Go further. Write honestly.</span>
+  <span>Data via <a href="https://tallyfy.com/national-holidays/" target="_blank" rel="noopener">Tallyfy National Holidays API</a></span>
+</footer>
+
+<script>
+  const COUNTRY_NAMES = {
+    US:'United States',GB:'United Kingdom',CA:'Canada',AU:'Australia',
+    DE:'Germany',FR:'France',JP:'Japan',CN:'China',IN:'India',BR:'Brazil',
+    MX:'Mexico',KR:'South Korea',IT:'Italy',ES:'Spain',NL:'Netherlands',
+    SG:'Singapore',NZ:'New Zealand',ZA:'South Africa',NG:'Nigeria',
+    AR:'Argentina',SE:'Sweden',NO:'Norway',DK:'Denmark',CH:'Switzerland',
+    PT:'Portugal',PL:'Poland',TR:'Turkey',EG:'Egypt',SA:'Saudi Arabia',
+    AE:'United Arab Emirates',IL:'Israel',PH:'Philippines',ID:'Indonesia',
+    TH:'Thailand',MY:'Malaysia',VN:'Vietnam',PK:'Pakistan',BD:'Bangladesh',
+    KE:'Kenya',GH:'Ghana',UA:'Ukraine',RU:'Russia',CO:'Colombia',CL:'Chile',
+    PE:'Peru',IE:'Ireland',BE:'Belgium',AT:'Austria',GR:'Greece',FI:'Finland',
+    CZ:'Czechia',HU:'Hungary',RO:'Romania',SK:'Slovakia',HR:'Croatia',
+    RS:'Serbia',BG:'Bulgaria',LU:'Luxembourg',IS:'Iceland',EE:'Estonia',
+    LV:'Latvia',LT:'Lithuania',SI:'Slovenia',CY:'Cyprus',MT:'Malta',
+    MA:'Morocco',TN:'Tunisia',ET:'Ethiopia',TZ:'Tanzania',UG:'Uganda',
+    ZW:'Zimbabwe',CM:'Cameroon',CI:"Ivory Coast",SN:'Senegal',DZ:'Algeria',
+    AO:'Angola',MZ:'Mozambique',ZM:'Zambia',EC:'Ecuador',VE:'Venezuela',
+    BO:'Bolivia',PY:'Paraguay',UY:'Uruguay',PA:'Panama',CR:'Costa Rica',
+    GT:'Guatemala',HN:'Honduras',SV:'El Salvador',NI:'Nicaragua',CU:'Cuba',
+    DO:'Dominican Republic',JM:'Jamaica',HT:'Haiti',LK:'Sri Lanka',NP:'Nepal',
+    MM:'Myanmar',KH:'Cambodia',LA:'Laos',TW:'Taiwan',HK:'Hong Kong',
+    MN:'Mongolia',KZ:'Kazakhstan',UZ:'Uzbekistan',AZ:'Azerbaijan',GE:'Georgia',
+    AM:'Armenia',JO:'Jordan',LB:'Lebanon',IQ:'Iraq',IR:'Iran',KW:'Kuwait',
+    QA:'Qatar',BH:'Bahrain',OM:'Oman',YE:'Yemen',LY:'Libya',SD:'Sudan'
+  };
+
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  function getDayName(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return DAYS[new Date(y, m - 1, d).getDay()];
+  }
+
+  function formatDate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[m-1]} ${d}, ${y}`;
+  }
+
+  function setStatus(type, msg) {
+    const banner = document.getElementById('status-banner');
+    const text = document.getElementById('status-text');
+    const spinner = document.getElementById('spinner');
+    banner.className = 'status-banner visible ' + type;
+    text.textContent = msg;
+    spinner.style.display = type === 'loading' ? 'block' : 'none';
+  }
+
+  function hideStatus() {
+    document.getElementById('status-banner').className = 'status-banner';
+  }
+
+  async function fetchYear(code, year) {
+    const url = `https://tallyfy.com/national-holidays/api/${code}/${year}.json`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`No data for ${year}`);
+    return res.json();
+  }
+
+  async function handleSearch() {
+    const code = document.getElementById('country-select').value;
+    const fromYear = parseInt(document.getElementById('year-from').value);
+    const toYear = parseInt(document.getElementById('year-to').value);
+    const btn = document.getElementById('btn-search');
+
+    if (!code) { setStatus('error', 'Please select a country.'); return; }
+    if (fromYear > toYear) { setStatus('error', 'Start year must be ≤ end year.'); return; }
+
+    btn.disabled = true;
+    setStatus('loading', `Fetching holiday data for ${COUNTRY_NAMES[code] || code}…`);
+    document.getElementById('results-header').className = 'results-header';
+    document.getElementById('results-body').innerHTML = '';
+
+    const years = [];
+    for (let y = fromYear; y <= toYear; y++) years.push(y);
+
+    const allData = [];
+    const errors = [];
+
+    for (const year of years) {
+      try {
+        const data = await fetchYear(code, year);
+        allData.push({ year, holidays: data.holidays || [] });
+      } catch(e) {
+        errors.push(year);
+      }
+    }
+
+    btn.disabled = false;
+
+    if (allData.length === 0) {
+      setStatus('error', `Could not load data for ${COUNTRY_NAMES[code] || code}. The API may not support this country or year range.`);
+      return;
+    }
+
+    hideStatus();
+
+    // Totals
+    const allHolidays = allData.flatMap(d => d.holidays);
+    const shiftedCount = allHolidays.filter(h => h.is_observed_shifted).length;
+    const countryName = COUNTRY_NAMES[code] || code;
+    const yearRange = years.length === 1 ? `${fromYear}` : `${fromYear}–${toYear}`;
+
+    // Header
+    document.getElementById('results-title').textContent = `${countryName} · ${yearRange}`;
+    document.getElementById('badge-count').textContent = `${allHolidays.length} holiday${allHolidays.length !== 1 ? 's' : ''}`;
+    const shiftBadge = document.getElementById('badge-shifted');
+    if (shiftedCount > 0) {
+      shiftBadge.textContent = `${shiftedCount} observed shift${shiftedCount !== 1 ? 's' : ''}`;
+      shiftBadge.style.display = 'inline-block';
+    } else {
+      shiftBadge.style.display = 'none';
+    }
+    document.getElementById('results-header').className = 'results-header visible fade-up';
+
+    // Body
+    const body = document.getElementById('results-body');
+    body.innerHTML = '';
+
+    allData.forEach(({ year, holidays }) => {
+      if (holidays.length === 0) return;
+
+      const group = document.createElement('div');
+      group.className = 'year-group fade-up';
+
+      const yearLabel = document.createElement('div');
+      yearLabel.className = 'year-label';
+      yearLabel.textContent = year;
+      group.appendChild(yearLabel);
+
+      const table = document.createElement('table');
+      table.className = 'holiday-table';
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Actual Date</th>
+            <th>Holiday</th>
+            <th>Day</th>
+            <th>Observed Date</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      `;
+
+      const tbody = table.querySelector('tbody');
+
+      holidays.forEach(h => {
+        const actual = h.date || '';
+        const observed = h.observed_date || actual;
+        const shifted = h.is_observed_shifted;
+        const day = getDayName(observed);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${formatDate(actual)}</td>
+          <td>
+            <span class="holiday-name">${h.name || '—'}</span>
+            ${shifted ? '<span class="shifted-tag">Observed</span>' : ''}
+          </td>
+          <td><span class="day-pill">${day}</span></td>
+          <td>
+            ${shifted
+              ? `<span style="color:var(--ink);font-weight:500;">${formatDate(observed)}</span>
+                 <span class="observed-diff">Shifted from ${formatDate(actual)}</span>`
+              : `<span style="color:var(--ash);">${formatDate(observed)}</span>`
+            }
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      group.appendChild(table);
+
+      if (errors.length > 0) {
+        const note = document.createElement('p');
+        note.style.cssText = `font-size:0.8125rem;color:var(--ash);margin-top:var(--md);font-style:italic;`;
+        note.textContent = `⚠ Could not load data for: ${errors.join(', ')}.`;
+        group.appendChild(note);
+      }
+
+      body.appendChild(group);
+    });
+  }
+
+  // Allow Enter key on selects
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSearch();
+  });
+</script>
+
+</body>
+</html>
