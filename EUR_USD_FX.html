@@ -674,8 +674,7 @@ function updateChartSection() {
 // ── Chart series ──────────────────────────────────────────────────
 function series() {
   var f  = $el("from").value, t = $el("to").value;
-  // per is in trading days; DATES is daily so use directly.
-  // per=9999 means "all data".
+  // per is trading days; DATES contains ECB daily business days (~261/yr).
   var n = per >= 9999 ? DATES.length : Math.min(per, DATES.length);
   var fH = HIST[f], tH = HIST[t];
   if (!fH || !tH || n === 0) return { data: [], n: 0 };
@@ -687,26 +686,65 @@ function series() {
     return (v != null && ts[i] != null) ? +((ts[i] / v).toFixed(5)) : null;
   });
 
-  var tMap = {}, lastYr = -1, lastMo = -1;
+  // ── X-axis tick labels ──────────────────────────────────────────
+  // Target 7-10 labels per period. Uses absolute week number to
+  // correctly handle Monday detection across year boundaries.
+  var EPOCH_MS = Date.UTC(1970, 0, 1);
+  var tMap = {}, lastYr = -1, lastMo = -1, lastWeek = -1;
+
   for (var i = 0; i < n; i++) {
-    var dt  = new Date(ds[i]);
-    var yr  = dt.getFullYear();
-    var mo  = dt.getMonth();
-    var dom = dt.getDate();
-    var ms  = dt.toLocaleString("en-US", { month: "short" });
+    var dt      = new Date(ds[i]);
+    var yr      = dt.getUTCFullYear();
+    var mo      = dt.getUTCMonth();       // 0-11
+    var dom     = dt.getUTCDate();
+    var day     = dt.getUTCDay();         // 0=Sun, 1=Mon
+    var ms      = dt.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+    var absWeek = Math.floor((dt.getTime() - EPOCH_MS) / 604800000);
+
     if (per >= 9999) {
+      // 5Y: first trading day of each year
       if (yr !== lastYr) { tMap[i] = String(yr); lastYr = yr; }
+
     } else if (per >= 365) {
-      if (mo !== lastMo) { tMap[i] = ms; lastMo = mo; }
-    } else if (per >= 180) {
+      // 1Y: every 2 months (6 labels + endpoints)
       if (mo !== lastMo && mo % 2 === 0) {
         tMap[i] = ms + " '" + String(yr).slice(2); lastMo = mo;
       }
+
+    } else if (per >= 180) {
+      // 180D: every month (9-10 labels)
+      if (mo !== lastMo) {
+        tMap[i] = ms + " '" + String(yr).slice(2); lastMo = mo;
+      }
+
+    } else if (per >= 90) {
+      // 90D: every other Monday (9-10 labels)
+      if (day === 1 && absWeek !== lastWeek) {
+        if (lastWeek === -1 || (absWeek - lastWeek) >= 2) {
+          tMap[i] = ms + " " + dom; lastWeek = absWeek;
+        }
+      }
+
     } else {
-      var steps = [0, Math.round(n/3), Math.round(2*n/3), n-1];
-      if (steps.indexOf(i) !== -1) tMap[i] = ms + " " + dom;
+      // 30D: every Monday (~5-6 labels)
+      if (day === 1 && absWeek !== lastWeek) {
+        tMap[i] = ms + " " + dom; lastWeek = absWeek;
+      }
     }
   }
+
+  // Always label first and last point for context
+  if (!tMap[0]) {
+    var d0 = new Date(ds[0]);
+    tMap[0] = d0.toLocaleString("en-US", {month:"short",timeZone:"UTC"}) +
+              " " + d0.getUTCDate();
+  }
+  if (n > 1 && !tMap[n - 1]) {
+    var dL = new Date(ds[n - 1]);
+    tMap[n - 1] = dL.toLocaleString("en-US", {month:"short",timeZone:"UTC"}) +
+                  " " + dL.getUTCDate();
+  }
+
   _tMap = tMap;
   _rawDates = ds;
   return { data: data, n: n };
