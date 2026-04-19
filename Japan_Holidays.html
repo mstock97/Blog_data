@@ -120,29 +120,26 @@ body {
   animation: spin .65s linear infinite;
 }
 
-/* ── year tabs ── */
-.year-nav {
-  display: none;
-  padding: 8px 16px 0;
-  gap: 6px;
-  flex-wrap: wrap;
+/* ── year divider (between years inline in the grid) ── */
+.year-divider {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 2px 2px;
 }
-.year-nav.show { display: flex; }
-
-.year-tab {
-  padding: 2px 14px;
+.year-divider-label {
   font-family: var(--f-display);
-  font-size: 13px;
-  letter-spacing: 0.1em;
+  font-size: 15px;
+  letter-spacing: 0.12em;
   color: var(--ash);
-  background: none;
-  border: 1px solid var(--cloud);
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all .12s;
+  flex-shrink: 0;
 }
-.year-tab:hover { border-color: var(--canopy); color: var(--canopy); }
-.year-tab.active { background: var(--forest); color: var(--white); border-color: var(--forest); }
+.year-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--cloud);
+}
 
 /* ── legend ── */
 .legend {
@@ -541,10 +538,6 @@ body {
   <span id="status-msg"></span>
 </div>
 
-<!-- ── year tabs ── -->
-
-<div class="year-nav" id="year-nav"></div>
-
 <!-- ── legend ── -->
 
 <div class="legend" id="legend">
@@ -600,8 +593,7 @@ var MSHORT  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov'
 var DSHORT  = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 var DFULL   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-var store      = {};   /* { year: [holidays] } */
-var activeYear = null;
+var store = {};  /* { year: [holidays] } */
 
 /* ── helpers ── */
 function pad(n) { return n < 10 ? '0'+n : ''+n; }
@@ -689,11 +681,165 @@ function fetchYear(code, yr) {
     .then(function(r) { if (!r.ok) throw new Error(); return r.json(); });
 }
 
+/* ── visible window ── */
+function visibleCount() {
+  return window.innerWidth <= 680 ? 2 : 4;
+}
+
+/* ── build one month card (no grid insertion) ── */
+function buildMonthCard(year, mo, holidays, actMap, obsMap) {
+  var firstDow    = new Date(year, mo, 1).getDay();
+  var daysInMonth = new Date(year, mo+1, 0).getDate();
+  var actualsHere = holidays.filter(function(h) {
+    return parseInt(h.date.split('-')[1], 10) - 1 === mo;
+  });
+
+  var card = document.createElement('div');
+  card.className   = 'month-card';
+  card.dataset.mo  = mo;
+  card.dataset.yr  = year;
+
+  var head = document.createElement('div');
+  head.className = 'month-head';
+  head.innerHTML =
+    '<span class="month-name">' + MONTHS[mo].toUpperCase() + '</span>' +
+    (actualsHere.length ? '<span class="month-hcount">' + actualsHere.length + '</span>' : '');
+  card.appendChild(head);
+
+  var wkr = document.createElement('div');
+  wkr.className = 'cal-wkdays';
+  DSHORT.forEach(function(d) {
+    var s = document.createElement('span');
+    s.className = 'cal-wkday';
+    s.textContent = d;
+    wkr.appendChild(s);
+  });
+  card.appendChild(wkr);
+
+  var dg = document.createElement('div');
+  dg.className = 'cal-days';
+
+  for (var e = 0; e < firstDow; e++) {
+    var em = document.createElement('div');
+    em.className = 'cal-day empty';
+    em.innerHTML = '<div class="cal-day-in"></div>';
+    dg.appendChild(em);
+  }
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var ds     = year + '-' + pad(mo+1) + '-' + pad(d);
+    var actH   = actMap[ds] || [];
+    var obsAll = obsMap[ds] || [];
+    var obsOth = obsAll.filter(function(h) { return actH.indexOf(h) === -1; });
+    var isA    = actH.length > 0;
+    var isO    = obsOth.length > 0;
+
+    var cell = document.createElement('div');
+    cell.className = 'cal-day';
+    if (isA) cell.classList.add('is-a');
+    if (isO) cell.classList.add('is-o');
+
+    var inner = document.createElement('div');
+    inner.className   = 'cal-day-in';
+    inner.textContent = d;
+    cell.appendChild(inner);
+
+    if (isA || isO) {
+      cell.classList.add('has-tip');
+      var html = '';
+      var first = true;
+
+      actH.forEach(function(h) {
+        if (!first) html += '<hr class="tip-hr">';
+        first = false;
+        var sh = h.is_observed_shifted;
+        html +=
+          '<div class="tip-name">' + h.name + '</div>' +
+          '<div class="tip-row"><span class="tip-k">Date</span><span class="tip-v">' + fmtDate(h.date) + '</span></div>' +
+          '<div class="tip-row"><span class="tip-k">Day</span><span class="tip-v">' + dayName(h.date) + '</span></div>';
+        if (sh) {
+          html +=
+            '<div class="tip-row"><span class="tip-k">Observed</span><span class="tip-v">' + fmtDate(h.observed_date) + '</span></div>' +
+            '<span class="tip-pill pill-s">Observed ' + dayName(h.observed_date) + '</span>';
+        } else {
+          html += '<span class="tip-pill pill-a">Actual date</span>';
+        }
+      });
+
+      obsOth.forEach(function(h) {
+        if (!first) html += '<hr class="tip-hr">';
+        first = false;
+        html +=
+          '<div class="tip-name">' + h.name + '</div>' +
+          '<div class="tip-row"><span class="tip-k">Actual</span><span class="tip-v">' + fmtDate(h.date) + '</span></div>' +
+          '<div class="tip-row"><span class="tip-k">Observed</span><span class="tip-v">' + fmtDate(h.observed_date) + '</span></div>' +
+          '<span class="tip-pill pill-o">Observed here</span>';
+      });
+
+      (function(c, h) {
+        c.addEventListener('mouseenter', function() { tipTarget = c; showTip(c, h); });
+        c.addEventListener('mouseleave', function() { hideTip(); });
+      })(cell, html);
+    }
+
+    dg.appendChild(cell);
+  }
+
+  card.appendChild(dg);
+  return card;
+}
+
+/* ── collapse bar factory ── */
+var barIdSeq = 0;
+function makeCollapseBar(label, metaText, cards, onOpen) {
+  var id  = 'cbar-' + (++barIdSeq);
+  var bar = document.createElement('div');
+  bar.className = 'collapse-bar';
+  bar.innerHTML =
+    '<span class="collapse-bar-label">' + label + '</span>' +
+    '<span class="collapse-bar-meta">' + metaText + '</span>' +
+    '<span class="collapse-chev" id="' + id + '">▼</span>';
+
+  bar.addEventListener('click', function() {
+    var chev   = $(id);
+    var isOpen = chev.classList.toggle('open');
+    cards.forEach(function(c) { c.classList.toggle('collapsed', !isOpen); });
+    bar.querySelector('.collapse-bar-label').textContent = isOpen ? 'Show less' : label;
+    if (isOpen && onOpen) onOpen();
+  });
+  return bar;
+}
+
+/* ── collapse meta string ── */
+function barMeta(cards, holidays) {
+  if (!cards.length) return '';
+  var first = MONTHS[parseInt(cards[0].dataset.mo, 10)];
+  var last  = MONTHS[parseInt(cards[cards.length-1].dataset.mo, 10)];
+  var range = cards.length === 1 ? first : first + ' – ' + last;
+  var hols  = 0;
+  cards.forEach(function(c) {
+    var m = parseInt(c.dataset.mo, 10);
+    hols += holidays.filter(function(h) {
+      return parseInt(h.date.split('-')[1], 10) - 1 === m;
+    }).length;
+  });
+  return range + ' · ' + cards.length + ' month' + (cards.length !== 1 ? 's' : '') +
+         (hols ? ' · ' + hols + ' holiday' + (hols !== 1 ? 's' : '') : '');
+}
+
+/* ── year divider ── */
+function makeYearDivider(yr) {
+  var div = document.createElement('div');
+  div.className = 'year-divider';
+  div.innerHTML = '<span class="year-divider-label">' + yr + '</span><div class="year-divider-line"></div>';
+  return div;
+}
+
 /* ── init ── */
 (function init() {
-  var now    = new Date().getFullYear();
-  var years  = [now, now + 1];
-  var code   = DEFAULT_COUNTRY || 'US';
+  var now   = new Date().getFullYear();
+  var years = [now, now + 1];
+  var code  = DEFAULT_COUNTRY || 'US';
 
   setStatus('loading', 'Loading holidays for ' + (COUNTRY_NAMES[code] || code) + '…');
 
@@ -716,7 +862,6 @@ function fetchYear(code, yr) {
     var shifted = allH.filter(function(h){ return h.is_observed_shifted; }).length;
     var range   = good.length === 1 ? '' + good[0] : good[0] + '–' + good[good.length-1];
 
-    /* title bar */
     $('top-title').textContent = (COUNTRY_NAMES[code] || code).toUpperCase() + ' · HOLIDAYS';
     $('top-meta').textContent  = range;
     $('badge-count').textContent = allH.length + ' holiday' + (allH.length !== 1 ? 's' : '');
@@ -725,245 +870,150 @@ function fetchYear(code, yr) {
       $('badge-shifted').textContent = shifted + ' shift' + (shifted !== 1 ? 's' : '');
       show('badge-shifted');
     }
-
-    /* year tabs */
-    var nav = $('year-nav');
-    nav.innerHTML = '';
-    good.forEach(function(yr, i) {
-      var t = document.createElement('button');
-      t.className   = 'year-tab' + (i === 0 ? ' active' : '');
-      t.textContent = yr;
-      t.dataset.year = yr;
-      t.onclick = function() { switchYear(yr); };
-      nav.appendChild(t);
-    });
-    nav.className = 'year-nav show';
     $('legend').className = 'legend show';
 
-    activeYear = good[0];
-    renderCal(activeYear);
+    renderAllCals(good);
     renderList(good);
     $('list-section').className = 'list-section show';
   });
 })();
 
-/* ── switch year ── */
-function switchYear(yr) {
-  activeYear = yr;
-  document.querySelectorAll('.year-tab').forEach(function(t) {
-    t.classList.toggle('active', parseInt(t.dataset.year, 10) === yr);
-  });
-  renderCal(yr);
-}
-
-/* ── how many months to show upfront ── */
-function visibleMonthCount() {
-  /* desktop ≥ 681px → show current + next 3 = 4 months
-     mobile  ≤ 680px → show current + next 1 = 2 months */
-  return window.innerWidth <= 680 ? 2 : 4;
-}
-
-/* ── render calendar ── */
-function renderCal(year) {
-  var holidays = store[year] || [];
-
-  var actMap = {};
-  var obsMap = {};
-
-  holidays.forEach(function(h) {
-    if (!actMap[h.date]) actMap[h.date] = [];
-    actMap[h.date].push(h);
-    if (h.is_observed_shifted) {
-      if (!obsMap[h.observed_date]) obsMap[h.observed_date] = [];
-      obsMap[h.observed_date].push(h);
-    }
-  });
-
+/* ── render all years into one unified grid ── */
+function renderAllCals(years) {
   var grid = $('cal-grid');
   grid.innerHTML = '';
 
-  /* Which months are "visible" by default?
-     - If viewing the current year: current calendar month through current+N-1
-     - If viewing a future year: January through N-1 (first N months) */
   var today      = new Date();
   var todayYear  = today.getFullYear();
   var todayMonth = today.getMonth(); /* 0-based */
+  var showN      = visibleCount();   /* 2 mobile / 4 desktop */
 
-  var showCount  = visibleMonthCount();
-  var firstVis   = (year === todayYear) ? todayMonth : 0;
-  var lastVis    = firstVis + showCount - 1; /* inclusive, may exceed 11 */
+  years.forEach(function(year, yi) {
+    var holidays = store[year] || [];
 
-  /* Collect all cards first so we can build the collapse bar */
-  var cards = [];
-
-  for (var mo = 0; mo < 12; mo++) {
-    var firstDow    = new Date(year, mo, 1).getDay();
-    var daysInMonth = new Date(year, mo+1, 0).getDate();
-    var actualsHere = holidays.filter(function(h) {
-      return parseInt(h.date.split('-')[1], 10) - 1 === mo;
+    /* build lookup maps */
+    var actMap = {}, obsMap = {};
+    holidays.forEach(function(h) {
+      if (!actMap[h.date]) actMap[h.date] = [];
+      actMap[h.date].push(h);
+      if (h.is_observed_shifted) {
+        if (!obsMap[h.observed_date]) obsMap[h.observed_date] = [];
+        obsMap[h.observed_date].push(h);
+      }
     });
 
-    var card = document.createElement('div');
-    card.className = 'month-card';
-    card.dataset.mo = mo; /* store for collapse logic */
+    /* For year[0] (current year):
+         before  = months BEFORE this month   → collapsed, "before" bar
+         visible = this month … this month + showN-1
+         after   = rest of this year          → collapsed, "after" bar
+       For year[1] (next year):
+         entire year starts collapsed behind a year-divider collapse bar     */
 
-    /* mark collapsed if outside visible window */
-    var isVisible = (mo >= firstVis && mo <= lastVis);
-    if (!isVisible) card.classList.add('collapsed');
+    var beforeCards  = [];
+    var visibleCards = [];
+    var afterCards   = [];
 
-    /* header */
-    var head = document.createElement('div');
-    head.className = 'month-head';
-    head.innerHTML =
-      '<span class="month-name">' + MONTHS[mo].toUpperCase() + '</span>' +
-      (actualsHere.length
-        ? '<span class="month-hcount">' + actualsHere.length + '</span>'
-        : '');
-    card.appendChild(head);
-
-    /* weekday row */
-    var wkr = document.createElement('div');
-    wkr.className = 'cal-wkdays';
-    DSHORT.forEach(function(d) {
-      var s = document.createElement('span');
-      s.className   = 'cal-wkday';
-      s.textContent = d;
-      wkr.appendChild(s);
-    });
-    card.appendChild(wkr);
-
-    /* days */
-    var dg = document.createElement('div');
-    dg.className = 'cal-days';
-
-    for (var e = 0; e < firstDow; e++) {
-      var em = document.createElement('div');
-      em.className = 'cal-day empty';
-      em.innerHTML = '<div class="cal-day-in"></div>';
-      dg.appendChild(em);
+    var firstVis, lastVis;
+    if (year === todayYear) {
+      firstVis = todayMonth;
+      lastVis  = Math.min(11, todayMonth + showN - 1);
+    } else {
+      /* next year: nothing is "before", nothing visible by default — all behind divider */
+      firstVis = -1; /* nothing visible */
+      lastVis  = -1;
     }
 
-    for (var d = 1; d <= daysInMonth; d++) {
-      var ds      = year + '-' + pad(mo+1) + '-' + pad(d);
-      var actH    = actMap[ds] || [];
-      var obsAll  = obsMap[ds] || [];
-      var obsOth  = obsAll.filter(function(h) { return actH.indexOf(h) === -1; });
+    for (var mo = 0; mo < 12; mo++) {
+      var card = buildMonthCard(year, mo, holidays, actMap, obsMap);
+      if (year === todayYear) {
+        if (mo < firstVis) {
+          card.classList.add('collapsed');
+          beforeCards.push(card);
+        } else if (mo <= lastVis) {
+          visibleCards.push(card);
+        } else {
+          card.classList.add('collapsed');
+          afterCards.push(card);
+        }
+      } else {
+        /* next year — all collapsed */
+        card.classList.add('collapsed');
+        afterCards.push(card);
+      }
+    }
 
-      var isA = actH.length > 0;
-      var isO = obsOth.length > 0;
+    /* ── inject into grid ── */
 
-      var cell = document.createElement('div');
-      cell.className = 'cal-day';
-      if (isA) cell.classList.add('is-a');
-      if (isO) cell.classList.add('is-o');
-
-      var inner = document.createElement('div');
-      inner.className   = 'cal-day-in';
-      inner.textContent = d;
-      cell.appendChild(inner);
-
-      if (isA || isO) {
-        cell.classList.add('has-tip');
-
-        var html = '';
-        var first = true;
-
-        actH.forEach(function(h) {
-          if (!first) html += '<hr class="tip-hr">';
-          first = false;
-          var sh = h.is_observed_shifted;
-          html +=
-            '<div class="tip-name">' + h.name + '</div>' +
-            '<div class="tip-row"><span class="tip-k">Date</span><span class="tip-v">' + fmtDate(h.date) + '</span></div>' +
-            '<div class="tip-row"><span class="tip-k">Day</span><span class="tip-v">' + dayName(h.date) + '</span></div>';
-          if (sh) {
-            html +=
-              '<div class="tip-row"><span class="tip-k">Observed</span><span class="tip-v">' + fmtDate(h.observed_date) + '</span></div>' +
-              '<span class="tip-pill pill-s">Observed ' + dayName(h.observed_date) + '</span>';
-          } else {
-            html += '<span class="tip-pill pill-a">Actual date</span>';
-          }
-        });
-
-        obsOth.forEach(function(h) {
-          if (!first) html += '<hr class="tip-hr">';
-          first = false;
-          html +=
-            '<div class="tip-name">' + h.name + '</div>' +
-            '<div class="tip-row"><span class="tip-k">Actual</span><span class="tip-v">' + fmtDate(h.date) + '</span></div>' +
-            '<div class="tip-row"><span class="tip-k">Observed</span><span class="tip-v">' + fmtDate(h.observed_date) + '</span></div>' +
-            '<span class="tip-pill pill-o">Observed here</span>';
-        });
-
-        (function(c, h) {
-          c.addEventListener('mouseenter', function() { tipTarget = c; showTip(c, h); });
-          c.addEventListener('mouseleave', function() { hideTip(); });
-        })(cell, html);
+    if (year === todayYear) {
+      /* BEFORE bar (only if there are past months this year) */
+      if (beforeCards.length) {
+        var bBar = makeCollapseBar(
+          'Earlier this year',
+          barMeta(beforeCards, holidays),
+          beforeCards,
+          null
+        );
+        grid.appendChild(bBar);
+        beforeCards.forEach(function(c) { grid.appendChild(c); });
       }
 
-      dg.appendChild(cell);
-    }
+      /* visible months */
+      visibleCards.forEach(function(c) { grid.appendChild(c); });
 
-    card.appendChild(dg);
-    cards.push(card);
-  }
+      /* AFTER bar — rest of this year */
+      if (afterCards.length) {
+        var aBar = makeCollapseBar(
+          'Later this year',
+          barMeta(afterCards, holidays),
+          afterCards,
+          null
+        );
+        grid.appendChild(aBar);
+        afterCards.forEach(function(c) { grid.appendChild(c); });
+      }
 
-  /* Insert cards into grid, injecting collapse bar before the first hidden card */
-  var barInserted = false;
-  var hiddenCards = []; /* refs to toggle on bar click */
-  var collapseBar = null;
+    } else {
+      /* Next year: year-divider acts as the collapse trigger */
+      var divider = document.createElement('div');
+      divider.className = 'year-divider';
 
-  cards.forEach(function(card) {
-    var mo = parseInt(card.dataset.mo, 10);
-    var hidden = card.classList.contains('collapsed');
+      var lbl = document.createElement('span');
+      lbl.className   = 'year-divider-label';
+      lbl.textContent = year;
 
-    if (hidden && !barInserted) {
-      /* Count how many months are hidden and list their names */
-      var hiddenMonths = cards.filter(function(c){ return c.classList.contains('collapsed'); });
-      var hiddenNames  = hiddenMonths.map(function(c){ return MONTHS[parseInt(c.dataset.mo,10)]; });
+      var line = document.createElement('div');
+      line.className = 'year-divider-line';
 
-      /* Build count of hidden holidays */
-      var hiddenHolCount = 0;
-      hiddenMonths.forEach(function(c) {
-        var m = parseInt(c.dataset.mo, 10);
-        hiddenHolCount += holidays.filter(function(h){
-          return parseInt(h.date.split('-')[1], 10) - 1 === m;
-        }).length;
+      /* collapsed indicator shown in divider */
+      var holCount = holidays.length;
+      var hint = document.createElement('span');
+      hint.className = 'collapse-bar-meta';
+      hint.style.cssText = 'font-size:9px;color:var(--fog);margin-left:6px;white-space:nowrap;';
+      hint.id = 'next-yr-hint';
+      hint.textContent = holCount + ' holiday' + (holCount !== 1 ? 's' : '') + ' · click to expand';
+
+      var chev = document.createElement('span');
+      chev.className = 'collapse-chev';
+      chev.id = 'next-yr-chev';
+
+      divider.appendChild(lbl);
+      divider.appendChild(hint);
+      divider.appendChild(line);
+      divider.appendChild(chev);
+      divider.style.cursor = 'pointer';
+      divider.style.userSelect = 'none';
+
+      divider.addEventListener('click', function() {
+        var isOpen = chev.classList.toggle('open');
+        afterCards.forEach(function(c) { c.classList.toggle('collapsed', !isOpen); });
+        hint.textContent = isOpen
+          ? (holCount + ' holiday' + (holCount !== 1 ? 's' : '') + ' · click to collapse')
+          : (holCount + ' holiday' + (holCount !== 1 ? 's' : '') + ' · click to expand');
       });
 
-      /* Label: e.g. "May – December  ·  8 more months" */
-      var firstName = hiddenNames[0];
-      var lastName  = hiddenNames[hiddenNames.length - 1];
-      var rangeStr  = hiddenNames.length === 1
-                        ? firstName
-                        : firstName + ' – ' + lastName;
-
-      collapseBar = document.createElement('div');
-      collapseBar.className = 'collapse-bar';
-      collapseBar.innerHTML =
-        '<span class="collapse-bar-label">Show more</span>' +
-        '<span class="collapse-bar-meta">' + rangeStr + ' &nbsp;·&nbsp; ' + hiddenMonths.length + ' month' + (hiddenMonths.length !== 1 ? 's' : '') + (hiddenHolCount ? ' · ' + hiddenHolCount + ' holiday' + (hiddenHolCount !== 1 ? 's' : '') : '') + '</span>' +
-        '<span class="collapse-chev" id="collapse-chev-' + year + '">▼</span>';
-
-      hiddenCards = hiddenMonths;
-
-      /* Toggle logic */
-      (function(bar, hCards, yr) {
-        bar.addEventListener('click', function() {
-          var chev = $('collapse-chev-' + yr);
-          var nowOpen = chev.classList.toggle('open');
-          hCards.forEach(function(c) {
-            c.classList.toggle('collapsed', !nowOpen);
-          });
-          bar.querySelector('.collapse-bar-label').textContent = nowOpen ? 'Show less' : 'Show more';
-        });
-      })(collapseBar, hiddenCards, year);
-
-      grid.appendChild(collapseBar);
-      barInserted = true;
+      grid.appendChild(divider);
+      afterCards.forEach(function(c) { grid.appendChild(c); });
     }
-
-    grid.appendChild(card);
   });
 }
 
