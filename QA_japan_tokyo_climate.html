@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Climate — Tokyo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --forest:#1E4034;
+      --canopy:#2D6A4F;
+      --moss:#52B788;
+      --stone:#5C5346;
+      --driftwood:#A8896A;
+      --fog:#C9D4C5;
+      --ink:#0F0F0F;
+      --graphite:#3D3D3D;
+      --ash:#8C8C8C;
+      --cloud:#EFEFEF;
+      --paper:#F7F5F0;
+      --white:#FFFFFF;
+      --forest-8:#F1F4F3;
+      --forest-20:#DCDEDD;
+      --moss-12:#E9F4EE;
+      --moss-20:#DCEEE4;
+    }
+    .ht-widget{
+      font-family:'DM Sans',sans-serif;
+      color:var(--graphite);
+      font-size:14px;
+      line-height:1.6;
+      background:transparent;
+      overflow-x:hidden;
+    }
+
+    /* ── Strips ── */
+    .strips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .strip{
+      flex:1 1 160px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+      border-radius:6px;
+      padding:10px 14px;
+      min-width:0;
+    }
+    .strip-best{background:var(--forest);color:var(--white)}
+    .strip-avoid{background:var(--stone);color:var(--white)}
+    .strip strong{
+      font-family:'DM Sans',sans-serif;
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      opacity:.6;
+      flex-shrink:0;
+      font-weight:500;
+      white-space:nowrap;
+    }
+    .pill{
+      border-radius:20px;
+      padding:3px 10px;
+      font-size:12px;
+      font-weight:500;
+      background:rgba(255,255,255,.15);
+      border:1px solid rgba(255,255,255,.25);
+      white-space:nowrap;
+    }
+
+    /* ── Narrative ── */
+    .narrative{
+      font-size:13px;
+      line-height:1.85;
+      color:var(--graphite);
+      margin-bottom:16px;
+      padding:14px 16px;
+      background:var(--white);
+      border-left:3px solid var(--driftwood);
+      border-radius:0 5px 5px 0;
+    }
+
+    /* ── Unit toggle row ── */
+    .unit-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:12px}
+    .unit-lbl{font-size:12px;font-weight:500;color:var(--ash);min-width:22px;text-align:center;transition:color .18s}
+    .unit-lbl.active{color:var(--forest)}
+    .toggle{position:relative;display:inline-block;width:34px;height:18px;cursor:pointer;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .slider{position:absolute;inset:0;background:var(--fog);border-radius:18px;transition:.2s}
+    .slider::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:var(--white);border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+    input:checked+.slider{background:var(--canopy)}
+    input:checked+.slider::before{transform:translateX(16px)}
+
+    /* ── Charts ── */
+    .charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .chart-card{background:var(--white);border:1px solid var(--cloud);border-radius:8px;padding:12px 12px 8px;min-width:0}
+    .chart-title{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:8px}
+
+    /* ── Collapsible header ── */
+    .collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:10px 0 8px;border-top:1px solid var(--cloud);margin-top:4px}
+    .collapsible-header:hover .col-label{color:var(--canopy)}
+    .col-label{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);transition:color .15s}
+    .chevron{font-size:10px;color:var(--ash);transition:transform .2s;line-height:1}
+    .chevron.open{transform:rotate(180deg)}
+    .table-wrap{display:none;margin-top:6px}
+    .table-wrap.open{display:block}
+
+    /* ── Desktop table ── */
+    .tbl-desktop{width:100%;border-collapse:collapse;font-size:12px;border:1px solid var(--cloud);border-radius:8px;overflow:hidden}
+    .tbl-desktop thead{background:var(--forest)}
+    .tbl-desktop thead th{padding:8px 10px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+    .tbl-desktop tbody tr{border-bottom:1px solid var(--cloud);transition:background .1s}
+    .tbl-desktop tbody tr:last-child{border-bottom:none}
+    .tbl-desktop tbody tr:hover{background:var(--paper)}
+    .tbl-desktop tbody tr.row-best{background:var(--moss-20)}
+    .tbl-desktop tbody tr.row-worst{background:#FFF7D2}
+    .tbl-desktop td{padding:7px 10px;vertical-align:middle}
+
+    /* ── Mobile card table ── */
+    .tbl-mobile{display:none}
+    .mob-card{border:1px solid var(--cloud);border-radius:8px;overflow:hidden;margin-bottom:8px;background:var(--white)}
+    .mob-card.row-best{background:var(--moss-20);border-color:#A3D9B5}
+    .mob-card.row-worst{background:#FFF7D2;border-color:#E8D88A}
+    .mob-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:9px 12px;background:var(--forest);color:var(--white);
+      font-weight:500;font-size:13px;
+    }
+    .mob-card.row-best .mob-head{background:var(--canopy)}
+    .mob-card.row-worst .mob-head{background:var(--stone)}
+    .mob-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;text-align:center}
+    .mob-cell{padding:8px 4px;border-right:1px solid var(--cloud)}
+    .mob-cell:last-child{border-right:none}
+    .mob-cell-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);margin-bottom:2px}
+    .mob-cell-val{font-size:13px;font-weight:500;color:var(--ink)}
+
+    /* ── Shared ── */
+    .col-month{font-weight:500;white-space:nowrap;color:var(--ink)}
+    .badge{display:inline-block;margin-left:6px;font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 5px;border-radius:3px;vertical-align:middle}
+    .badge-best{background:var(--moss);color:var(--white)}
+    .badge-avoid{background:var(--driftwood);color:var(--white)}
+    .meta{margin-top:12px;font-size:11px;color:var(--ash);line-height:1.8}
+    .meta a{color:var(--canopy);text-decoration:none}
+    .meta a:hover{text-decoration:underline}
+
+    /* ── Responsive breakpoints ── */
+    @media(max-width:540px){
+      .charts{grid-template-columns:1fr}
+    }
+    @media(max-width:600px){
+      .tbl-desktop{display:none}
+      .tbl-mobile{display:block}
+      .narrative{font-size:12px;padding:12px 13px}
+      .strips{flex-direction:column}
+      .strip{flex:none;width:100%}
+    }
+  </style>
+</head>
+<body>
+<div class="ht-widget">
+
+  <!-- Best / Avoid strips -->
+  <div class="strips">
+    <div class="strip strip-best"><strong>Best months to visit</strong><span class="pill pill-best">January</span><span class="pill pill-best">May</span><span class="pill pill-best">June</span></div>
+    <div class="strip strip-avoid"><strong>Months to avoid</strong><span class="pill pill-avoid">February</span><span class="pill pill-avoid">March</span><span class="pill pill-avoid">September</span></div>
+  </div>
+
+  <!-- Narrative -->
+  <p class="narrative">The best time to visit Tokyo is January, May and June, when temperatures are comfortable and rainfall is relatively low. Try to avoid February, March and September, when conditions are at their least comfortable. Tokyo experiences a wide temperature swing across the year, from a cold January averaging around 44.8F (7.1C) to a hot August averaging around 85.8F (29.9C). In a warm August, average temperatures can reach 85.8F (29.9C), while a cold August may only average 85.8F (29.9C). Similarly, January averages range from 44.2F (6.8C) in a cold year to 45.3F (7.4C) in a mild one. Rainfall peaks in October and is lowest in January.</p>
+
+  <!-- Unit toggle -->
+  <div class="unit-row">
+    <span class="unit-lbl" id="lbl-c">°C</span>
+    <label class="toggle">
+      <input type="checkbox" id="unit-toggle" checked onchange="htSwitchUnits(this.checked)"/>
+      <span class="slider"></span>
+    </label>
+    <span class="unit-lbl active" id="lbl-f">°F</span>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts">
+    <div class="chart-card">
+      <div class="chart-title">Temperature</div>
+      <canvas id="htTempChart" height="175"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Precipitation</div>
+      <canvas id="htPrcpChart" height="175"></canvas>
+    </div>
+  </div>
+
+  <!-- Collapsible monthly breakdown -->
+  <div class="collapsible-header" onclick="htToggleTable()">
+    <span class="col-label">Monthly breakdown</span>
+    <span class="chevron" id="htChev">&#9660;</span>
+  </div>
+  <div class="table-wrap" id="htMonthTable">
+
+    <!-- Desktop: traditional table (hidden ≤600px via CSS) -->
+    <table class="tbl-desktop">
+      <thead>
+        <tr><th>Month</th><th>High</th><th>Avg</th><th>Low</th><th>Rainfall</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-best">
+          <td class="col-month">January<span class="badge badge-best">✦ Best</span></td>
+          <td><span class="vc">10.3°C</span><span class="vf" style="display:none">50.5°F</span></td>
+          <td><span class="vc">7.1°C</span><span class="vf" style="display:none">44.8°F</span></td>
+          <td><span class="vc">3.5°C</span><span class="vf" style="display:none">38.3°F</span></td>
+          <td><span class="pmm">47.7 mm</span><span class="pin" style="display:none">1.88"</span></td>
+        </tr>
+        <tr class="row-worst">
+          <td class="col-month">February<span class="badge badge-avoid">Avoid</span></td>
+          <td><span class="vc">10.9°C</span><span class="vf" style="display:none">51.6°F</span></td>
+          <td><span class="vc">7.8°C</span><span class="vf" style="display:none">46.0°F</span></td>
+          <td><span class="vc">4.2°C</span><span class="vf" style="display:none">39.6°F</span></td>
+          <td><span class="pmm">64.5 mm</span><span class="pin" style="display:none">2.54"</span></td>
+        </tr>
+        <tr class="row-worst">
+          <td class="col-month">March<span class="badge badge-avoid">Avoid</span></td>
+          <td><span class="vc">14.6°C</span><span class="vf" style="display:none">58.3°F</span></td>
+          <td><span class="vc">11.3°C</span><span class="vf" style="display:none">52.3°F</span></td>
+          <td><span class="vc">7.5°C</span><span class="vf" style="display:none">45.5°F</span></td>
+          <td><span class="pmm">113.0 mm</span><span class="pin" style="display:none">4.45"</span></td>
+        </tr>
+        <tr>
+          <td class="col-month">April</td>
+          <td><span class="vc">19.1°C</span><span class="vf" style="display:none">66.4°F</span></td>
+          <td><span class="vc">16.3°C</span><span class="vf" style="display:none">61.3°F</span></td>
+          <td><span class="vc">13.1°C</span><span class="vf" style="display:none">55.6°F</span></td>
+          <td><span class="pmm">127.4 mm</span><span class="pin" style="display:none">5.02"</span></td>
+        </tr>
+        <tr class="row-best">
+          <td class="col-month">May<span class="badge badge-best">✦ Best</span></td>
+          <td><span class="vc">23.5°C</span><span class="vf" style="display:none">74.3°F</span></td>
+          <td><span class="vc">19.8°C</span><span class="vf" style="display:none">67.6°F</span></td>
+          <td><span class="vc">16.9°C</span><span class="vf" style="display:none">62.4°F</span></td>
+          <td><span class="pmm">138.9 mm</span><span class="pin" style="display:none">5.47"</span></td>
+        </tr>
+        <tr class="row-best">
+          <td class="col-month">June<span class="badge badge-best">✦ Best</span></td>
+          <td><span class="vc">26.3°C</span><span class="vf" style="display:none">79.3°F</span></td>
+          <td><span class="vc">25.5°C</span><span class="vf" style="display:none">77.9°F</span></td>
+          <td><span class="vc">22.8°C</span><span class="vf" style="display:none">73.0°F</span></td>
+          <td><span class="pmm">171.7 mm</span><span class="pin" style="display:none">6.76"</span></td>
+        </tr>
+        <tr>
+          <td class="col-month">July</td>
+          <td><span class="vc">30.2°C</span><span class="vf" style="display:none">86.4°F</span></td>
+          <td><span class="vc">28.7°C</span><span class="vf" style="display:none">83.7°F</span></td>
+          <td><span class="vc">26.0°C</span><span class="vf" style="display:none">78.8°F</span></td>
+          <td><span class="pmm">126.9 mm</span><span class="pin" style="display:none">5.0"</span></td>
+        </tr>
+        <tr>
+          <td class="col-month">August</td>
+          <td><span class="vc">31.6°C</span><span class="vf" style="display:none">88.9°F</span></td>
+          <td><span class="vc">29.9°C</span><span class="vf" style="display:none">85.8°F</span></td>
+          <td><span class="vc">27.1°C</span><span class="vf" style="display:none">80.8°F</span></td>
+          <td><span class="pmm">132.8 mm</span><span class="pin" style="display:none">5.23"</span></td>
+        </tr>
+        <tr class="row-worst">
+          <td class="col-month">September<span class="badge badge-avoid">Avoid</span></td>
+          <td><span class="vc">27.9°C</span><span class="vf" style="display:none">82.2°F</span></td>
+          <td><span class="vc">26.9°C</span><span class="vf" style="display:none">80.4°F</span></td>
+          <td><span class="vc">24.1°C</span><span class="vf" style="display:none">75.4°F</span></td>
+          <td><span class="pmm">206.8 mm</span><span class="pin" style="display:none">8.14"</span></td>
+        </tr>
+        <tr>
+          <td class="col-month">October</td>
+          <td><span class="vc">22.5°C</span><span class="vf" style="display:none">72.5°F</span></td>
+          <td><span class="vc">19.3°C</span><span class="vf" style="display:none">66.7°F</span></td>
+          <td><span class="vc">16.7°C</span><span class="vf" style="display:none">62.1°F</span></td>
+          <td><span class="pmm">226.2 mm</span><span class="pin" style="display:none">8.91"</span></td>
+        </tr>
+        <tr>
+          <td class="col-month">November</td>
+          <td><span class="vc">17.6°C</span><span class="vf" style="display:none">63.7°F</span></td>
+          <td><span class="vc">13.7°C</span><span class="vf" style="display:none">56.7°F</span></td>
+          <td><span class="vc">10.1°C</span><span class="vf" style="display:none">50.2°F</span></td>
+          <td><span class="pmm">100.0 mm</span><span class="pin" style="display:none">3.94"</span></td>
+        </tr>
+        <tr>
+          <td class="col-month">December</td>
+          <td><span class="vc">12.7°C</span><span class="vf" style="display:none">54.9°F</span></td>
+          <td><span class="vc">9.3°C</span><span class="vf" style="display:none">48.7°F</span></td>
+          <td><span class="vc">5.6°C</span><span class="vf" style="display:none">42.1°F</span></td>
+          <td><span class="pmm">62.3 mm</span><span class="pin" style="display:none">2.45"</span></td>
+        </tr></tbody>
+    </table>
+
+    <!-- Mobile: stacked cards (hidden >600px, built by JS) -->
+    <div class="tbl-mobile" id="htMobileCards"></div>
+
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const MONTHS  = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const HI_C    = [10.3,10.9,14.6,19.1,23.5,26.3,30.2,31.6,27.9,22.5,17.6,12.7];
+  const AVG_C   = [7.1,7.8,11.3,16.3,19.8,25.5,28.7,29.9,26.9,19.3,13.7,9.3];
+  const LO_C    = [3.5,4.2,7.5,13.1,16.9,22.8,26.0,27.1,24.1,16.7,10.1,5.6];
+  const HI_F    = [50.5,51.6,58.3,66.4,74.3,79.3,86.4,88.9,82.2,72.5,63.7,54.9];
+  const AVG_F   = [44.8,46.0,52.3,61.3,67.6,77.9,83.7,85.8,80.4,66.7,56.7,48.7];
+  const LO_F    = [38.3,39.6,45.5,55.6,62.4,73.0,78.8,80.8,75.4,62.1,50.2,42.1];
+  const PRCP_MM = [47.7,64.5,113.0,127.4,138.9,171.7,126.9,132.8,206.8,226.2,100.0,62.3];
+  const PRCP_IN = [1.88,2.54,4.45,5.02,5.47,6.76,5.0,5.23,8.14,8.91,3.94,2.45];
+  const BEST    = new Set(['May', 'June', 'January']);
+  const WORST   = new Set(['February', 'March', 'September']);
+
+  const C_HI  = '#1E4034';
+  const C_AVG = '#2D6A4F';
+  const C_LO  = '#52B788';
+
+  let useF = true;
+
+  // ── Build mobile month cards from JS data arrays ───────────────
+  function buildMobileCards() {
+    const container = document.getElementById('htMobileCards');
+    if (!container) return;
+    let html = '';
+    for (let i = 0; i < MONTHS.length; i++) {
+      const m   = MONTHS[i];
+      const cls = BEST.has(m)  ? 'mob-card row-best'  :
+                  WORST.has(m) ? 'mob-card row-worst' : 'mob-card';
+      const badge = BEST.has(m)  ? '<span class="badge badge-best">✦ Best</span>' :
+                    WORST.has(m) ? '<span class="badge badge-avoid">Avoid</span>' : '';
+      const mmVal = PRCP_MM[i];
+      const inVal = PRCP_IN[i];
+      html += `<div class="${cls}">
+        <div class="mob-head"><span>${m}${badge}</span></div>
+        <div class="mob-grid">
+          <div class="mob-cell">
+            <div class="mob-cell-label">High</div>
+            <div class="mob-cell-val">
+              <span class="vc">${HI_C[i]!=null?HI_C[i]+'°C':'—'}</span>
+              <span class="vf" style="display:none">${HI_F[i]!=null?HI_F[i]+'°F':'—'}</span>
+            </div>
+          </div>
+          <div class="mob-cell">
+            <div class="mob-cell-label">Avg</div>
+            <div class="mob-cell-val">
+              <span class="vc">${AVG_C[i]!=null?AVG_C[i]+'°C':'—'}</span>
+              <span class="vf" style="display:none">${AVG_F[i]!=null?AVG_F[i]+'°F':'—'}</span>
+            </div>
+          </div>
+          <div class="mob-cell">
+            <div class="mob-cell-label">Low</div>
+            <div class="mob-cell-val">
+              <span class="vc">${LO_C[i]!=null?LO_C[i]+'°C':'—'}</span>
+              <span class="vf" style="display:none">${LO_F[i]!=null?LO_F[i]+'°F':'—'}</span>
+            </div>
+          </div>
+          <div class="mob-cell">
+            <div class="mob-cell-label">Rain</div>
+            <div class="mob-cell-val">
+              <span class="pmm">${mmVal!=null?mmVal+' mm':'—'}</span>
+              <span class="pin" style="display:none">${inVal!=null?inVal+'"':'—'}</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  buildMobileCards();
+
+  // ── Temperature chart ──────────────────────────────────────────
+  const tempChart = new Chart(document.getElementById('htTempChart'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        { label:'High', data:HI_F,  borderColor:C_HI,  backgroundColor:'rgba(30,64,52,.07)',  borderWidth:2,   pointRadius:2, pointHoverRadius:5, tension:0.35, fill:false },
+        { label:'Avg',  data:AVG_F, borderColor:C_AVG, backgroundColor:'rgba(45,106,79,.08)', borderWidth:2.5, pointRadius:2, pointHoverRadius:5, tension:0.35, fill:false },
+        { label:'Low',  data:LO_F,  borderColor:C_LO,  backgroundColor:'rgba(82,183,136,.07)',borderWidth:2,   pointRadius:2, pointHoverRadius:5, tension:0.35, fill:false },
+      ]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:true,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{ labels:{ boxWidth:10, font:{ size:10, family:"'DM Sans',sans-serif" }, color:'#3D3D3D' } },
+        tooltip:{
+          backgroundColor:'#1E4034', titleColor:'rgba(255,255,255,.7)',
+          bodyColor:'#fff', padding:9, cornerRadius:6,
+          callbacks:{
+            title: ctx => MONTHS[ctx[0].dataIndex],
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y+(useF?'°F':'°C'):'—'}`,
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ font:{ size:10 }, color:'#8C8C8C', maxRotation:0 } },
+        y:{ grid:{ color:'#EFEFEF' }, ticks:{ font:{ size:10 }, color:'#8C8C8C', callback: v => v+(useF?'°F':'°C') } }
+      }
+    }
+  });
+
+  // ── Precipitation chart ────────────────────────────────────────
+  const prcpChart = new Chart(document.getElementById('htPrcpChart'), {
+    type: 'bar',
+    data: {
+      labels: MONTHS,
+      datasets: [{
+        label:'Rainfall', data:PRCP_IN,
+        backgroundColor:'rgba(168,137,106,.55)', borderColor:'rgba(168,137,106,.85)',
+        borderWidth:1, borderRadius:3, hoverBackgroundColor:'rgba(168,137,106,.8)',
+      }]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:true,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          backgroundColor:'#1E4034', titleColor:'rgba(255,255,255,.7)',
+          bodyColor:'#fff', padding:9, cornerRadius:6,
+          callbacks:{
+            title: ctx => MONTHS[ctx[0].dataIndex],
+            label: ctx => {
+              const i   = ctx.dataIndex;
+              const mm  = PRCP_MM[i];
+              const inc = PRCP_IN[i];
+              if (mm==null) return ' —';
+              return useF ? ` ${inc!=null?inc+'″':'—'}` : ` ${mm} mm (${inc!=null?inc+'″':'—'})`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ grid:{ display:false }, ticks:{ font:{ size:10 }, color:'#8C8C8C', maxRotation:0 } },
+        y:{ grid:{ color:'#EFEFEF' }, ticks:{ font:{ size:10 }, color:'#8C8C8C', callback: v => useF?v+'″':v+'mm' } }
+      }
+    }
+  });
+
+  // ── Switch °C / °F ─────────────────────────────────────────────
+  window.htSwitchUnits = function(toF) {
+    useF = toF;
+    tempChart.data.datasets[0].data = toF ? HI_F  : HI_C;
+    tempChart.data.datasets[1].data = toF ? AVG_F : AVG_C;
+    tempChart.data.datasets[2].data = toF ? LO_F  : LO_C;
+    tempChart.options.scales.y.ticks.callback = v => v+(toF?'°F':'°C');
+    tempChart.update();
+    prcpChart.data.datasets[0].data = toF ? PRCP_IN : PRCP_MM;
+    prcpChart.options.scales.y.ticks.callback = v => toF ? v+'″' : v+'mm';
+    prcpChart.update();
+    document.querySelectorAll('.vc').forEach(el  => el.style.display = toF?'none':'');
+    document.querySelectorAll('.vf').forEach(el  => el.style.display = toF?'':'none');
+    document.querySelectorAll('.pmm').forEach(el => el.style.display = toF?'none':'');
+    document.querySelectorAll('.pin').forEach(el => el.style.display = toF?'':'none');
+    document.getElementById('lbl-c').classList.toggle('active', !toF);
+    document.getElementById('lbl-f').classList.toggle('active',  toF);
+  };
+
+  // ── Collapsible table toggle ───────────────────────────────────
+  window.htToggleTable = function() {
+    document.getElementById('htMonthTable').classList.toggle('open');
+    document.getElementById('htChev').classList.toggle('open');
+  };
+
+  htSwitchUnits(true);
+})();
+</script>
+</body>
+</html>
