@@ -638,9 +638,15 @@ function series() {
     }
   }
 
-  _tMap = tMap;
+  // Build labels array for category axis.
+  // Empty string = no visible tick. Non-empty = tick label shown.
+  var labels = [];
+  for (var j = 0; j < n; j++) {
+    labels.push(tMap[j] !== undefined ? tMap[j] : "");
+  }
+
   _rawDates = ds;
-  return { data: data, n: n };
+  return { data: data, labels: labels, n: n };
 }
 
 function buildChart() {
@@ -650,7 +656,7 @@ function buildChart() {
   fxChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: Array.from({length: s.n}, function(_, i) { return i; }),
+      labels: s.labels,
       datasets: [{
         data: s.data,
         borderColor: "#52B788", borderWidth: 1.5,
@@ -687,15 +693,11 @@ function buildChart() {
       },
       scales: {
         x: {
-          type: "linear", min: 0, max: Math.max(0, s.n - 1),
+          type: "category",
           grid: { display: false }, border: { display: false },
           ticks: {
             color: "#8C8C8C", font: { size: 9 },
-            maxRotation: 0, autoSkip: false,
-            callback: function(val) {
-              var label = _tMap[Math.round(val)];
-              return label != null ? label : null;
-            }
+            maxRotation: 0, autoSkip: false
           }
         },
         y: {
@@ -712,9 +714,8 @@ function refreshChart() {
   if (!fxChart) return;
   var s = series();
   if (!s.n) return;
-  fxChart.data.labels = Array.from({length: s.n}, function(_, i) { return i; });
+  fxChart.data.labels = s.labels;
   fxChart.data.datasets[0].data = s.data;
-  fxChart.options.scales.x.max = Math.max(0, s.n - 1);
   fxChart.update();
 }
 
