@@ -1,4 +1,5 @@
-<!-- FX Widget: EUR/USD -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>EUR/USD FX</title></head><body style="margin:0;padding:16px;background:#F7F5F0"><!-- FX Widget: EUR/USD -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <div id="fx_eur_usd">
 <style>
@@ -343,7 +344,7 @@
               font:{size:9},
               maxRotation:0,
               autoSkip:false,
-              callback:(v,i)=>ch.data.labels[i]||null
+              callback:(v,i)=>labels[i]||null
             }
           },
           y:{
@@ -385,3 +386,4 @@
 })();
 </script>
 </div>
+</body></html>
