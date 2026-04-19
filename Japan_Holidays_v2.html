@@ -806,25 +806,57 @@ function barMeta(cards, holidays) {
          (hols ? ' · ' + hols + ' holiday' + (hols !== 1 ? 's' : '') : '');
 }
 
-/* ── init — load current year immediately, background-load the rest ── */
+/* ── init — load current year immediately, background-load the rest in order ── */
 (function init() {
   var now  = new Date().getFullYear();
   var code = DEFAULT_COUNTRY || 'US';
 
-  /* Years to fetch: current year through 2030 */
   var allYears = [];
   for (var y = now; y <= 2030; y++) allYears.push(y);
 
+  /* Pre-insert one sentinel <div> per year into the grid and list body
+     so that whenever a fetch resolves it writes into the correct position,
+     regardless of network arrival order.                                    */
+  var grid = $('cal-grid');
+  var gridAnchors = {};
+  allYears.forEach(function(yr) {
+    var a = document.createElement('div');
+    a.dataset.anchor = yr;
+    a.style.display = 'contents'; /* invisible wrapper — doesn't affect grid layout */
+    grid.appendChild(a);
+    gridAnchors[yr] = a;
+  });
+
+  /* List anchors are comment nodes so they don't affect table rendering */
+  var body = $('list-body');
+  var listAnchors = {};
+  allYears.forEach(function(yr) {
+    var a = document.createComment('year-' + yr);
+    body.appendChild(a);
+    listAnchors[yr] = a;
+  });
+
   setStatus('loading', 'Loading…');
 
-  /* 1. Fetch current year first — render as soon as it arrives */
+  /* helper: insert all nodes of a fragment before a given anchor node */
+  function insertAtGridAnchor(yr, nodes) {
+    var anchor = gridAnchors[yr];
+    nodes.forEach(function(n) { anchor.parentNode.insertBefore(n, anchor); });
+  }
+
+  function insertAtListAnchor(yr, nodes) {
+    var anchor = listAnchors[yr];
+    nodes.forEach(function(n) { anchor.parentNode.insertBefore(n, anchor); });
+  }
+
+  /* 1. Fetch current year first */
   fetchYear(code, now)
     .then(function(d) {
       store[now] = d.holidays || [];
       clearStatus();
       $('legend').className = 'legend show';
-      appendYearToGrid(now, true /* isFirstYear */);
-      appendYearToList(now);
+      appendYearToGrid(now, true,  insertAtGridAnchor);
+      appendYearToList(now,        insertAtListAnchor);
       $('list-section').className = 'list-section show';
     })
     .catch(function() {
@@ -833,24 +865,21 @@ function barMeta(cards, holidays) {
       setStatus('error', 'Could not load data.');
     });
 
-  /* 2. Background-fetch remaining years — each appends when ready */
-  var futureYears = allYears.slice(1); /* now+1 … 2030 */
-  futureYears.forEach(function(yr) {
+  /* 2. Background-fetch remaining years */
+  allYears.slice(1).forEach(function(yr) {
     fetchYear(code, yr)
       .then(function(d) {
         store[yr] = d.holidays || [];
-        appendYearToGrid(yr, false);
-        appendYearToList(yr);
+        appendYearToGrid(yr, false, insertAtGridAnchor);
+        appendYearToList(yr,        insertAtListAnchor);
+        $('list-section').className = 'list-section show';
       })
-      .catch(function() {
-        store[yr] = null; /* silently skip failed years */
-      });
+      .catch(function() { store[yr] = null; });
   });
 })();
 
-/* ── append a single year's calendar section to the grid ── */
-function appendYearToGrid(year, isFirstYear) {
-  var grid     = $('cal-grid');
+/* ── append a single year's calendar section at its reserved anchor ── */
+function appendYearToGrid(year, isFirstYear, insertAt) {
   var holidays = store[year] || [];
 
   var today      = new Date();
@@ -876,7 +905,6 @@ function appendYearToGrid(year, isFirstYear) {
   for (var mo = 0; mo < 12; mo++) {
     var card = buildMonthCard(year, mo, holidays, actMap, obsMap);
     if (isFirstYear) {
-      /* current year: split into before / visible / after */
       if (mo < todayMonth) {
         card.classList.add('collapsed');
         beforeCards.push(card);
@@ -887,28 +915,25 @@ function appendYearToGrid(year, isFirstYear) {
         afterCards.push(card);
       }
     } else {
-      /* future year: all collapsed behind year-divider */
       card.classList.add('collapsed');
       afterCards.push(card);
     }
   }
 
-  if (isFirstYear) {
-    /* before bar */
-    if (beforeCards.length) {
-      grid.appendChild(makeCollapseBar('Earlier this year', barMeta(beforeCards, holidays), beforeCards));
-      beforeCards.forEach(function(c) { grid.appendChild(c); });
-    }
-    /* visible months */
-    visibleCards.forEach(function(c) { grid.appendChild(c); });
-    /* after bar */
-    if (afterCards.length) {
-      grid.appendChild(makeCollapseBar('Later this year', barMeta(afterCards, holidays), afterCards));
-      afterCards.forEach(function(c) { grid.appendChild(c); });
-    }
+  /* collect all nodes to insert in order */
+  var nodes = [];
 
+  if (isFirstYear) {
+    if (beforeCards.length) {
+      nodes.push(makeCollapseBar('Earlier this year', barMeta(beforeCards, holidays), beforeCards));
+      beforeCards.forEach(function(c) { nodes.push(c); });
+    }
+    visibleCards.forEach(function(c) { nodes.push(c); });
+    if (afterCards.length) {
+      nodes.push(makeCollapseBar('Later this year', barMeta(afterCards, holidays), afterCards));
+      afterCards.forEach(function(c) { nodes.push(c); });
+    }
   } else {
-    /* year-divider that expands on click */
     var divider = document.createElement('div');
     divider.className = 'year-divider';
     divider.style.cursor = 'pointer';
@@ -943,18 +968,17 @@ function appendYearToGrid(year, isFirstYear) {
       chev.style.display = 'none';
     });
 
-    grid.appendChild(divider);
-    afterCards.forEach(function(c) { grid.appendChild(c); });
+    nodes.push(divider);
+    afterCards.forEach(function(c) { nodes.push(c); });
   }
+
+  insertAt(year, nodes);
 }
 
-/* ── append a single year's rows to the shared list table ── */
-function appendYearToList(year) {
+/* ── append a single year's rows to the shared list table at its anchor ── */
+function appendYearToList(year, insertAt) {
   var hols = store[year] || [];
   if (!hols.length) return;
-
-  /* ensure the list section is visible */
-  $('list-section').className = 'list-section show';
 
   var body = $('list-body');
 
@@ -973,27 +997,53 @@ function appendYearToList(year) {
     tbl.createTHead().innerHTML =
       '<tr><th>Date</th><th>Holiday</th><th>Day</th><th>Observed</th></tr>';
     tbl.createTBody();
-    body.appendChild(tbl);
+    body.insertBefore(tbl, body.firstChild);
   }
 
+  /* build a temporary tbody fragment for this year, then insert at anchor */
   var tb = tbl.querySelector('tbody');
 
+  /* we can't use comment anchors inside a table, so instead track insertion
+     point by year — find the first row whose data-yr is greater than ours  */
+  var rows = tb.rows;
+  var insertBefore = null;
+  for (var i = 0; i < rows.length; i++) {
+    var rowYr = parseInt(rows[i].dataset.yr || rows[i].querySelector('[data-yr]'), 10);
+    /* sep rows carry data-yr directly */
+    if (rows[i].dataset.yr && parseInt(rows[i].dataset.yr, 10) > year) {
+      insertBefore = rows[i];
+      break;
+    }
+  }
+
   /* year separator row */
-  var sepRow = tb.insertRow();
+  var sepRow = document.createElement('tr');
   sepRow.className = 'list-yr-row';
-  var sepCell = sepRow.insertCell();
+  sepRow.dataset.yr = year;
+  var sepCell = document.createElement('td');
   sepCell.colSpan = 4;
   sepCell.className = 'list-yr-cell';
   sepCell.textContent = year;
+  sepRow.appendChild(sepCell);
 
+  var newRows = [sepRow];
   hols.forEach(function(h) {
     var sh = h.is_observed_shifted;
-    var tr = tb.insertRow();
+    var tr = document.createElement('tr');
     tr.innerHTML =
       '<td class="td-date">' + fmtDate(h.date) + '</td>' +
       '<td class="td-name">' + h.name + (sh ? '<span class="chip">Shifted</span>' : '') + '</td>' +
       '<td class="td-day">'  + dayName(h.observed_date || h.date) + '</td>' +
       '<td class="td-obs">'  + (sh ? fmtDate(h.observed_date) : '—') + '</td>';
+    newRows.push(tr);
+  });
+
+  newRows.forEach(function(r) {
+    if (insertBefore) {
+      tb.insertBefore(r, insertBefore);
+    } else {
+      tb.appendChild(r);
+    }
   });
 }
 
