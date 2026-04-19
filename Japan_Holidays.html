@@ -938,25 +938,15 @@ function renderAllCals(years) {
       divider.appendChild(line);
       divider.appendChild(chev);
 
-      divider.addEventListener('click', function() {
+      divider.addEventListener('click', function onClick() {
         /* reveal all next-year cards */
         afterCards.forEach(function(c) { c.classList.remove('collapsed'); });
-        /* turn divider into a plain non-clickable label */
+        /* strip interactivity from divider — just mutate in place, no new element */
+        divider.removeEventListener('click', onClick);
         divider.style.cursor = 'default';
+        divider.style.userSelect = 'default';
         hint.style.display = 'none';
         chev.style.display = 'none';
-        divider.replaceWith(divider.cloneNode(true)); /* strip event listener */
-        /* re-append the now-static divider */
-        var staticDiv = document.createElement('div');
-        staticDiv.className = 'year-divider';
-        var staticLbl = document.createElement('span');
-        staticLbl.className = 'year-divider-label';
-        staticLbl.textContent = year;
-        var staticLine = document.createElement('div');
-        staticLine.className = 'year-divider-line';
-        staticDiv.appendChild(staticLbl);
-        staticDiv.appendChild(staticLine);
-        grid.insertBefore(staticDiv, afterCards[0]);
       });
 
       grid.appendChild(divider);
