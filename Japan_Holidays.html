@@ -2,552 +2,772 @@
 
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>National Holiday Lookup</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
+<!--
+  ╔══════════════════════════════════════════╗
+  ║  EASY CONFIGURATION — EDIT THESE ONLY   ║
+  ╚══════════════════════════════════════════╝
+  DEFAULT_COUNTRY : ISO 2-letter code
+  Examples: "US" "JP" "GB" "DE" "FR" "AU"
+-->
+
+<script>
+  var DEFAULT_COUNTRY = "JP";
+</script>
+
+<!--
+  Fonts: preconnect first, then load.
+  GitHub Pages allows Google Fonts — the issue was CSP on some configs.
+  We also declare robust system-font fallbacks so it looks good either way.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+<style>
+/* ─────────────────────────────────────────
+   BRAND TOKENS  (Horizon Trails v1.2)
+───────────────────────────────────────── */
 :root {
-–forest:    #1E4034;
-–canopy:    #2D6A4F;
-–moss:      #52B788;
-–driftwood: #A8896A;
-–fog:       #C9D4C5;
-–ink:       #0F0F0F;
-–graphite:  #3D3D3D;
-–ash:       #8C8C8C;
-–cloud:     #EFEFEF;
-–paper:     #F7F5F0;
-–white:     #FFFFFF;
-–warning:   #FF9500;
-–forest-8:  #F1F4F3;
-–forest-12: #EAEEED;
-–moss-20:   #DCEEE4;
-–canopy-8:  #EEF3F1;
+  --forest:     #1E4034;
+  --canopy:     #2D6A4F;
+  --moss:       #52B788;
+  --driftwood:  #A8896A;
+  --fog:        #C9D4C5;
+  --stone:      #5C5346;
+  --ink:        #0F0F0F;
+  --graphite:   #3D3D3D;
+  --ash:        #8C8C8C;
+  --cloud:      #EFEFEF;
+  --paper:      #F7F5F0;
+  --white:      #FFFFFF;
+
+  /* tints */
+  --forest-04:  #F8FAF9;
+  --forest-08:  #F1F4F3;
+  --forest-12:  #EAEEED;
+  --moss-20:    #DCEEE4;
+  --drift-20:   #F2EBE3;
+
+  /* alert */
+  --warn-base:  #FF9500;
+  --warn-bg:    #FFF5EA;
+  --warn-text:  #7A3800;
+
+  /* typography — safe fallbacks if Google Fonts blocked */
+  --font-display: 'Bebas Neue', 'Arial Black', 'Impact', sans-serif;
+  --font-editorial: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+  --font-body: 'DM Sans', 'Helvetica Neue', 'Arial', sans-serif;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ─────────────────────────────────────────
+   RESET
+───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { -webkit-text-size-adjust: 100%; }
 
 body {
-background: var(–paper);
-color: var(–graphite);
-font-family: ‘DM Sans’, ‘Helvetica Neue’, Arial, sans-serif;
-font-size: 15px;
-line-height: 1.55;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--graphite);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Search bar ── */
+button { font-family: inherit; }
+
+/* ─────────────────────────────────────────
+   SEARCH BAR
+───────────────────────────────────────── */
 .search-bar {
-background: var(–forest);
-padding: 20px 28px;
-display: flex;
-flex-wrap: wrap;
-align-items: flex-end;
-gap: 14px;
+  background: var(--forest);
+  padding: 18px 24px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: flex-end;
+  border-bottom: 3px solid var(--canopy);
 }
 
-.search-heading {
-width: 100%;
+.search-title-block {
+  flex: 0 0 100%;
+  margin-bottom: 2px;
 }
 
-.search-bar-title {
-font-family: ‘Bebas Neue’, ‘Arial Black’, sans-serif;
-font-size: 1.5rem;
-letter-spacing: 0.1em;
-color: var(–white);
-display: block;
+.search-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  color: var(--white);
+  line-height: 1;
 }
 
-.search-bar-sub {
-display: block;
-font-family: ‘Playfair Display’, Georgia, serif;
-font-style: italic;
-font-size: 0.82rem;
-color: var(–fog);
-margin-top: 2px;
-margin-bottom: 10px;
+.search-sub {
+  display: block;
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--fog);
+  margin-top: 3px;
+  line-height: 1.4;
 }
 
-.field { display: flex; flex-direction: column; gap: 5px; }
-
-.field label {
-font-size: 0.62rem;
-letter-spacing: 0.18em;
-text-transform: uppercase;
-color: var(–fog);
-font-weight: 500;
+/* Field label + control stacked */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
+.field-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+  line-height: 1;
+}
+
+/* Native select — styled to look intentional on all browsers */
 .field select {
-padding: 8px 34px 8px 12px;
-border: 1px solid rgba(255,255,255,0.15);
-background-color: rgba(255,255,255,0.08);
-background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘10’ height=‘6’ viewBox=‘0 0 10 6’%3E%3Cpath d=‘M1 1l4 4 4-4’ stroke=’%23C9D4C5’ stroke-width=‘1.5’ fill=‘none’ stroke-linecap=‘round’/%3E%3C/svg%3E”);
-background-repeat: no-repeat;
-background-position: right 10px center;
-color: var(–white);
-font-family: ‘DM Sans’, sans-serif;
-font-size: 0.875rem;
-outline: none;
--webkit-appearance: none;
-appearance: none;
-cursor: pointer;
-min-width: 180px;
-transition: border-color 0.2s;
+  height: 36px;
+  padding: 0 32px 0 11px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--white);
+  background-color: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.20);
+  border-radius: 2px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Cpolyline points='2,2 8,8 14,2' fill='none' stroke='%23C9D4C5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 10px 7px;
+  transition: border-color 0.15s;
 }
 
-.field select:focus { border-color: var(–moss); }
-.field select option { background: var(–forest); color: var(–white); }
+.field select:focus {
+  border-color: var(--moss);
+  box-shadow: 0 0 0 2px rgba(82,183,136,0.25);
+}
 
-.year-pair { display: flex; align-items: center; gap: 8px; }
-.year-pair span { color: var(–fog); font-size: 0.75rem; }
-.year-pair select { min-width: 80px; }
+/* Firefox: white text on dark bg for options */
+.field select option {
+  background: #1a3a2e;
+  color: var(--white);
+}
 
+.sel-country { min-width: 180px; }
+
+.year-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.year-sep {
+  font-size: 12px;
+  color: var(--fog);
+}
+.sel-year { min-width: 76px; }
+
+/* Lookup button */
 .btn-lookup {
-padding: 9px 28px;
-background: var(–moss);
-color: var(–ink);
-font-family: ‘Bebas Neue’, ‘Arial Black’, sans-serif;
-font-size: 1.05rem;
-letter-spacing: 0.1em;
-border: none;
-cursor: pointer;
-transition: background 0.18s, transform 0.1s;
-align-self: flex-end;
-white-space: nowrap;
+  height: 36px;
+  padding: 0 24px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  background: var(--moss);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s;
+  align-self: flex-end;
 }
-.btn-lookup:hover { background: #3fa071; }
+.btn-lookup:hover  { background: #3fa071; }
 .btn-lookup:active { transform: scale(0.97); }
-.btn-lookup:disabled { background: var(–ash); cursor: not-allowed; }
-
-/* ── Status ── */
-.status {
-display: none;
-align-items: center;
-gap: 10px;
-padding: 11px 28px;
-font-size: 0.8rem;
-font-weight: 500;
+.btn-lookup:disabled {
+  background: var(--ash);
+  cursor: not-allowed;
+  transform: none;
 }
-.status.show { display: flex; }
-.status.loading { background: var(–forest-12); color: var(–forest); }
-.status.error   { background: #FFF5EA; color: #7a3800; border-left: 3px solid var(–warning); }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ─────────────────────────────────────────
+   STATUS STRIP
+───────────────────────────────────────── */
+.status-strip {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.status-strip.visible { display: flex; }
+.status-strip.is-loading {
+  background: var(--forest-12);
+  color: var(--forest);
+  border-bottom: 1px solid var(--fog);
+}
+.status-strip.is-error {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border-left: 3px solid var(--warn-base);
+  border-bottom: 1px solid #FFD6AA;
+}
+
+@keyframes _spin { to { transform: rotate(360deg); } }
 .spinner {
-width: 13px; height: 13px;
-border: 2px solid var(–fog);
-border-top-color: var(–canopy);
-border-radius: 50%;
-animation: spin 0.7s linear infinite;
-flex-shrink: 0;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(46,106,79,0.25);
+  border-top-color: var(--canopy);
+  border-radius: 50%;
+  animation: _spin 0.65s linear infinite;
 }
 
-/* ── Results ── */
-.results { padding: 22px 28px; }
-
-.results-meta {
-display: none;
-align-items: baseline;
-justify-content: space-between;
-flex-wrap: wrap;
-gap: 8px;
-margin-bottom: 18px;
-padding-bottom: 12px;
-border-bottom: 2px solid var(–ink);
-}
-.results-meta.show { display: flex; }
-
-.results-country {
-font-family: ‘Bebas Neue’, ‘Arial Black’, sans-serif;
-font-size: clamp(1.6rem, 4vw, 2.6rem);
-letter-spacing: 0.05em;
-color: var(–ink);
-line-height: 1;
+/* ─────────────────────────────────────────
+   MAIN RESULTS AREA
+───────────────────────────────────────── */
+.results-area {
+  padding: 20px 24px 32px;
 }
 
-.meta-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+/* Meta row */
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.meta-country {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 4vw, 36px);
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.meta-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
 .badge {
-display: inline-block;
-padding: 3px 10px;
-font-size: 0.6rem;
-font-weight: 500;
-letter-spacing: 0.15em;
-text-transform: uppercase;
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  line-height: 1.6;
 }
-.badge-total   { background: var(–moss-20); color: var(–canopy); }
-.badge-shifted { background: #FFF1DF; color: #7a3800; }
+.badge-count    { background: var(--moss-20); color: var(--canopy); }
+.badge-shifted  { background: var(--drift-20); color: #6a4200; }
 
-/* ── Year tabs ── */
-.year-nav {
-display: none;
-align-items: center;
-gap: 8px;
-margin-bottom: 16px;
-flex-wrap: wrap;
+/* Year tabs */
+.year-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
 }
-.year-nav.show { display: flex; }
 
 .year-tab {
-padding: 4px 16px;
-font-family: ‘Bebas Neue’, ‘Arial Black’, sans-serif;
-font-size: 1rem;
-letter-spacing: 0.1em;
-color: var(–ash);
-background: none;
-border: 1px solid var(–cloud);
-cursor: pointer;
-transition: all 0.15s;
+  padding: 4px 18px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  color: var(--ash);
+  background: none;
+  border: 1px solid var(--cloud);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
 }
-.year-tab:hover { border-color: var(–canopy); color: var(–canopy); }
-.year-tab.active { background: var(–forest); color: var(–white); border-color: var(–forest); }
+.year-tab:hover {
+  border-color: var(--canopy);
+  color: var(--canopy);
+}
+.year-tab.active {
+  background: var(--forest);
+  color: var(--white);
+  border-color: var(--forest);
+}
 
-/* ── Legend ── */
+/* Legend */
 .legend {
-display: none;
-align-items: center;
-gap: 16px;
-margin-bottom: 14px;
-flex-wrap: wrap;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
 }
-.legend.show { display: flex; }
 
 .legend-item {
-display: flex;
-align-items: center;
-gap: 6px;
-font-size: 0.68rem;
-letter-spacing: 0.08em;
-text-transform: uppercase;
-color: var(–ash);
-font-weight: 500;
-}
-.legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
-.dot-actual   { background: var(–canopy); }
-.dot-observed { background: var(–driftwood); }
-
-/* ── Calendar grid ── */
-.calendar-grid {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 14px;
-margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash);
 }
 
-@media (max-width: 600px) {
-.calendar-grid { grid-template-columns: 1fr; }
-.search-bar { padding: 14px 16px; }
-.results { padding: 16px; }
+.legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
-@media (min-width: 601px) and (max-width: 900px) {
-.calendar-grid { grid-template-columns: repeat(2, 1fr); }
+.dot-actual   { background: var(--canopy); }
+.dot-observed { background: var(--driftwood); }
+
+/* ─────────────────────────────────────────
+   CALENDAR GRID
+───────────────────────────────────────── */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
+/* Month card */
 .month-card {
-background: var(–white);
-border: 1px solid var(–cloud);
-overflow: visible;
+  background: var(--white);
+  border: 1px solid var(--cloud);
+  border-radius: 2px;
+  overflow: visible; /* tooltips need to escape */
 }
 
-.month-header {
-background: var(–forest);
-padding: 7px 11px;
-display: flex;
-justify-content: space-between;
-align-items: center;
+.month-head {
+  background: var(--forest);
+  padding: 7px 11px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 2px 2px 0 0;
 }
 
-.month-name {
-font-family: ‘Bebas Neue’, ‘Arial Black’, sans-serif;
-font-size: 0.95rem;
-letter-spacing: 0.12em;
-color: var(–white);
+.month-name-label {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  color: var(--white);
+  line-height: 1;
 }
 
-.month-hcount {
-font-size: 0.6rem;
-letter-spacing: 0.1em;
-text-transform: uppercase;
-color: var(–moss);
-font-weight: 500;
+.month-count-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--moss);
+  line-height: 1;
 }
 
-.cal-weekdays {
-display: grid;
-grid-template-columns: repeat(7, 1fr);
-background: var(–forest-12);
+/* Weekday header row */
+.cal-wkdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--forest-08);
+  border-bottom: 1px solid var(--cloud);
 }
 
-.cal-weekdays span {
-text-align: center;
-padding: 4px 0;
-font-size: 0.58rem;
-letter-spacing: 0.08em;
-text-transform: uppercase;
-color: var(–ash);
-font-weight: 500;
+.cal-wkday {
+  text-align: center;
+  padding: 4px 0;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ash);
+  line-height: 1;
 }
 
+/* Day cells */
 .cal-days {
-display: grid;
-grid-template-columns: repeat(7, 1fr);
-padding: 4px;
-gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 4px;
+  gap: 2px;
 }
 
 .cal-day {
-position: relative;
-aspect-ratio: 1;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 0.7rem;
-color: var(–graphite);
-border-radius: 50%;
-z-index: 1;
+  position: relative;
+  /* force square via padding trick (more reliable than aspect-ratio across browsers) */
+  width: 100%;
+  padding-top: 100%;
+  border-radius: 50%;
+  cursor: default;
+  transition: filter 0.1s;
 }
 
-.cal-day.empty { color: transparent; }
-
-.cal-day.is-holiday { cursor: pointer; font-weight: 600; z-index: 2; }
-
-.cal-day.actual-holiday {
-background: var(–canopy);
-color: var(–white);
+/* inner content centered */
+.cal-day-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--graphite);
+  line-height: 1;
+  border-radius: 50%;
 }
 
-.cal-day.observed-only {
-background: var(–driftwood);
-color: var(–white);
+.cal-day.empty .cal-day-inner { color: transparent; }
+
+/* Holiday states */
+.cal-day.is-actual .cal-day-inner {
+  background: var(--canopy);
+  color: var(--white);
+  font-weight: 600;
 }
 
-/* Day that is BOTH the actual date of one holiday and the observed date of another */
-.cal-day.actual-holiday.observed-other {
-background: linear-gradient(135deg, var(–canopy) 50%, var(–driftwood) 50%);
-color: var(–white);
+.cal-day.is-observed .cal-day-inner {
+  background: var(--driftwood);
+  color: var(--white);
+  font-weight: 600;
 }
 
-.cal-day.is-holiday:hover { filter: brightness(1.15); z-index: 20; }
-
-/* ── Tooltip ── */
-.tooltip {
-display: none;
-position: absolute;
-bottom: calc(100% + 8px);
-left: 50%;
-transform: translateX(-50%);
-background: var(–ink);
-color: var(–white);
-padding: 10px 12px;
-min-width: 175px;
-max-width: 215px;
-font-size: 0.72rem;
-line-height: 1.45;
-z-index: 999;
-pointer-events: none;
-box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-text-align: left;
-white-space: normal;
+/* Both actual + observed (different holidays) on same date */
+.cal-day.is-actual.is-observed .cal-day-inner {
+  background: linear-gradient(135deg, var(--canopy) 50%, var(--driftwood) 50%);
+  color: var(--white);
+  font-weight: 600;
 }
 
-.tooltip::after {
-content: ‘’;
-position: absolute;
-top: 100%;
-left: 50%;
-transform: translateX(-50%);
-border: 5px solid transparent;
-border-top-color: var(–ink);
+/* Hover */
+.cal-day.is-holiday {
+  cursor: pointer;
+  z-index: 1;
+}
+.cal-day.is-holiday:hover {
+  filter: brightness(1.12);
+  z-index: 50;
 }
 
-/* edge flipping */
-.cal-day:nth-child(7n+1) .tooltip,
-.cal-day:nth-child(7n+2) .tooltip {
-left: 0; transform: none;
-}
-.cal-day:nth-child(7n+1) .tooltip::after,
-.cal-day:nth-child(7n+2) .tooltip::after {
-left: 12px; transform: none;
-}
-.cal-day:nth-child(7n+6) .tooltip,
-.cal-day:nth-child(7n) .tooltip {
-left: auto; right: 0; transform: none;
-}
-.cal-day:nth-child(7n+6) .tooltip::after,
-.cal-day:nth-child(7n) .tooltip::after {
-left: auto; right: 12px; transform: none;
+/* ─────────────────────────────────────────
+   TOOLTIP
+───────────────────────────────────────── */
+.tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--white);
+  padding: 11px 13px;
+  min-width: 170px;
+  max-width: 210px;
+  border-radius: 3px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  pointer-events: none;
+  white-space: normal;
+  text-align: left;
+  z-index: 999;
 }
 
-.cal-day.is-holiday:hover .tooltip { display: block; }
+/* Arrow */
+.tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--ink);
+}
 
+/* Show on hover */
+.cal-day.is-holiday:hover .tip { display: block; }
+
+/* Edge nudging: columns 1–2 → align left */
+.cal-day.col-1 .tip,
+.cal-day.col-2 .tip {
+  left: 0;
+  transform: none;
+}
+.cal-day.col-1 .tip::after,
+.cal-day.col-2 .tip::after {
+  left: 14px;
+  transform: none;
+}
+
+/* Edge nudging: columns 6–7 → align right */
+.cal-day.col-6 .tip,
+.cal-day.col-7 .tip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.cal-day.col-6 .tip::after,
+.cal-day.col-7 .tip::after {
+  left: auto;
+  right: 14px;
+  transform: none;
+}
+
+/* Tooltip internals */
 .tip-name {
-font-weight: 500;
-font-size: 0.76rem;
-color: var(–white);
-margin-bottom: 5px;
-line-height: 1.3;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--white);
+  line-height: 1.35;
+  margin-bottom: 6px;
 }
 
 .tip-divider {
-border: none;
-border-top: 1px solid rgba(255,255,255,0.1);
-margin: 6px 0;
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  margin: 7px 0;
 }
 
 .tip-row {
-display: flex;
-justify-content: space-between;
-gap: 8px;
-font-size: 0.66rem;
-margin-top: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 3px;
+  font-size: 10px;
+  line-height: 1.4;
 }
-.tip-row .tip-label { color: var(–ash); }
-.tip-row .tip-val   { color: var(–fog); text-align: right; }
+.tip-key { color: var(--ash); flex-shrink: 0; }
+.tip-val { color: var(--fog); text-align: right; }
 
-.tip-tag {
-display: inline-block;
-margin-top: 6px;
-padding: 1px 7px;
-font-size: 0.58rem;
-letter-spacing: 0.1em;
-text-transform: uppercase;
-font-weight: 500;
+.tip-pill {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 2px;
 }
-.tip-tag.actual    { background: var(–canopy); color: var(–white); }
-.tip-tag.observed  { background: var(–driftwood); color: var(–white); }
-.tip-tag.shifted   { background: rgba(255,255,255,0.12); color: var(–moss); }
+.pill-actual    { background: var(--canopy); color: var(--white); }
+.pill-observed  { background: var(--driftwood); color: var(--white); }
+.pill-shifted   { background: rgba(255,255,255,0.12); color: var(--moss); }
 
-/* ── Collapsible list ── */
-.list-section { margin-top: 4px; }
+/* ─────────────────────────────────────────
+   COLLAPSIBLE LIST
+───────────────────────────────────────── */
+.list-section { margin-top: 6px; }
 
-.list-toggle {
-display: flex;
-align-items: center;
-gap: 10px;
-padding: 10px 14px;
-width: 100%;
-background: var(–forest-8);
-border: 1px solid var(–cloud);
-border-bottom: none;
-font-size: 0.68rem;
-letter-spacing: 0.15em;
-text-transform: uppercase;
-font-weight: 500;
-color: var(–ash);
-cursor: pointer;
-text-align: left;
-transition: background 0.15s;
+.list-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--forest-08);
+  border: 1px solid var(--cloud);
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--stone);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
 }
-.list-toggle:hover { background: var(–forest-12); color: var(–canopy); }
-
-.toggle-arrow {
-margin-left: auto;
-font-size: 0.75rem;
-transition: transform 0.2s;
-display: inline-block;
+.list-toggle-btn:hover {
+  background: var(--forest-12);
+  color: var(--canopy);
 }
-.toggle-arrow.open { transform: rotate(180deg); }
+
+.toggle-chevron {
+  font-size: 11px;
+  color: var(--ash);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.toggle-chevron.open { transform: rotate(180deg); }
 
 .list-body {
-display: none;
-border: 1px solid var(–cloud);
-background: var(–white);
+  display: none;
+  border: 1px solid var(--cloud);
+  border-radius: 0 0 2px 2px;
+  overflow: hidden;
 }
 .list-body.open { display: block; }
 
-.list-year-hdr {
-background: var(–forest-12);
-padding: 5px 14px;
-font-family: ‘Bebas Neue’, ‘Arial Black’, sans-serif;
-font-size: 0.9rem;
-letter-spacing: 0.12em;
-color: var(–ash);
-border-bottom: 1px solid var(–cloud);
+/* Year header inside list */
+.list-yr-hdr {
+  padding: 5px 14px;
+  background: var(--forest-12);
+  border-bottom: 1px solid var(--cloud);
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--ash);
 }
 
-.list-table { width: 100%; border-collapse: collapse; }
-
-.list-table thead tr { background: var(–forest); }
-
-.list-table thead th {
-padding: 7px 13px;
-text-align: left;
-font-size: 0.58rem;
-letter-spacing: 0.16em;
-text-transform: uppercase;
-color: var(–fog);
-font-weight: 500;
+/* Table */
+.list-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
 }
 
-.list-table tbody tr { border-bottom: 1px solid var(–cloud); transition: background 0.1s; }
-.list-table tbody tr:last-child { border-bottom: none; }
-.list-table tbody tr:hover { background: var(–forest-8); }
+.list-tbl thead tr { background: var(--forest); }
 
-.list-table td {
-padding: 8px 13px;
-font-size: 0.8rem;
-color: var(–graphite);
-vertical-align: middle;
+.list-tbl thead th {
+  padding: 7px 13px;
+  text-align: left;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
 }
 
-.list-table td:first-child {
-color: var(–ash);
-font-size: 0.72rem;
-white-space: nowrap;
-font-weight: 300;
-width: 100px;
+.list-tbl tbody tr {
+  border-bottom: 1px solid var(--cloud);
+  transition: background 0.08s;
+}
+.list-tbl tbody tr:last-child { border-bottom: none; }
+.list-tbl tbody tr:hover { background: var(--forest-04); }
+
+.list-tbl td {
+  padding: 8px 13px;
+  color: var(--graphite);
+  vertical-align: middle;
 }
 
-.td-name { font-weight: 500; color: var(–ink); }
-
-.shift-pill {
-display: inline-block;
-margin-left: 8px;
-padding: 1px 7px;
-font-size: 0.58rem;
-letter-spacing: 0.1em;
-text-transform: uppercase;
-font-weight: 500;
-background: #FFF1DF;
-color: #7a3800;
-vertical-align: middle;
+.td-date {
+  white-space: nowrap;
+  color: var(--ash);
+  font-size: 11px;
+  font-weight: 300;
+  width: 95px;
 }
 
-/* ── Empty ── */
-.empty { padding: 56px 20px; text-align: center; }
-.empty-icon { font-size: 2.2rem; opacity: 0.3; margin-bottom: 10px; }
-.empty p {
-font-family: ‘Playfair Display’, Georgia, serif;
-font-style: italic;
-color: var(–ash);
-font-size: 0.95rem;
+.td-name {
+  font-weight: 500;
+  color: var(--ink);
 }
 
-/* ── Fade ── */
-@keyframes fadeUp {
-from { opacity: 0; transform: translateY(7px); }
-to   { opacity: 1; transform: translateY(0); }
+.td-day {
+  color: var(--ash);
+  font-size: 11px;
+  white-space: nowrap;
 }
-.fade-up { animation: fadeUp 0.28s ease forwards; }
+
+.td-observed {
+  font-size: 11px;
+  color: var(--driftwood);
+}
+
+.shift-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--drift-20);
+  color: #6a4200;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+/* ─────────────────────────────────────────
+   EMPTY STATE
+───────────────────────────────────────── */
+.empty-state {
+  padding: 56px 20px;
+  text-align: center;
+}
+.empty-icon {
+  font-size: 36px;
+  line-height: 1;
+  margin-bottom: 12px;
+  opacity: 0.3;
+}
+.empty-text {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ash);
+}
+
+/* ─────────────────────────────────────────
+   HIDDEN UTILITY
+───────────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@media (max-width: 680px) {
+  .cal-grid { grid-template-columns: 1fr 1fr; }
+  .search-bar { padding: 14px 16px; gap: 10px 12px; }
+  .results-area { padding: 16px 16px 28px; }
+  .cal-day-inner { font-size: 10px; }
+}
+
+@media (max-width: 400px) {
+  .cal-grid { grid-template-columns: 1fr; }
+  .sel-country { min-width: 140px; }
+}
 </style>
 
 </head>
 <body>
 
-<!-- ── Search bar ── -->
+<!-- ══════════════════════════════════════
+     SEARCH BAR
+════════════════════════════════════════ -->
 
 <div class="search-bar">
-  <div class="search-heading">
-    <span class="search-bar-title">NATIONAL HOLIDAYS</span>
-    <span class="search-bar-sub">Go further. Write honestly.</span>
+
+  <div class="search-title-block">
+    <span class="search-title">NATIONAL HOLIDAYS</span>
+    <span class="search-sub">Go further. Write honestly.</span>
   </div>
 
   <div class="field">
-    <label for="sel-country">Country</label>
-    <select id="sel-country">
-      <option value="">— Select —</option>
+    <span class="field-label">Country</span>
+    <select class="sel-country" id="sel-country">
       <option value="US">United States</option>
       <option value="GB">United Kingdom</option>
       <option value="CA">Canada</option>
@@ -669,385 +889,490 @@ to   { opacity: 1; transform: translateY(0); }
   </div>
 
   <div class="field">
-    <label>Year Range</label>
-    <div class="year-pair">
-      <select id="sel-from">
-        <option value="2026">2026</option>
-        <option value="2027">2027</option>
-        <option value="2028">2028</option>
-        <option value="2029">2029</option>
-        <option value="2030">2030</option>
-      </select>
-      <span>to</span>
-      <select id="sel-to">
-        <option value="2026">2026</option>
-        <option value="2027" selected>2027</option>
-        <option value="2028">2028</option>
-        <option value="2029">2029</option>
-        <option value="2030">2030</option>
-      </select>
+    <span class="field-label">Year range</span>
+    <div class="year-row">
+      <select class="sel-year" id="sel-from"></select>
+      <span class="year-sep">to</span>
+      <select class="sel-year" id="sel-to"></select>
     </div>
   </div>
 
-<button class="btn-lookup" id="btn-lookup" onclick="handleSearch()">LOOK UP</button>
+<button class="btn-lookup" id="btn-lookup" onclick="doSearch()">LOOK UP</button>
 
 </div>
 
-<!-- ── Status ── -->
+<!-- ══════════════════════════════════════
+     STATUS STRIP
+════════════════════════════════════════ -->
 
-<div class="status" id="status">
+<div class="status-strip" id="status-strip">
   <div class="spinner" id="spinner"></div>
-  <span id="status-text"></span>
+  <span id="status-msg"></span>
 </div>
 
-<!-- ── Results ── -->
+<!-- ══════════════════════════════════════
+     RESULTS
+════════════════════════════════════════ -->
 
-<div class="results" id="results">
+<div class="results-area">
 
-  <div class="results-meta" id="results-meta">
-    <div class="results-country" id="results-country"></div>
+  <!-- Meta -->
+
+  <div class="meta-row hidden" id="meta-row">
+    <span class="meta-country" id="meta-country"></span>
     <div class="meta-badges">
-      <span class="badge badge-total" id="badge-total"></span>
-      <span class="badge badge-shifted" id="badge-shifted" style="display:none;"></span>
+      <span class="badge badge-count" id="badge-count"></span>
+      <span class="badge badge-shifted hidden" id="badge-shifted"></span>
     </div>
   </div>
 
-  <div class="year-nav" id="year-nav"></div>
+  <!-- Year tabs -->
 
-  <div class="legend" id="legend">
-    <div class="legend-item"><div class="legend-dot dot-actual"></div>Actual date</div>
-    <div class="legend-item"><div class="legend-dot dot-observed"></div>Observed (shifted)</div>
+  <div class="year-tabs hidden" id="year-tabs"></div>
+
+  <!-- Legend -->
+
+  <div class="legend hidden" id="legend">
+    <div class="legend-item">
+      <div class="legend-dot dot-actual"></div>
+      Actual date
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot dot-observed"></div>
+      Observed (shifted)
+    </div>
   </div>
 
-  <div id="calendar-area"></div>
+  <!-- Calendar -->
 
-  <div class="list-section" id="list-section" style="display:none;">
-    <button class="list-toggle" onclick="toggleList()">
-      Full Holiday List
-      <span class="toggle-arrow" id="toggle-arrow">▼</span>
+  <div id="cal-area"></div>
+
+  <!-- List -->
+
+  <div class="list-section hidden" id="list-section">
+    <button class="list-toggle-btn" id="list-toggle" onclick="toggleList()">
+      Full holiday list
+      <span class="toggle-chevron" id="toggle-chevron">▼</span>
     </button>
     <div class="list-body" id="list-body"></div>
   </div>
 
-  <div class="empty" id="empty-state">
+  <!-- Empty -->
+
+  <div class="empty-state" id="empty-state">
     <div class="empty-icon">🧭</div>
-    <p>Select a country and year range above to explore its holidays.</p>
+    <p class="empty-text">Select a country and year range above to explore its holidays.</p>
   </div>
 
-</div>
+</div><!-- /results-area -->
 
 <script>
-const COUNTRY_NAMES = {
+/* ══════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+var COUNTRY_NAMES = {
   US:'United States',GB:'United Kingdom',CA:'Canada',AU:'Australia',
   DE:'Germany',FR:'France',JP:'Japan',CN:'China',IN:'India',BR:'Brazil',
   MX:'Mexico',KR:'South Korea',IT:'Italy',ES:'Spain',NL:'Netherlands',
-  SG:'Singapore',NZ:'New Zealand',ZA:'South Africa',NG:'Nigeria',
-  AR:'Argentina',SE:'Sweden',NO:'Norway',DK:'Denmark',CH:'Switzerland',
-  PT:'Portugal',PL:'Poland',TR:'Turkey',EG:'Egypt',SA:'Saudi Arabia',
-  AE:'United Arab Emirates',IL:'Israel',PH:'Philippines',ID:'Indonesia',
-  TH:'Thailand',MY:'Malaysia',VN:'Vietnam',PK:'Pakistan',BD:'Bangladesh',
-  KE:'Kenya',GH:'Ghana',UA:'Ukraine',RU:'Russia',CO:'Colombia',CL:'Chile',
-  PE:'Peru',IE:'Ireland',BE:'Belgium',AT:'Austria',GR:'Greece',FI:'Finland',
-  CZ:'Czechia',HU:'Hungary',RO:'Romania',SK:'Slovakia',HR:'Croatia',
-  RS:'Serbia',BG:'Bulgaria',LU:'Luxembourg',IS:'Iceland',EE:'Estonia',
-  LV:'Latvia',LT:'Lithuania',SI:'Slovenia',CY:'Cyprus',MT:'Malta',
-  MA:'Morocco',TN:'Tunisia',ET:'Ethiopia',TZ:'Tanzania',UG:'Uganda',
-  ZW:'Zimbabwe',CM:'Cameroon',CI:'Ivory Coast',SN:'Senegal',DZ:'Algeria',
-  AO:'Angola',MZ:'Mozambique',ZM:'Zambia',EC:'Ecuador',VE:'Venezuela',
-  BO:'Bolivia',PY:'Paraguay',UY:'Uruguay',PA:'Panama',CR:'Costa Rica',
-  GT:'Guatemala',HN:'Honduras',SV:'El Salvador',NI:'Nicaragua',CU:'Cuba',
-  DO:'Dominican Republic',JM:'Jamaica',HT:'Haiti',LK:'Sri Lanka',NP:'Nepal',
-  MM:'Myanmar',KH:'Cambodia',LA:'Laos',TW:'Taiwan',HK:'Hong Kong',
+  SG:'Singapore',NZ:'New Zealand',ZA:'South Africa',NG:'Nigeria',AR:'Argentina',
+  SE:'Sweden',NO:'Norway',DK:'Denmark',CH:'Switzerland',PT:'Portugal',PL:'Poland',
+  TR:'Turkey',EG:'Egypt',SA:'Saudi Arabia',AE:'United Arab Emirates',IL:'Israel',
+  PH:'Philippines',ID:'Indonesia',TH:'Thailand',MY:'Malaysia',VN:'Vietnam',
+  PK:'Pakistan',BD:'Bangladesh',KE:'Kenya',GH:'Ghana',UA:'Ukraine',RU:'Russia',
+  CO:'Colombia',CL:'Chile',PE:'Peru',IE:'Ireland',BE:'Belgium',AT:'Austria',
+  GR:'Greece',FI:'Finland',CZ:'Czechia',HU:'Hungary',RO:'Romania',SK:'Slovakia',
+  HR:'Croatia',RS:'Serbia',BG:'Bulgaria',LU:'Luxembourg',IS:'Iceland',EE:'Estonia',
+  LV:'Latvia',LT:'Lithuania',SI:'Slovenia',CY:'Cyprus',MT:'Malta',MA:'Morocco',
+  TN:'Tunisia',ET:'Ethiopia',TZ:'Tanzania',UG:'Uganda',ZW:'Zimbabwe',CM:'Cameroon',
+  CI:'Ivory Coast',SN:'Senegal',DZ:'Algeria',AO:'Angola',MZ:'Mozambique',ZM:'Zambia',
+  EC:'Ecuador',VE:'Venezuela',BO:'Bolivia',PY:'Paraguay',UY:'Uruguay',PA:'Panama',
+  CR:'Costa Rica',GT:'Guatemala',HN:'Honduras',SV:'El Salvador',NI:'Nicaragua',
+  CU:'Cuba',DO:'Dominican Republic',JM:'Jamaica',HT:'Haiti',LK:'Sri Lanka',
+  NP:'Nepal',MM:'Myanmar',KH:'Cambodia',LA:'Laos',TW:'Taiwan',HK:'Hong Kong',
   MN:'Mongolia',KZ:'Kazakhstan',UZ:'Uzbekistan',AZ:'Azerbaijan',GE:'Georgia',
   AM:'Armenia',JO:'Jordan',LB:'Lebanon',IQ:'Iraq',IR:'Iran',KW:'Kuwait',
   QA:'Qatar',BH:'Bahrain',OM:'Oman',YE:'Yemen',LY:'Libya',SD:'Sudan'
 };
 
-const MONTHS      = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const MONTHS_S    = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DAYS_SHORT  = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-const DAYS_FULL   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var MONTH_NAMES  = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December'];
+var MONTH_SHORT  = ['Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'];
+var DAY_SHORT    = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+var DAY_FULL     = ['Sunday','Monday','Tuesday','Wednesday',
+                    'Thursday','Friday','Saturday'];
 
-let allData    = {};
-let activeYear = null;
+/* ══════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+var loaded = {};      // { year: [holidays] | null }
+var activeYear = null;
 
-/* ── Helpers ── */
+/* ══════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+(function init() {
+  // Year dropdowns: current year and next 4
+  var thisYear = new Date().getFullYear();
+  var fromSel  = document.getElementById('sel-from');
+  var toSel    = document.getElementById('sel-to');
+
+  for (var y = thisYear; y <= thisYear + 4; y++) {
+    fromSel.appendChild(makeOpt(y, y));
+    toSel.appendChild(makeOpt(y, y));
+  }
+
+  // Default: this year and next year
+  fromSel.value = thisYear;
+  toSel.value   = thisYear + 1;
+
+  // Default country
+  var countrySel = document.getElementById('sel-country');
+  if (DEFAULT_COUNTRY && countrySel.querySelector('option[value="' + DEFAULT_COUNTRY + '"]')) {
+    countrySel.value = DEFAULT_COUNTRY;
+  }
+
+  // Auto-run on load
+  doSearch();
+})();
+
+function makeOpt(val, txt) {
+  var o = document.createElement('option');
+  o.value = val;
+  o.textContent = txt;
+  return o;
+}
+
+/* ══════════════════════════════════════
+   HELPERS
+════════════════════════════════════════ */
 function fmtDate(s) {
-  const [y,m,d] = s.split('-').map(Number);
-  return `${MONTHS_S[m-1]} ${d}, ${y}`;
+  var p = s.split('-');
+  return MONTH_SHORT[+p[1]-1] + ' ' + +p[2] + ', ' + p[0];
 }
-function dayName(s) {
-  const [y,m,d] = s.split('-').map(Number);
-  return DAYS_FULL[new Date(y,m-1,d).getDay()];
+
+function getDayName(s) {
+  var p = s.split('-').map(Number);
+  return DAY_FULL[new Date(p[0], p[1]-1, p[2]).getDay()];
 }
+
+function show(id)   { document.getElementById(id).classList.remove('hidden'); }
+function hide(id)   { document.getElementById(id).classList.add('hidden'); }
+function el(id)     { return document.getElementById(id); }
+
 function setStatus(type, msg) {
-  const el = document.getElementById('status');
-  el.className = 'status show ' + type;
-  document.getElementById('status-text').textContent = msg;
-  document.getElementById('spinner').style.display = type === 'loading' ? 'block' : 'none';
+  var strip = el('status-strip');
+  strip.className = 'status-strip visible is-' + type;
+  el('status-msg').textContent = msg;
+  el('spinner').style.display = (type === 'loading') ? 'block' : 'none';
 }
-function hideStatus() { document.getElementById('status').className = 'status'; }
-
-/* ── Fetch ── */
-async function fetchYear(code, year) {
-  const r = await fetch(`https://tallyfy.com/national-holidays/api/${code}/${year}.json`);
-  if (!r.ok) throw new Error();
-  return r.json();
+function clearStatus() {
+  el('status-strip').className = 'status-strip';
 }
 
-/* ── Main search ── */
-async function handleSearch() {
-  const code  = document.getElementById('sel-country').value;
-  const fromY = parseInt(document.getElementById('sel-from').value);
-  const toY   = parseInt(document.getElementById('sel-to').value);
-  const btn   = document.getElementById('btn-lookup');
+/* ══════════════════════════════════════
+   FETCH
+════════════════════════════════════════ */
+function fetchYear(code, year) {
+  return fetch('https://tallyfy.com/national-holidays/api/' + code + '/' + year + '.json')
+    .then(function(r) {
+      if (!r.ok) throw new Error('not ok');
+      return r.json();
+    });
+}
 
-  if (!code)       { setStatus('error','Please select a country.'); return; }
-  if (fromY > toY) { setStatus('error','Start year must be ≤ end year.'); return; }
+/* ══════════════════════════════════════
+   SEARCH
+════════════════════════════════════════ */
+function doSearch() {
+  var code   = el('sel-country').value;
+  var fromY  = parseInt(el('sel-from').value, 10);
+  var toY    = parseInt(el('sel-to').value, 10);
+  var btn    = el('btn-lookup');
 
+  if (!code) { setStatus('error', 'Please select a country.'); return; }
+  if (fromY > toY) {
+    var tmp = fromY; fromY = toY; toY = tmp; // auto-fix
+    el('sel-from').value = fromY;
+    el('sel-to').value   = toY;
+  }
+
+  // Reset
   btn.disabled = true;
-  allData = {};
-  setStatus('loading', `Loading holidays for ${COUNTRY_NAMES[code] || code}…`);
+  loaded = {};
+  setStatus('loading', 'Loading holidays for ' + (COUNTRY_NAMES[code]||code) + '…');
+  hide('meta-row'); hide('year-tabs'); hide('legend');
+  hide('list-section'); hide('empty-state');
+  el('cal-area').innerHTML = '';
+  el('list-body').innerHTML = '';
 
-  // reset UI
-  document.getElementById('results-meta').className    = 'results-meta';
-  document.getElementById('year-nav').className        = 'year-nav';
-  document.getElementById('legend').className          = 'legend';
-  document.getElementById('calendar-area').innerHTML   = '';
-  document.getElementById('list-section').style.display = 'none';
-  document.getElementById('empty-state').style.display  = 'none';
+  var years = [];
+  for (var y = fromY; y <= toY; y++) years.push(y);
 
-  const years = [];
-  for (let y = fromY; y <= toY; y++) years.push(y);
-
-  for (const year of years) {
-    try {
-      const d = await fetchYear(code, year);
-      allData[year] = d.holidays || [];
-    } catch { allData[year] = null; }
-  }
-
-  btn.disabled = false;
-  hideStatus();
-
-  const loaded = years.filter(y => allData[y] !== null);
-  if (!loaded.length) {
-    setStatus('error', `No data available for ${COUNTRY_NAMES[code] || code} in that range.`);
-    document.getElementById('empty-state').style.display = 'block';
-    return;
-  }
-
-  const allHols     = loaded.flatMap(y => allData[y]);
-  const shiftedCnt  = allHols.filter(h => h.is_observed_shifted).length;
-  const yearRange   = loaded.length === 1 ? `${loaded[0]}` : `${loaded[0]}–${loaded[loaded.length-1]}`;
-
-  // Meta
-  document.getElementById('results-country').textContent = `${COUNTRY_NAMES[code] || code} · ${yearRange}`;
-  document.getElementById('badge-total').textContent     = `${allHols.length} holiday${allHols.length!==1?'s':''}`;
-  const sb = document.getElementById('badge-shifted');
-  if (shiftedCnt) { sb.textContent = `${shiftedCnt} observed shift${shiftedCnt!==1?'s':''}`; sb.style.display = 'inline-block'; }
-  else              { sb.style.display = 'none'; }
-  document.getElementById('results-meta').className = 'results-meta show fade-up';
-
-  // Year tabs
-  const nav = document.getElementById('year-nav');
-  nav.innerHTML = '';
-  loaded.forEach((yr, i) => {
-    const t = document.createElement('button');
-    t.className   = 'year-tab' + (i===0?' active':'');
-    t.textContent = yr;
-    t.dataset.year = yr;
-    t.onclick = () => switchYear(yr);
-    nav.appendChild(t);
+  // Fetch all years in parallel
+  var promises = years.map(function(yr) {
+    return fetchYear(code, yr)
+      .then(function(data) { loaded[yr] = data.holidays || []; })
+      .catch(function()    { loaded[yr] = null; });
   });
-  nav.className = 'year-nav show';
 
-  // Legend (always show so layout is consistent)
-  document.getElementById('legend').className = 'legend show';
+  Promise.all(promises).then(function() {
+    btn.disabled = false;
+    clearStatus();
 
-  activeYear = loaded[0];
-  renderCalendar(activeYear);
-  renderList(loaded);
-  document.getElementById('list-section').style.display = 'block';
+    var goodYears = years.filter(function(y) { return loaded[y] !== null; });
+
+    if (!goodYears.length) {
+      setStatus('error', 'No data found for ' + (COUNTRY_NAMES[code]||code) + '. Try a different range.');
+      show('empty-state');
+      return;
+    }
+
+    var allHols     = [].concat.apply([], goodYears.map(function(y){ return loaded[y]; }));
+    var shiftedCnt  = allHols.filter(function(h){ return h.is_observed_shifted; }).length;
+    var yearRange   = goodYears.length === 1
+                      ? '' + goodYears[0]
+                      : goodYears[0] + '–' + goodYears[goodYears.length-1];
+
+    // Meta
+    el('meta-country').textContent = (COUNTRY_NAMES[code]||code) + ' · ' + yearRange;
+    el('badge-count').textContent  = allHols.length + ' holiday' + (allHols.length!==1?'s':'');
+    if (shiftedCnt) {
+      el('badge-shifted').textContent = shiftedCnt + ' observed shift' + (shiftedCnt!==1?'s':'');
+      show('badge-shifted');
+    } else {
+      hide('badge-shifted');
+    }
+    show('meta-row');
+
+    // Year tabs
+    var tabsEl = el('year-tabs');
+    tabsEl.innerHTML = '';
+    goodYears.forEach(function(yr, i) {
+      var t = document.createElement('button');
+      t.className   = 'year-tab' + (i===0 ? ' active' : '');
+      t.textContent = yr;
+      t.dataset.year = yr;
+      t.onclick = function() { switchYear(yr); };
+      tabsEl.appendChild(t);
+    });
+    show('year-tabs');
+    show('legend');
+
+    activeYear = goodYears[0];
+    renderCalendar(activeYear);
+    renderList(goodYears);
+    show('list-section');
+  });
 }
 
-/* ── Switch year ── */
-function switchYear(year) {
-  activeYear = year;
-  document.querySelectorAll('.year-tab').forEach(t =>
-    t.classList.toggle('active', parseInt(t.dataset.year) === year)
-  );
-  renderCalendar(year);
+/* ══════════════════════════════════════
+   YEAR SWITCH
+════════════════════════════════════════ */
+function switchYear(yr) {
+  activeYear = yr;
+  document.querySelectorAll('.year-tab').forEach(function(t) {
+    t.classList.toggle('active', parseInt(t.dataset.year, 10) === yr);
+  });
+  renderCalendar(yr);
 }
 
-/* ── Calendar ── */
+/* ══════════════════════════════════════
+   RENDER CALENDAR
+════════════════════════════════════════ */
 function renderCalendar(year) {
-  const holidays = allData[year] || [];
+  var holidays = loaded[year] || [];
 
-  // Build maps: dateStr -> [holiday, ...]
-  const actualMap   = {}; // holidays whose ACTUAL date is here
-  const observedMap = {}; // holidays whose OBSERVED date is here (when shifted, differs from actual)
+  // Build lookup maps
+  var actualMap   = {};  // dateStr -> [holiday, ...]  (actual date)
+  var observedMap = {};  // dateStr -> [holiday, ...]  (observed date, only if shifted)
 
-  holidays.forEach(h => {
-    const ak = h.date;
-    if (!actualMap[ak])   actualMap[ak]   = [];
-    actualMap[ak].push(h);
+  holidays.forEach(function(h) {
+    if (!actualMap[h.date]) actualMap[h.date] = [];
+    actualMap[h.date].push(h);
 
     if (h.is_observed_shifted) {
-      const ok = h.observed_date;
-      if (!observedMap[ok]) observedMap[ok] = [];
-      observedMap[ok].push(h);
+      var od = h.observed_date;
+      if (!observedMap[od]) observedMap[od] = [];
+      observedMap[od].push(h);
     }
   });
 
-  const area = document.getElementById('calendar-area');
+  var area = el('cal-area');
   area.innerHTML = '';
-  const grid = document.createElement('div');
-  grid.className = 'calendar-grid fade-up';
 
-  for (let mo = 0; mo < 12; mo++) {
-    const firstDow    = new Date(year, mo, 1).getDay();
-    const daysInMonth = new Date(year, mo+1, 0).getDate();
-    const actualsHere = holidays.filter(h => parseInt(h.date.split('-')[1])-1 === mo);
+  var grid = document.createElement('div');
+  grid.className = 'cal-grid';
 
-    const card = document.createElement('div');
+  for (var mo = 0; mo < 12; mo++) {
+    var firstDow    = new Date(year, mo, 1).getDay();
+    var daysInMonth = new Date(year, mo+1, 0).getDate();
+    var actualsHere = holidays.filter(function(h){
+      return parseInt(h.date.split('-')[1], 10) - 1 === mo;
+    });
+
+    // Card
+    var card = document.createElement('div');
     card.className = 'month-card';
 
     // Header
-    const hdr = document.createElement('div');
-    hdr.className = 'month-header';
-    hdr.innerHTML = `
-      <span class="month-name">${MONTHS[mo].toUpperCase()}</span>
-      ${actualsHere.length ? `<span class="month-hcount">${actualsHere.length} holiday${actualsHere.length!==1?'s':''}</span>` : ''}
-    `;
-    card.appendChild(hdr);
+    var head = document.createElement('div');
+    head.className = 'month-head';
+    head.innerHTML =
+      '<span class="month-name-label">' + MONTH_NAMES[mo].toUpperCase() + '</span>' +
+      (actualsHere.length
+        ? '<span class="month-count-label">' + actualsHere.length + ' holiday' + (actualsHere.length!==1?'s':'') + '</span>'
+        : '');
+    card.appendChild(head);
 
     // Weekday row
-    const wd = document.createElement('div');
-    wd.className = 'cal-weekdays';
-    DAYS_SHORT.forEach(d => { wd.innerHTML += `<span>${d}</span>`; });
-    card.appendChild(wd);
+    var wkRow = document.createElement('div');
+    wkRow.className = 'cal-wkdays';
+    DAY_SHORT.forEach(function(d) {
+      var s = document.createElement('span');
+      s.className = 'cal-wkday';
+      s.textContent = d;
+      wkRow.appendChild(s);
+    });
+    card.appendChild(wkRow);
 
-    // Days
-    const dg = document.createElement('div');
-    dg.className = 'cal-days';
+    // Days container
+    var daysDiv = document.createElement('div');
+    daysDiv.className = 'cal-days';
 
-    for (let e = 0; e < firstDow; e++) {
-      const em = document.createElement('div');
+    // Blank cells
+    for (var e = 0; e < firstDow; e++) {
+      var em = document.createElement('div');
       em.className = 'cal-day empty';
-      dg.appendChild(em);
+      em.innerHTML = '<div class="cal-day-inner"></div>';
+      daysDiv.appendChild(em);
     }
 
-    for (let d = 1; d <= daysInMonth; d++) {
-      const ds       = `${year}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const actHere  = actualMap[ds]   || [];
-      const obsHere  = observedMap[ds] || [];
+    // Day cells
+    for (var d = 1; d <= daysInMonth; d++) {
+      var ds     = year + '-' + pad(mo+1) + '-' + pad(d);
+      var colIdx = ((firstDow + d - 1) % 7) + 1; // 1-7
 
-      // observed-OTHER: observed holidays that are NOT actual on this day
-      const obsOther = obsHere.filter(h => !actHere.includes(h));
+      var actHere  = actualMap[ds]   || [];
+      var obsAll   = observedMap[ds] || [];
+      // "observed-other": holidays observed here whose ACTUAL date is elsewhere
+      var obsOther = obsAll.filter(function(h) { return actHere.indexOf(h) === -1; });
 
-      const isActual  = actHere.length > 0;
-      const isObs     = obsOther.length > 0;
-      const isHoliday = isActual || isObs;
+      var isActual = actHere.length > 0;
+      var isObs    = obsOther.length > 0;
 
-      const cell = document.createElement('div');
-      cell.className = 'cal-day';
-      if (isActual && isObs) {
-        cell.classList.add('is-holiday','actual-holiday','observed-other');
-      } else if (isActual) {
-        cell.classList.add('is-holiday','actual-holiday');
-      } else if (isObs) {
-        cell.classList.add('is-holiday','observed-only');
+      var cell = document.createElement('div');
+      cell.className = 'cal-day col-' + colIdx;
+      if (isActual || isObs) {
+        cell.classList.add('is-holiday');
+        if (isActual) cell.classList.add('is-actual');
+        if (isObs)    cell.classList.add('is-observed');
       }
-      cell.textContent = d;
 
-      if (isHoliday) {
-        const tip = document.createElement('div');
-        tip.className = 'tooltip';
-        let html = '';
+      var inner = document.createElement('div');
+      inner.className = 'cal-day-inner';
+      inner.textContent = d;
+      cell.appendChild(inner);
 
-        actHere.forEach((h, i) => {
-          if (i > 0) html += '<hr class="tip-divider">';
-          const shifted = h.is_observed_shifted;
-          html += `<div class="tip-name">${h.name}</div>`;
-          html += `<div class="tip-row"><span class="tip-label">Date</span><span class="tip-val">${fmtDate(h.date)}</span></div>`;
-          html += `<div class="tip-row"><span class="tip-label">Day</span><span class="tip-val">${dayName(h.date)}</span></div>`;
+      // Tooltip
+      if (isActual || isObs) {
+        var tip = document.createElement('div');
+        tip.className = 'tip';
+        var tipHTML = '';
+        var first = true;
+
+        actHere.forEach(function(h) {
+          if (!first) tipHTML += '<hr class="tip-divider">';
+          first = false;
+          var shifted = h.is_observed_shifted;
+          tipHTML +=
+            '<div class="tip-name">' + h.name + '</div>' +
+            '<div class="tip-row"><span class="tip-key">Date</span><span class="tip-val">' + fmtDate(h.date) + '</span></div>' +
+            '<div class="tip-row"><span class="tip-key">Day</span><span class="tip-val">' + getDayName(h.date) + '</span></div>';
           if (shifted) {
-            html += `<div class="tip-row"><span class="tip-label">Observed</span><span class="tip-val">${fmtDate(h.observed_date)}</span></div>`;
-            html += `<span class="tip-tag shifted">Observed on ${dayName(h.observed_date)}</span>`;
+            tipHTML +=
+              '<div class="tip-row"><span class="tip-key">Observed</span><span class="tip-val">' + fmtDate(h.observed_date) + '</span></div>' +
+              '<span class="tip-pill pill-shifted">Observed ' + getDayName(h.observed_date) + '</span>';
           } else {
-            html += `<span class="tip-tag actual">Actual date</span>`;
+            tipHTML += '<span class="tip-pill pill-actual">Actual date</span>';
           }
         });
 
-        obsOther.forEach((h, i) => {
-          if (actHere.length > 0 || i > 0) html += '<hr class="tip-divider">';
-          html += `<div class="tip-name">${h.name}</div>`;
-          html += `<div class="tip-row"><span class="tip-label">Actual date</span><span class="tip-val">${fmtDate(h.date)}</span></div>`;
-          html += `<div class="tip-row"><span class="tip-label">Observed here</span><span class="tip-val">${fmtDate(h.observed_date)}</span></div>`;
-          html += `<span class="tip-tag observed">Observed</span>`;
+        obsOther.forEach(function(h) {
+          if (!first) tipHTML += '<hr class="tip-divider">';
+          first = false;
+          tipHTML +=
+            '<div class="tip-name">' + h.name + '</div>' +
+            '<div class="tip-row"><span class="tip-key">Actual date</span><span class="tip-val">' + fmtDate(h.date) + '</span></div>' +
+            '<div class="tip-row"><span class="tip-key">Observed here</span><span class="tip-val">' + fmtDate(h.observed_date) + '</span></div>' +
+            '<span class="tip-pill pill-observed">Observed</span>';
         });
 
-        tip.innerHTML = html;
+        tip.innerHTML = tipHTML;
         cell.appendChild(tip);
       }
 
-      dg.appendChild(cell);
+      daysDiv.appendChild(cell);
     }
 
-    card.appendChild(dg);
+    card.appendChild(daysDiv);
     grid.appendChild(card);
   }
 
   area.appendChild(grid);
 }
 
-/* ── List ── */
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+
+/* ══════════════════════════════════════
+   RENDER LIST
+════════════════════════════════════════ */
 function renderList(years) {
-  const body = document.getElementById('list-body');
+  var body = el('list-body');
   body.innerHTML = '';
 
-  years.forEach(year => {
-    const holidays = allData[year] || [];
+  years.forEach(function(year) {
+    var holidays = loaded[year] || [];
     if (!holidays.length) return;
 
-    const yh = document.createElement('div');
-    yh.className = 'list-year-hdr';
+    var yh = document.createElement('div');
+    yh.className = 'list-yr-hdr';
     yh.textContent = year;
     body.appendChild(yh);
 
-    const tbl = document.createElement('table');
-    tbl.className = 'list-table';
-    tbl.innerHTML = `<thead><tr>
-      <th>Date</th><th>Holiday</th><th>Day</th><th>Observed</th>
-    </tr></thead><tbody></tbody>`;
+    var tbl = document.createElement('table');
+    tbl.className = 'list-tbl';
 
-    const tb = tbl.querySelector('tbody');
-    holidays.forEach(h => {
-      const shifted = h.is_observed_shifted;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${fmtDate(h.date)}</td>
-        <td class="td-name">${h.name}${shifted?'<span class="shift-pill">Shifted</span>':''}</td>
-        <td>${dayName(h.observed_date || h.date)}</td>
-        <td style="font-size:0.72rem;color:${shifted?'var(--driftwood)':'var(--ash)'}">
-          ${shifted ? fmtDate(h.observed_date) : '—'}
-        </td>
-      `;
-      tb.appendChild(tr);
+    var thead = tbl.createTHead();
+    thead.innerHTML = '<tr><th>Date</th><th>Holiday</th><th>Day</th><th>Observed</th></tr>';
+
+    var tbody = tbl.createTBody();
+    holidays.forEach(function(h) {
+      var shifted = h.is_observed_shifted;
+      var tr = tbody.insertRow();
+      tr.innerHTML =
+        '<td class="td-date">' + fmtDate(h.date) + '</td>' +
+        '<td class="td-name">' + h.name + (shifted ? '<span class="shift-chip">Shifted</span>' : '') + '</td>' +
+        '<td class="td-day">' + getDayName(h.observed_date || h.date) + '</td>' +
+        '<td class="td-observed">' + (shifted ? fmtDate(h.observed_date) : '—') + '</td>';
     });
 
     body.appendChild(tbl);
   });
 }
 
-/* ── Toggle list ── */
+/* ══════════════════════════════════════
+   TOGGLE LIST
+════════════════════════════════════════ */
 function toggleList() {
-  const open = document.getElementById('list-body').classList.toggle('open');
-  document.getElementById('toggle-arrow').classList.toggle('open', open);
+  var open = el('list-body').classList.toggle('open');
+  el('toggle-chevron').classList.toggle('open', open);
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Enter') handleSearch(); });
+/* Enter key */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doSearch();
+});
 </script>
 
 </body>
