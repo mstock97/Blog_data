@@ -57,9 +57,6 @@ body {
 .top-bar {
   background: var(--forest);
   padding: 8px 16px;
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
   border-bottom: 2px solid var(--canopy);
 }
 
@@ -70,33 +67,6 @@ body {
   color: var(--white);
   line-height: 1;
 }
-
-.top-meta {
-  font-size: 11px;
-  color: var(--fog);
-  letter-spacing: 0.04em;
-}
-
-.top-badges {
-  margin-left: auto;
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  border-radius: 2px;
-  line-height: 1.6;
-}
-.badge-count   { background: var(--moss-15); color: var(--canopy); }
-.badge-shifted { background: var(--drift-15); color: #6a4200; }
 
 /* ── status strip ── */
 .status {
@@ -504,10 +474,8 @@ body {
 .collapse-chev {
   font-size: 10px;
   color: var(--ash);
-  transition: transform .18s;
   flex-shrink: 0;
 }
-.collapse-chev.open { transform: rotate(180deg); }
 
 /* hidden month cards — toggled by JS */
 .month-card.collapsed { display: none; }
@@ -522,13 +490,8 @@ body {
 
 <!-- ── thin title bar ── -->
 
-<div class="top-bar" id="top-bar">
-  <span class="top-title" id="top-title">NATIONAL HOLIDAYS</span>
-  <span class="top-meta" id="top-meta"></span>
-  <div class="top-badges">
-    <span class="badge badge-count  hidden" id="badge-count"></span>
-    <span class="badge badge-shifted hidden" id="badge-shifted"></span>
-  </div>
+<div class="top-bar">
+  <span class="top-title">HOLIDAYS</span>
 </div>
 
 <!-- ── status ── -->
@@ -681,9 +644,10 @@ function fetchYear(code, yr) {
     .then(function(r) { if (!r.ok) throw new Error(); return r.json(); });
 }
 
-/* ── visible window ── */
+/* ── visible window — mirrors CSS breakpoint exactly ── */
 function visibleCount() {
-  return window.innerWidth <= 680 ? 2 : 4;
+  /* must match the CSS @media (max-width: 680px) breakpoint */
+  return window.matchMedia('(max-width: 680px)').matches ? 2 : 4;
 }
 
 /* ── build one month card (no grid insertion) ── */
@@ -789,23 +753,21 @@ function buildMonthCard(year, mo, holidays, actMap, obsMap) {
   return card;
 }
 
-/* ── collapse bar factory ── */
+/* ── collapse bar factory — one-way reveal, no toggle back ── */
 var barIdSeq = 0;
-function makeCollapseBar(label, metaText, cards, onOpen) {
-  var id  = 'cbar-' + (++barIdSeq);
+function makeCollapseBar(label, metaText, cards) {
   var bar = document.createElement('div');
   bar.className = 'collapse-bar';
   bar.innerHTML =
     '<span class="collapse-bar-label">' + label + '</span>' +
     '<span class="collapse-bar-meta">' + metaText + '</span>' +
-    '<span class="collapse-chev" id="' + id + '">▼</span>';
+    '<span class="collapse-chev">▼</span>';
 
   bar.addEventListener('click', function() {
-    var chev   = $(id);
-    var isOpen = chev.classList.toggle('open');
-    cards.forEach(function(c) { c.classList.toggle('collapsed', !isOpen); });
-    bar.querySelector('.collapse-bar-label').textContent = isOpen ? 'Show less' : label;
-    if (isOpen && onOpen) onOpen();
+    /* reveal all cards */
+    cards.forEach(function(c) { c.classList.remove('collapsed'); });
+    /* remove the bar itself — no going back */
+    bar.parentNode.removeChild(bar);
   });
   return bar;
 }
@@ -827,21 +789,13 @@ function barMeta(cards, holidays) {
          (hols ? ' · ' + hols + ' holiday' + (hols !== 1 ? 's' : '') : '');
 }
 
-/* ── year divider ── */
-function makeYearDivider(yr) {
-  var div = document.createElement('div');
-  div.className = 'year-divider';
-  div.innerHTML = '<span class="year-divider-label">' + yr + '</span><div class="year-divider-line"></div>';
-  return div;
-}
-
 /* ── init ── */
 (function init() {
   var now   = new Date().getFullYear();
   var years = [now, now + 1];
   var code  = DEFAULT_COUNTRY || 'US';
 
-  setStatus('loading', 'Loading holidays for ' + (COUNTRY_NAMES[code] || code) + '…');
+  setStatus('loading', 'Loading…');
 
   var tasks = years.map(function(yr) {
     return fetchYear(code, yr)
@@ -854,24 +808,11 @@ function makeYearDivider(yr) {
 
     var good = years.filter(function(y) { return store[y] !== null; });
     if (!good.length) {
-      setStatus('error', 'No data found for ' + (COUNTRY_NAMES[code]||code) + '.');
+      setStatus('error', 'No data found.');
       return;
     }
 
-    var allH    = [].concat.apply([], good.map(function(y){ return store[y]; }));
-    var shifted = allH.filter(function(h){ return h.is_observed_shifted; }).length;
-    var range   = good.length === 1 ? '' + good[0] : good[0] + '–' + good[good.length-1];
-
-    $('top-title').textContent = (COUNTRY_NAMES[code] || code).toUpperCase() + ' · HOLIDAYS';
-    $('top-meta').textContent  = range;
-    $('badge-count').textContent = allH.length + ' holiday' + (allH.length !== 1 ? 's' : '');
-    show('badge-count');
-    if (shifted) {
-      $('badge-shifted').textContent = shifted + ' shift' + (shifted !== 1 ? 's' : '');
-      show('badge-shifted');
-    }
     $('legend').className = 'legend show';
-
     renderAllCals(good);
     renderList(good);
     $('list-section').className = 'list-section show';
@@ -950,8 +891,7 @@ function renderAllCals(years) {
         var bBar = makeCollapseBar(
           'Earlier this year',
           barMeta(beforeCards, holidays),
-          beforeCards,
-          null
+          beforeCards
         );
         grid.appendChild(bBar);
         beforeCards.forEach(function(c) { grid.appendChild(c); });
@@ -965,50 +905,58 @@ function renderAllCals(years) {
         var aBar = makeCollapseBar(
           'Later this year',
           barMeta(afterCards, holidays),
-          afterCards,
-          null
+          afterCards
         );
         grid.appendChild(aBar);
         afterCards.forEach(function(c) { grid.appendChild(c); });
       }
 
     } else {
-      /* Next year: year-divider acts as the collapse trigger */
+      /* Next year: year-divider acts as the collapse trigger — one-way expand */
       var divider = document.createElement('div');
       divider.className = 'year-divider';
+      divider.style.cursor = 'pointer';
+      divider.style.userSelect = 'none';
 
       var lbl = document.createElement('span');
       lbl.className   = 'year-divider-label';
       lbl.textContent = year;
 
-      var line = document.createElement('div');
-      line.className = 'year-divider-line';
-
-      /* collapsed indicator shown in divider */
       var holCount = holidays.length;
       var hint = document.createElement('span');
-      hint.className = 'collapse-bar-meta';
-      hint.style.cssText = 'font-size:9px;color:var(--fog);margin-left:6px;white-space:nowrap;';
-      hint.id = 'next-yr-hint';
-      hint.textContent = holCount + ' holiday' + (holCount !== 1 ? 's' : '') + ' · click to expand';
+      hint.style.cssText = 'font-size:9px;color:var(--fog);margin-left:8px;white-space:nowrap;letter-spacing:0.04em;';
+      hint.textContent = holCount + ' holiday' + (holCount !== 1 ? 's' : '') + ' · tap to expand';
 
       var chev = document.createElement('span');
       chev.className = 'collapse-chev';
-      chev.id = 'next-yr-chev';
+
+      var line = document.createElement('div');
+      line.className = 'year-divider-line';
 
       divider.appendChild(lbl);
       divider.appendChild(hint);
       divider.appendChild(line);
       divider.appendChild(chev);
-      divider.style.cursor = 'pointer';
-      divider.style.userSelect = 'none';
 
       divider.addEventListener('click', function() {
-        var isOpen = chev.classList.toggle('open');
-        afterCards.forEach(function(c) { c.classList.toggle('collapsed', !isOpen); });
-        hint.textContent = isOpen
-          ? (holCount + ' holiday' + (holCount !== 1 ? 's' : '') + ' · click to collapse')
-          : (holCount + ' holiday' + (holCount !== 1 ? 's' : '') + ' · click to expand');
+        /* reveal all next-year cards */
+        afterCards.forEach(function(c) { c.classList.remove('collapsed'); });
+        /* turn divider into a plain non-clickable label */
+        divider.style.cursor = 'default';
+        hint.style.display = 'none';
+        chev.style.display = 'none';
+        divider.replaceWith(divider.cloneNode(true)); /* strip event listener */
+        /* re-append the now-static divider */
+        var staticDiv = document.createElement('div');
+        staticDiv.className = 'year-divider';
+        var staticLbl = document.createElement('span');
+        staticLbl.className = 'year-divider-label';
+        staticLbl.textContent = year;
+        var staticLine = document.createElement('div');
+        staticLine.className = 'year-divider-line';
+        staticDiv.appendChild(staticLbl);
+        staticDiv.appendChild(staticLine);
+        grid.insertBefore(staticDiv, afterCards[0]);
       });
 
       grid.appendChild(divider);
