@@ -179,13 +179,44 @@ body {
   line-height: 1;
 }
 
-.month-hcount {
-  font-size: 8px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--moss);
+/* ── additional years container ── */
+.additional-years {
+  margin-top: 10px;
+}
+
+.add-years-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--forest);
+  border-radius: 2px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .12s;
+}
+.add-years-toggle:hover { background: var(--canopy); }
+
+.add-years-label {
+  font-family: var(--f-display);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  color: var(--white);
   line-height: 1;
+}
+
+.add-years-meta {
+  font-size: 9px;
+  color: var(--fog);
+  letter-spacing: 0.06em;
+  margin-left: 4px;
+}
+
+.add-years-toggle .collapse-chev { color: var(--fog); }
+.add-years-toggle .collapse-chev.open { transform: rotate(180deg); }
+
+.add-years-body {
+  padding-top: 8px;
 }
 
 .cal-wkdays {
@@ -512,6 +543,17 @@ body {
 
 <div class="cal-wrap">
   <div class="cal-grid" id="cal-grid"></div>
+  <!-- additional years container — populated by JS as background fetches land -->
+  <div class="additional-years" id="additional-years" style="display:none;">
+    <div class="add-years-toggle" id="add-years-toggle" onclick="toggleAdditionalYears()">
+      <span class="add-years-label">Additional Years</span>
+      <span class="add-years-meta" id="add-years-meta"></span>
+      <span class="collapse-chev" id="add-years-chev">▼</span>
+    </div>
+    <div class="add-years-body" id="add-years-body" style="display:none;">
+      <div class="cal-grid" id="extra-cal-grid"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ── list ── -->
@@ -644,52 +686,7 @@ document.addEventListener('touchstart', function(e) {
   }
 }, { passive: true });
 
-/* ── re-render grid when desktop ↔ mobile breakpoint is crossed ── */
-(function() {
-  var mq = window.matchMedia('(max-width: 680px)');
-
-  function onBreakpointChange() {
-    hideTip();
-
-    /* Wipe the grid and re-insert sentinel anchors for all years
-       that have already loaded, then re-render each one in order  */
-    var grid = $('cal-grid');
-    grid.innerHTML = '';
-
-    var now = new Date().getFullYear();
-    var allYears = [];
-    for (var y = now; y <= 2030; y++) allYears.push(y);
-
-    /* Rebuild anchors */
-    var gridAnchors = {};
-    allYears.forEach(function(yr) {
-      var a = document.createElement('div');
-      a.style.display = 'contents';
-      grid.appendChild(a);
-      gridAnchors[yr] = a;
-    });
-
-    function insertAtGridAnchor(yr, nodes) {
-      var anchor = gridAnchors[yr];
-      if (!anchor) return;
-      nodes.forEach(function(n) { anchor.parentNode.insertBefore(n, anchor); });
-    }
-
-    /* Re-render every year that has data, in order */
-    allYears.forEach(function(yr, i) {
-      if (store[yr]) {
-        appendYearToGrid(yr, i === 0, insertAtGridAnchor);
-      }
-    });
-  }
-
-  /* addListener is widely supported; addEventListener('change') is newer */
-  if (mq.addEventListener) {
-    mq.addEventListener('change', onBreakpointChange);
-  } else {
-    mq.addListener(onBreakpointChange); /* Safari < 14 fallback */
-  }
-})();
+/* ── re-render grid when desktop ↔ mobile breakpoint is crossed — see listener below ── */
 
 /* ── fetch ── */
 function fetchYear(code, yr) {
@@ -718,9 +715,7 @@ function buildMonthCard(year, mo, holidays, actMap, obsMap) {
 
   var head = document.createElement('div');
   head.className = 'month-head';
-  head.innerHTML =
-    '<span class="month-name">' + MONTHS[mo].toUpperCase() + '</span>' +
-    (actualsHere.length ? '<span class="month-hcount">' + actualsHere.length + '</span>' : '');
+  head.innerHTML = '<span class="month-name">' + MONTHS[mo].toUpperCase() + '</span>';
   card.appendChild(head);
 
   var wkr = document.createElement('div');
@@ -853,57 +848,138 @@ function barMeta(cards, holidays) {
          (hols ? ' · ' + hols + ' holiday' + (hols !== 1 ? 's' : '') : '');
 }
 
-/* ── init — load current year immediately, background-load the rest in order ── */
+/* ── toggle additional years panel ── */
+function toggleAdditionalYears() {
+  var body = $('add-years-body');
+  var chev = $('add-years-chev');
+  var open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chev.classList.toggle('open', open);
+}
+
+/* ── init — fetch current year immediately, discover & stream the rest ── */
 (function init() {
   var now  = new Date().getFullYear();
   var code = DEFAULT_COUNTRY || 'US';
 
-  var allYears = [];
-  for (var y = now; y <= 2030; y++) allYears.push(y);
-
-  /* Pre-insert one sentinel <div> per year into the grid and list body
-     so that whenever a fetch resolves it writes into the correct position,
-     regardless of network arrival order.                                    */
-  var grid = $('cal-grid');
-  var gridAnchors = {};
-  allYears.forEach(function(yr) {
-    var a = document.createElement('div');
-    a.dataset.anchor = yr;
-    a.style.display = 'contents'; /* invisible wrapper — doesn't affect grid layout */
-    grid.appendChild(a);
-    gridAnchors[yr] = a;
-  });
-
-  /* List anchors are comment nodes so they don't affect table rendering */
-  var body = $('list-body');
-  var listAnchors = {};
-  allYears.forEach(function(yr) {
-    var a = document.createComment('year-' + yr);
-    body.appendChild(a);
-    listAnchors[yr] = a;
-  });
+  /* We don't hardcode the max year — instead we probe upward from now+1
+     until the API returns a 404, then stop. Each successful year is streamed
+     into the UI as it arrives. Max probe cap: now+10 to avoid runaway.      */
+  var MAX_PROBE = now + 10;
 
   setStatus('loading', 'Loading…');
 
-  /* helper: insert all nodes of a fragment before a given anchor node */
-  function insertAtGridAnchor(yr, nodes) {
-    var anchor = gridAnchors[yr];
+  /* ── sentinel anchors for the current-year grid ── */
+  var mainGrid   = $('cal-grid');
+  var mainAnchor = {};
+  /* Just one anchor for the current year in the main grid */
+  (function() {
+    var a = document.createElement('div');
+    a.style.display = 'contents';
+    mainGrid.appendChild(a);
+    mainAnchor[now] = a;
+  })();
+
+  function insertAtMainAnchor(yr, nodes) {
+    var anchor = mainAnchor[yr];
+    if (!anchor) return;
     nodes.forEach(function(n) { anchor.parentNode.insertBefore(n, anchor); });
   }
 
-  function insertAtListAnchor(yr, nodes) {
-    var anchor = listAnchors[yr];
+  /* ── sentinel anchors for the extra-years grid (inserted as years are discovered) ── */
+  var extraGrid    = $('extra-cal-grid');
+  var extraAnchors = {};
+  var extraYears   = []; /* years confirmed available beyond now */
+
+  function ensureExtraAnchor(yr) {
+    if (extraAnchors[yr]) return;
+    var a = document.createElement('div');
+    a.style.display = 'contents';
+    extraGrid.appendChild(a);
+    extraAnchors[yr] = a;
+    extraYears.push(yr);
+    extraYears.sort(function(a,b){ return a-b; });
+  }
+
+  function insertAtExtraAnchor(yr, nodes) {
+    var anchor = extraAnchors[yr];
+    if (!anchor) return;
     nodes.forEach(function(n) { anchor.parentNode.insertBefore(n, anchor); });
   }
 
-  /* 1. Fetch current year first */
+  /* ── list ordering helper — shared table in list-body ── */
+  function insertAtListAnchor(year) {
+    var hols = store[year] || [];
+    if (!hols.length) return;
+    $('list-section').className = 'list-section show';
+
+    var body = $('list-body');
+    var tbl  = body.querySelector('table.list-tbl');
+    if (!tbl) {
+      tbl = document.createElement('table');
+      tbl.className = 'list-tbl';
+      var cg = document.createElement('colgroup');
+      cg.innerHTML =
+        '<col style="width:92px"><col><col style="width:80px"><col style="width:92px">';
+      tbl.appendChild(cg);
+      tbl.createTHead().innerHTML =
+        '<tr><th>Date</th><th>Holiday</th><th>Day</th><th>Observed</th></tr>';
+      tbl.createTBody();
+      body.insertBefore(tbl, body.firstChild);
+    }
+
+    var tb = tbl.querySelector('tbody');
+    /* find insert-before position: first sep row with yr > this year */
+    var insertBefore = null;
+    var rows = tb.rows;
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].dataset.yr && parseInt(rows[i].dataset.yr, 10) > year) {
+        insertBefore = rows[i]; break;
+      }
+    }
+
+    var sepRow = document.createElement('tr');
+    sepRow.className   = 'list-yr-row';
+    sepRow.dataset.yr  = year;
+    var sepCell        = document.createElement('td');
+    sepCell.colSpan    = 4;
+    sepCell.className  = 'list-yr-cell';
+    sepCell.textContent = year;
+    sepRow.appendChild(sepCell);
+
+    var newRows = [sepRow];
+    hols.forEach(function(h) {
+      var sh = h.is_observed_shifted;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="td-date">' + fmtDate(h.date) + '</td>' +
+        '<td class="td-name">' + h.name + (sh ? '<span class="chip">Shifted</span>' : '') + '</td>' +
+        '<td class="td-day">'  + dayName(h.observed_date || h.date) + '</td>' +
+        '<td class="td-obs">'  + (sh ? fmtDate(h.observed_date) : '—') + '</td>';
+      newRows.push(tr);
+    });
+    newRows.forEach(function(r) {
+      insertBefore ? tb.insertBefore(r, insertBefore) : tb.appendChild(r);
+    });
+  }
+
+  /* ── update the "Additional Years" meta label ── */
+  function updateExtraMeta() {
+    if (!extraYears.length) return;
+    var first = extraYears[0];
+    var last  = extraYears[extraYears.length - 1];
+    $('add-years-meta').textContent = first === last ? first : first + ' – ' + last;
+    $('additional-years').style.display = 'block';
+  }
+
+  /* ── fetch current year first ── */
   fetchYear(code, now)
     .then(function(d) {
       store[now] = d.holidays || [];
       clearStatus();
       $('legend').className = 'legend show';
-      appendYearToGrid(now, true,  insertAtGridAnchor);
-      appendYearToList(now,        insertAtListAnchor);
+      appendYearToGrid(now, true, insertAtMainAnchor);
+      insertAtListAnchor(now);
       $('list-section').className = 'list-section show';
     })
     .catch(function() {
@@ -912,17 +988,23 @@ function barMeta(cards, holidays) {
       setStatus('error', 'Could not load data.');
     });
 
-  /* 2. Background-fetch remaining years */
-  allYears.slice(1).forEach(function(yr) {
+  /* ── probe & stream future years ── */
+  (function probeNext(yr) {
+    if (yr > MAX_PROBE) return;
     fetchYear(code, yr)
       .then(function(d) {
         store[yr] = d.holidays || [];
-        appendYearToGrid(yr, false, insertAtGridAnchor);
-        appendYearToList(yr,        insertAtListAnchor);
-        $('list-section').className = 'list-section show';
+        ensureExtraAnchor(yr);
+        appendYearToGrid(yr, false, insertAtExtraAnchor);
+        insertAtListAnchor(yr);
+        updateExtraMeta();
+        probeNext(yr + 1); /* only probe next if this one succeeded */
       })
-      .catch(function() { store[yr] = null; });
-  });
+      .catch(function() {
+        /* 404 or error — stop probing, this year doesn't exist yet */
+      });
+  })(now + 1);
+
 })();
 
 /* ── append a single year's calendar section at its reserved anchor ── */
@@ -1022,83 +1104,56 @@ function appendYearToGrid(year, isFirstYear, insertAt) {
   insertAt(year, nodes);
 }
 
-/* ── append a single year's rows to the shared list table at its anchor ── */
-function appendYearToList(year, insertAt) {
-  var hols = store[year] || [];
-  if (!hols.length) return;
-
-  var body = $('list-body');
-
-  /* find or create the single shared table */
-  var tbl = body.querySelector('table.list-tbl');
-  if (!tbl) {
-    tbl = document.createElement('table');
-    tbl.className = 'list-tbl';
-    var colgroup = document.createElement('colgroup');
-    colgroup.innerHTML =
-      '<col style="width:92px">' +
-      '<col>' +
-      '<col style="width:80px">' +
-      '<col style="width:92px">';
-    tbl.appendChild(colgroup);
-    tbl.createTHead().innerHTML =
-      '<tr><th>Date</th><th>Holiday</th><th>Day</th><th>Observed</th></tr>';
-    tbl.createTBody();
-    body.insertBefore(tbl, body.firstChild);
-  }
-
-  /* build a temporary tbody fragment for this year, then insert at anchor */
-  var tb = tbl.querySelector('tbody');
-
-  /* we can't use comment anchors inside a table, so instead track insertion
-     point by year — find the first row whose data-yr is greater than ours  */
-  var rows = tb.rows;
-  var insertBefore = null;
-  for (var i = 0; i < rows.length; i++) {
-    var rowYr = parseInt(rows[i].dataset.yr || rows[i].querySelector('[data-yr]'), 10);
-    /* sep rows carry data-yr directly */
-    if (rows[i].dataset.yr && parseInt(rows[i].dataset.yr, 10) > year) {
-      insertBefore = rows[i];
-      break;
-    }
-  }
-
-  /* year separator row */
-  var sepRow = document.createElement('tr');
-  sepRow.className = 'list-yr-row';
-  sepRow.dataset.yr = year;
-  var sepCell = document.createElement('td');
-  sepCell.colSpan = 4;
-  sepCell.className = 'list-yr-cell';
-  sepCell.textContent = year;
-  sepRow.appendChild(sepCell);
-
-  var newRows = [sepRow];
-  hols.forEach(function(h) {
-    var sh = h.is_observed_shifted;
-    var tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td class="td-date">' + fmtDate(h.date) + '</td>' +
-      '<td class="td-name">' + h.name + (sh ? '<span class="chip">Shifted</span>' : '') + '</td>' +
-      '<td class="td-day">'  + dayName(h.observed_date || h.date) + '</td>' +
-      '<td class="td-obs">'  + (sh ? fmtDate(h.observed_date) : '—') + '</td>';
-    newRows.push(tr);
-  });
-
-  newRows.forEach(function(r) {
-    if (insertBefore) {
-      tb.insertBefore(r, insertBefore);
-    } else {
-      tb.appendChild(r);
-    }
-  });
-}
-
 /* ── toggle list ── */
 function toggleList() {
   var open = $('list-body').classList.toggle('open');
   $('chev').classList.toggle('open', open);
 }
+
+/* ── re-render both grids when desktop ↔ mobile breakpoint is crossed ── */
+(function() {
+  var mq = window.matchMedia('(max-width: 680px)');
+
+  function onBreakpointChange() {
+    hideTip();
+    var now = new Date().getFullYear();
+
+    /* Re-render main grid */
+    var mainGrid = $('cal-grid');
+    mainGrid.innerHTML = '';
+    var mainAnchor = document.createElement('div');
+    mainAnchor.style.display = 'contents';
+    mainGrid.appendChild(mainAnchor);
+    if (store[now]) {
+      appendYearToGrid(now, true, function(yr, nodes) {
+        nodes.forEach(function(n) { mainAnchor.parentNode.insertBefore(n, mainAnchor); });
+      });
+    }
+
+    /* Re-render extra grid — collect loaded future years in sorted order */
+    var extraGrid = $('extra-cal-grid');
+    extraGrid.innerHTML = '';
+    var futureYrs = Object.keys(store)
+      .map(function(y) { return parseInt(y, 10); })
+      .filter(function(y) { return y > now && store[y]; })
+      .sort(function(a, b) { return a - b; });
+
+    futureYrs.forEach(function(yr) {
+      var anchor = document.createElement('div');
+      anchor.style.display = 'contents';
+      extraGrid.appendChild(anchor);
+      appendYearToGrid(yr, false, function(y, nodes) {
+        nodes.forEach(function(n) { anchor.parentNode.insertBefore(n, anchor); });
+      });
+    });
+  }
+
+  if (mq.addEventListener) {
+    mq.addEventListener('change', onBreakpointChange);
+  } else {
+    mq.addListener(onBreakpointChange); /* Safari < 14 */
+  }
+})();
 </script>
 
 </body>
