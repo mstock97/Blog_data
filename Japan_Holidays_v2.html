@@ -644,6 +644,53 @@ document.addEventListener('touchstart', function(e) {
   }
 }, { passive: true });
 
+/* ── re-render grid when desktop ↔ mobile breakpoint is crossed ── */
+(function() {
+  var mq = window.matchMedia('(max-width: 680px)');
+
+  function onBreakpointChange() {
+    hideTip();
+
+    /* Wipe the grid and re-insert sentinel anchors for all years
+       that have already loaded, then re-render each one in order  */
+    var grid = $('cal-grid');
+    grid.innerHTML = '';
+
+    var now = new Date().getFullYear();
+    var allYears = [];
+    for (var y = now; y <= 2030; y++) allYears.push(y);
+
+    /* Rebuild anchors */
+    var gridAnchors = {};
+    allYears.forEach(function(yr) {
+      var a = document.createElement('div');
+      a.style.display = 'contents';
+      grid.appendChild(a);
+      gridAnchors[yr] = a;
+    });
+
+    function insertAtGridAnchor(yr, nodes) {
+      var anchor = gridAnchors[yr];
+      if (!anchor) return;
+      nodes.forEach(function(n) { anchor.parentNode.insertBefore(n, anchor); });
+    }
+
+    /* Re-render every year that has data, in order */
+    allYears.forEach(function(yr, i) {
+      if (store[yr]) {
+        appendYearToGrid(yr, i === 0, insertAtGridAnchor);
+      }
+    });
+  }
+
+  /* addListener is widely supported; addEventListener('change') is newer */
+  if (mq.addEventListener) {
+    mq.addEventListener('change', onBreakpointChange);
+  } else {
+    mq.addListener(onBreakpointChange); /* Safari < 14 fallback */
+  }
+})();
+
 /* ── fetch ── */
 function fetchYear(code, yr) {
   return fetch('https://tallyfy.com/national-holidays/api/' + code + '/' + yr + '.json')
