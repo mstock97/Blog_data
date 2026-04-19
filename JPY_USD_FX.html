@@ -3,109 +3,104 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.frankfurter.app https://open.er-api.com https://data-api.ecb.europa.eu; style-src 'self' 'unsafe-inline'"/>
 <title>JPY/USD FX Converter</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  @keyframes spin {from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes fx-spin {from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body style="margin:0;padding:16px;background:#F7F5F0">
 <div id="fx_jpy_usd" style="font-family:'DM Sans',sans-serif;font-size:13px;color:#3D3D3D;line-height:1.4;max-width:900px">
 <style>
 #fx_jpy_usd *{box-sizing:border-box;margin:0;padding:0}
-
-/* ── Converter row ── */
 #fx_jpy_usd .row1{
   display:grid;grid-template-columns:1fr 32px 1fr 1fr;
   gap:6px;align-items:end;padding:12px;
   background:#fff;border:1px solid #EFEFEF;
-  border-radius:4px 4px 0 0;border-bottom:none;
+  border-radius:4px 4px 0 0;border-bottom:none
 }
 @media(max-width:520px){
   #fx_jpy_usd .row1{grid-template-columns:1fr 32px 1fr}
-  #fx_jpy_usd .result-cell{grid-column:1/-1;border-top:1px solid #EFEFEF;padding-top:8px;margin-top:2px}
+  #fx_jpy_usd .rcell{grid-column:1/-1;border-top:1px solid #EFEFEF;padding-top:8px;margin-top:2px}
 }
-#fx_jpy_usd .fx-group{display:flex;flex-direction:column;gap:3px}
-#fx_jpy_usd .fx-lbl{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#8C8C8C;font-weight:500}
-#fx_jpy_usd .fx-sel{
+#fx_jpy_usd .fxg{display:flex;flex-direction:column;gap:3px}
+#fx_jpy_usd .fxlbl{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#8C8C8C;font-weight:500}
+#fx_jpy_usd .fxsel{
   background:#F7F5F0;border:1.5px solid #EFEFEF;border-radius:3px;
   padding:5px 24px 5px 8px;font-family:inherit;font-size:0.78rem;color:#0F0F0F;
-  appearance:none;
+  appearance:none;cursor:pointer;width:100%;transition:border-color .15s;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%238C8C8C' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 7px center;
-  cursor:pointer;width:100%;transition:border-color .15s
+  background-repeat:no-repeat;background-position:right 7px center
 }
-#fx_jpy_usd .fx-sel:focus{outline:none;border-color:#2D6A4F}
-#fx_jpy_usd .fx-amt{
+#fx_jpy_usd .fxsel:focus{outline:none;border-color:#2D6A4F}
+#fx_jpy_usd .fxamt{
   background:#F7F5F0;border:1.5px solid #EFEFEF;border-radius:3px;
   padding:5px 8px;font-family:'Bebas Neue','DM Sans',sans-serif;
   font-size:1.25rem;letter-spacing:.03em;color:#0F0F0F;
   width:100%;transition:border-color .15s
 }
-#fx_jpy_usd .fx-amt:focus{outline:none;border-color:#2D6A4F}
-#fx_jpy_usd .fx-amt::placeholder{color:#ccc}
+#fx_jpy_usd .fxamt:focus{outline:none;border-color:#2D6A4F}
+#fx_jpy_usd .fxamt::placeholder{color:#ccc}
 #fx_jpy_usd input[type=number]::-webkit-inner-spin-button,
 #fx_jpy_usd input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
-#fx_jpy_usd .swap-col{display:flex;align-items:flex-end;justify-content:center;padding-bottom:1px}
-#fx_jpy_usd .swap-btn{
+#fx_jpy_usd .swapcol{display:flex;align-items:flex-end;justify-content:center;padding-bottom:1px}
+#fx_jpy_usd .swapbtn{
   background:#1E4034;color:#fff;border:none;width:28px;height:28px;
   border-radius:50%;cursor:pointer;display:flex;align-items:center;
   justify-content:center;transition:background .2s,transform .3s
 }
-#fx_jpy_usd .swap-btn:hover{background:#2D6A4F;transform:rotate(180deg)}
-#fx_jpy_usd .swap-btn svg{width:12px;height:12px}
-#fx_jpy_usd .result-cell{display:flex;flex-direction:column;justify-content:flex-end;gap:1px}
-#fx_jpy_usd .rate-spinner-wrap{display:flex;align-items:center;gap:6px}
-#fx_jpy_usd .spinner{
-  width:14px;height:14px;border:2px solid #EFEFEF;
-  border-top-color:#52B788;border-radius:50%;
-  animation:spin .7s linear infinite;flex-shrink:0
+#fx_jpy_usd .swapbtn:hover{background:#2D6A4F;transform:rotate(180deg)}
+#fx_jpy_usd .swapbtn svg{width:12px;height:12px}
+#fx_jpy_usd .rcell{display:flex;flex-direction:column;justify-content:flex-end;gap:2px}
+#fx_jpy_usd .rspinwrap{display:flex;align-items:center;gap:6px}
+#fx_jpy_usd .fxspinner{
+  width:14px;height:14px;border:2px solid #EFEFEF;border-top-color:#52B788;
+  border-radius:50%;animation:fx-spin .7s linear infinite;flex-shrink:0
 }
-#fx_jpy_usd .result-val{
+#fx_jpy_usd .rval{
   font-family:'Bebas Neue','DM Sans',sans-serif;
   font-size:1.6rem;color:#1E4034;line-height:1;letter-spacing:.02em
 }
-#fx_jpy_usd .result-meta{font-size:9px;color:#8C8C8C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* ── Chart row ── */
-#fx_jpy_usd .row2{background:#fff;border:1px solid #EFEFEF;border-radius:0 0 4px 4px;overflow:hidden}
-#fx_jpy_usd .chart-toggle{
+#fx_jpy_usd .rmeta{font-size:9px;color:#8C8C8C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#fx_jpy_usd .row2{background:#fff;border:1px solid #EFEFEF;border-radius:0 0 4px 4px}
+#fx_jpy_usd .ctoggle{
   display:flex;align-items:center;justify-content:space-between;
   width:100%;padding:8px 12px;background:none;border:none;
   border-top:1px solid #EFEFEF;cursor:pointer;font-family:inherit;
   font-size:10px;color:#8C8C8C;letter-spacing:.1em;text-transform:uppercase;
   transition:background .15s
 }
-#fx_jpy_usd .chart-toggle:hover{background:#F7F5F0}
-#fx_jpy_usd .chart-toggle-left{display:flex;align-items:center;gap:6px}
+#fx_jpy_usd .ctoggle:hover{background:#F7F5F0}
+#fx_jpy_usd .ctgl{display:flex;align-items:center;gap:6px}
 #fx_jpy_usd .chev{transition:transform .25s;display:flex;align-items:center}
-#fx_jpy_usd .chart-body{display:none;padding:10px 12px}
-#fx_jpy_usd .chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
-#fx_jpy_usd .chart-title{font-size:10px;font-weight:500;color:#3D3D3D;letter-spacing:.02em}
-#fx_jpy_usd .period-btns{display:flex;gap:3px}
-#fx_jpy_usd .pbtn{
+#fx_jpy_usd .cbody{display:none;padding:10px 12px}
+#fx_jpy_usd .chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+#fx_jpy_usd .ctitle{font-size:10px;font-weight:500;color:#3D3D3D;letter-spacing:.02em}
+#fx_jpy_usd .pbtns{display:flex;gap:3px}
+#fx_jpy_usd .fx-pbtn{
   font-size:9px;letter-spacing:.06em;text-transform:uppercase;
   padding:2px 6px;border:1px solid #EFEFEF;border-radius:2px;
   background:transparent;color:#8C8C8C;cursor:pointer;
   transition:all .15s;font-family:inherit
 }
-#fx_jpy_usd .pbtn:hover,#fx_jpy_usd .pbtn.on{border-color:#2D6A4F;color:#2D6A4F;background:#EEF3F1}
-#fx_jpy_usd .chart-spinner-wrap{
+#fx_jpy_usd .fx-pbtn:hover,#fx_jpy_usd .fx-pbtn.on{border-color:#2D6A4F;color:#2D6A4F;background:#EEF3F1}
+#fx_jpy_usd .cspinwrap{
   display:flex;align-items:center;justify-content:center;
-  gap:8px;padding:30px 0;color:#8C8C8C;font-size:11px
+  gap:8px;padding:24px 0;color:#8C8C8C;font-size:11px
 }
-#fx_jpy_usd .chart-no-data{
+#fx_jpy_usd .cnodata{
   padding:16px 0;text-align:center;font-size:11px;
   color:#8C8C8C;font-style:italic
 }
 #fx_jpy_usd canvas{display:block;width:100%!important}
 </style>
 
-<!-- Converter -->
 <div class="row1">
-  <div class="fx-group">
-    <div class="fx-lbl">From</div>
-    <select class="fx-sel" id="fx_jpy_usd_from" onchange="fx_jpy_usd_go()"><optgroup label="Full history available"><option value="AUD">AUD — Australian Dollar</option>
+  <div class="fxg">
+    <div class="fxlbl">From</div>
+    <select class="fxsel" id="fx_jpy_usd_from" onchange="fx_jpy_usd_go()"><optgroup label="Full history available"><option value="AUD">AUD — Australian Dollar</option>
 <option value="BGN">BGN — Bulgarian Lev</option>
 <option value="BRL">BRL — Brazilian Real</option>
 <option value="CAD">CAD — Canadian Dollar</option>
@@ -233,22 +228,22 @@
 <option value="SLL">SLL — Sierra Leonean Leone</option>
 <option value="SOS">SOS — Somali Shilling</option>
 <option value="SRD">SRD — Surinamese Dollar</option>
-<option value="STN">STN — São Tomé & Príncipe Dobra</option>
+<option value="STN">STN — Sao Tome Dobra</option>
 <option value="SVC">SVC — Salvadoran Colon</option>
 <option value="SYP">SYP — Syrian Pound</option>
 <option value="SZL">SZL — Swazi Lilangeni</option>
 <option value="TJS">TJS — Tajikistani Somoni</option>
 <option value="TMT">TMT — Turkmenistani Manat</option>
 <option value="TND">TND — Tunisian Dinar</option>
-<option value="TOP">TOP — Tongan Paʻanga</option>
-<option value="TTD">TTD — Trinidad & Tobago Dollar</option>
+<option value="TOP">TOP — Tongan Paanga</option>
+<option value="TTD">TTD — Trinidad Dollar</option>
 <option value="TWD">TWD — New Taiwan Dollar</option>
 <option value="TZS">TZS — Tanzanian Shilling</option>
 <option value="UAH">UAH — Ukrainian Hryvnia</option>
 <option value="UGX">UGX — Ugandan Shilling</option>
 <option value="UYU">UYU — Uruguayan Peso</option>
 <option value="UZS">UZS — Uzbekistan Som</option>
-<option value="VES">VES — Venezuelan Bolívar</option>
+<option value="VES">VES — Venezuelan Bolivar</option>
 <option value="VND">VND — Vietnamese Dong</option>
 <option value="VUV">VUV — Vanuatu Vatu</option>
 <option value="WST">WST — Samoan Tala</option>
@@ -259,20 +254,21 @@
 <option value="YER">YER — Yemeni Rial</option>
 <option value="ZMW">ZMW — Zambian Kwacha</option>
 <option value="ZWL">ZWL — Zimbabwean Dollar</option></optgroup></select>
-    <input class="fx-amt" type="number" id="fx_jpy_usd_fromv"
-           value="1" min="0" step="any" placeholder="0" oninput="fx_jpy_usd_fwd()"/>
+    <input  class="fxamt" type="number" id="fx_jpy_usd_fromv"
+            value="1" min="0" step="any" placeholder="0"
+            oninput="fx_jpy_usd_fwd()"/>
   </div>
-  <div class="swap-col">
-    <button class="swap-btn" onclick="fx_jpy_usd_swap()" title="Swap">
+  <div class="swapcol">
+    <button class="swapbtn" onclick="fx_jpy_usd_swap()" title="Swap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
       </svg>
     </button>
   </div>
-  <div class="fx-group">
-    <div class="fx-lbl">To</div>
-    <select class="fx-sel" id="fx_jpy_usd_to" onchange="fx_jpy_usd_go()"><optgroup label="Full history available"><option value="AUD">AUD — Australian Dollar</option>
+  <div class="fxg">
+    <div class="fxlbl">To</div>
+    <select class="fxsel" id="fx_jpy_usd_to" onchange="fx_jpy_usd_go()"><optgroup label="Full history available"><option value="AUD">AUD — Australian Dollar</option>
 <option value="BGN">BGN — Bulgarian Lev</option>
 <option value="BRL">BRL — Brazilian Real</option>
 <option value="CAD">CAD — Canadian Dollar</option>
@@ -400,22 +396,22 @@
 <option value="SLL">SLL — Sierra Leonean Leone</option>
 <option value="SOS">SOS — Somali Shilling</option>
 <option value="SRD">SRD — Surinamese Dollar</option>
-<option value="STN">STN — São Tomé & Príncipe Dobra</option>
+<option value="STN">STN — Sao Tome Dobra</option>
 <option value="SVC">SVC — Salvadoran Colon</option>
 <option value="SYP">SYP — Syrian Pound</option>
 <option value="SZL">SZL — Swazi Lilangeni</option>
 <option value="TJS">TJS — Tajikistani Somoni</option>
 <option value="TMT">TMT — Turkmenistani Manat</option>
 <option value="TND">TND — Tunisian Dinar</option>
-<option value="TOP">TOP — Tongan Paʻanga</option>
-<option value="TTD">TTD — Trinidad & Tobago Dollar</option>
+<option value="TOP">TOP — Tongan Paanga</option>
+<option value="TTD">TTD — Trinidad Dollar</option>
 <option value="TWD">TWD — New Taiwan Dollar</option>
 <option value="TZS">TZS — Tanzanian Shilling</option>
 <option value="UAH">UAH — Ukrainian Hryvnia</option>
 <option value="UGX">UGX — Ugandan Shilling</option>
 <option value="UYU">UYU — Uruguayan Peso</option>
 <option value="UZS">UZS — Uzbekistan Som</option>
-<option value="VES">VES — Venezuelan Bolívar</option>
+<option value="VES">VES — Venezuelan Bolivar</option>
 <option value="VND">VND — Vietnamese Dong</option>
 <option value="VUV">VUV — Vanuatu Vatu</option>
 <option value="WST">WST — Samoan Tala</option>
@@ -426,25 +422,26 @@
 <option value="YER">YER — Yemeni Rial</option>
 <option value="ZMW">ZMW — Zambian Kwacha</option>
 <option value="ZWL">ZWL — Zimbabwean Dollar</option></optgroup></select>
-    <input class="fx-amt" type="number" id="fx_jpy_usd_tov"
-           value="" min="0" step="any" placeholder="0" oninput="fx_jpy_usd_rev()"/>
+    <input  class="fxamt" type="number" id="fx_jpy_usd_tov"
+            value="" min="0" step="any" placeholder="0"
+            oninput="fx_jpy_usd_rev()"/>
   </div>
-  <div class="result-cell">
-    <div class="fx-lbl" id="fx_jpy_usd_rlbl">1 JPY =</div>
-    <div class="rate-spinner-wrap">
-      <div class="spinner" id="fx_jpy_usd_rateSpinner" style="display:flex"></div>
-      <div class="result-val" id="fx_jpy_usd_rval">—</div>
+  <div class="rcell">
+    <div class="fxlbl" id="fx_jpy_usd_rlbl">1 JPY =</div>
+    <div class="rspinwrap">
+      <div class="fxspinner" id="fx_jpy_usd_rspinner"></div>
+      <div class="rval" id="fx_jpy_usd_rval">—</div>
     </div>
-    <div class="result-meta" id="fx_jpy_usd_rmeta">USD</div>
+    <div class="rmeta" id="fx_jpy_usd_rmeta">USD</div>
   </div>
 </div>
 
-<!-- Collapsible chart -->
-<div class="row2" id="fx_jpy_usd_chartRow">
-  <button class="chart-toggle" onclick="fx_jpy_usd_toggleChart()" aria-expanded="false">
-    <span class="chart-toggle-left">
+<div class="row2">
+  <button class="ctoggle" onclick="fx_jpy_usd_toggleChart()">
+    <span class="ctgl">
       <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
-        <path d="M1 1.5h9M1 4.5h6M1 7.5h3" stroke="#8C8C8C" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M1 1.5h9M1 4.5h6M1 7.5h3" stroke="#8C8C8C"
+              stroke-width="1.2" stroke-linecap="round"/>
       </svg>
       Rate history
     </span>
@@ -455,359 +452,331 @@
       </svg>
     </span>
   </button>
-  <div class="chart-body" id="fx_jpy_usd_cbody">
-    <div class="chart-head">
-      <span class="chart-title" id="fx_jpy_usd_ctitle">JPY/USD</span>
-      <div class="period-btns">
-        <button class="pbtn"    onclick="fx_jpy_usd_per(30,this)">30D</button>
-        <button class="pbtn"    onclick="fx_jpy_usd_per(90,this)">90D</button>
-        <button class="pbtn"    onclick="fx_jpy_usd_per(180,this)">180D</button>
-        <button class="pbtn"    onclick="fx_jpy_usd_per(365,this)">1Y</button>
-        <button class="pbtn on" onclick="fx_jpy_usd_per(9999,this)">5Y</button>
+  <div class="cbody" id="fx_jpy_usd_cbody">
+    <div class="chead">
+      <span class="ctitle" id="fx_jpy_usd_ctitle">JPY/USD</span>
+      <div class="pbtns">
+        <button class="fx-pbtn"    onclick="fx_jpy_usd_per(30,this)">30D</button>
+        <button class="fx-pbtn"    onclick="fx_jpy_usd_per(90,this)">90D</button>
+        <button class="fx-pbtn"    onclick="fx_jpy_usd_per(180,this)">180D</button>
+        <button class="fx-pbtn"    onclick="fx_jpy_usd_per(365,this)">1Y</button>
+        <button class="fx-pbtn on" onclick="fx_jpy_usd_per(9999,this)">5Y</button>
       </div>
     </div>
-    <!-- Loading spinner (shown while history fetches) -->
-    <div id="fx_jpy_usd_chartSpinner" class="chart-spinner-wrap" style="display:none">
-      <div class="spinner"></div>
-      Loading rate history...
+    <div id="fx_jpy_usd_cspinner" class="cspinwrap" style="display:none">
+      <div class="fxspinner"></div> Loading rate history…
     </div>
-    <!-- Chart canvas -->
-    <div id="fx_jpy_usd_chartCanvas">
+    <div id="fx_jpy_usd_chartArea">
       <canvas id="fx_jpy_usd_c" height="130"></canvas>
     </div>
-    <!-- No-data message for Tier 2 currencies -->
-    <div id="fx_jpy_usd_chartNoData" class="chart-no-data" style="display:none">
+    <div id="fx_jpy_usd_chartNoData" class="cnodata" style="display:none">
       <span id="fx_jpy_usd_noDataMsg"></span>
     </div>
   </div>
 </div>
 
 </div>
-<script>(function(){
-// ============================================================
-//  CONFIGURATION — change these two lines to set defaults
-// ============================================================
-const DEFAULT_FROM = "JPY";
-const DEFAULT_TO   = "USD";
-// ============================================================
+<script>
+(function() {
 
-const TIER1      = {"AUD": "Australian Dollar", "BGN": "Bulgarian Lev", "BRL": "Brazilian Real", "CAD": "Canadian Dollar", "CHF": "Swiss Franc", "CNY": "Chinese Yuan", "CZK": "Czech Koruna", "DKK": "Danish Krone", "EUR": "Euro", "GBP": "British Pound", "HKD": "Hong Kong Dollar", "HUF": "Hungarian Forint", "IDR": "Indonesian Rupiah", "ILS": "Israeli Shekel", "INR": "Indian Rupee", "ISK": "Icelandic Krona", "JPY": "Japanese Yen", "KRW": "South Korean Won", "MXN": "Mexican Peso", "MYR": "Malaysian Ringgit", "NOK": "Norwegian Krone", "NZD": "New Zealand Dollar", "PHP": "Philippine Peso", "PLN": "Polish Zloty", "RON": "Romanian Leu", "SEK": "Swedish Krona", "SGD": "Singapore Dollar", "THB": "Thai Baht", "TRY": "Turkish Lira", "USD": "US Dollar", "ZAR": "South African Rand"};
-const ALL_CCY    = {"AUD": "Australian Dollar", "BGN": "Bulgarian Lev", "BRL": "Brazilian Real", "CAD": "Canadian Dollar", "CHF": "Swiss Franc", "CNY": "Chinese Yuan", "CZK": "Czech Koruna", "DKK": "Danish Krone", "EUR": "Euro", "GBP": "British Pound", "HKD": "Hong Kong Dollar", "HUF": "Hungarian Forint", "IDR": "Indonesian Rupiah", "ILS": "Israeli Shekel", "INR": "Indian Rupee", "ISK": "Icelandic Krona", "JPY": "Japanese Yen", "KRW": "South Korean Won", "MXN": "Mexican Peso", "MYR": "Malaysian Ringgit", "NOK": "Norwegian Krone", "NZD": "New Zealand Dollar", "PHP": "Philippine Peso", "PLN": "Polish Zloty", "RON": "Romanian Leu", "SEK": "Swedish Krona", "SGD": "Singapore Dollar", "THB": "Thai Baht", "TRY": "Turkish Lira", "USD": "US Dollar", "ZAR": "South African Rand", "AED": "UAE Dirham", "AFN": "Afghan Afghani", "ALL": "Albanian Lek", "AMD": "Armenian Dram", "ANG": "Netherlands Antillean Guilder", "AOA": "Angolan Kwanza", "ARS": "Argentine Peso", "AWG": "Aruban Florin", "AZN": "Azerbaijani Manat", "BAM": "Bosnia-Herzegovina Mark", "BBD": "Barbadian Dollar", "BDT": "Bangladeshi Taka", "BHD": "Bahraini Dinar", "BIF": "Burundian Franc", "BMD": "Bermudian Dollar", "BND": "Brunei Dollar", "BOB": "Bolivian Boliviano", "BSD": "Bahamian Dollar", "BTN": "Bhutanese Ngultrum", "BWP": "Botswanan Pula", "BYN": "Belarusian Ruble", "BZD": "Belize Dollar", "CDF": "Congolese Franc", "CLP": "Chilean Peso", "COP": "Colombian Peso", "CRC": "Costa Rican Colon", "CUP": "Cuban Peso", "CVE": "Cape Verdean Escudo", "DJF": "Djiboutian Franc", "DOP": "Dominican Peso", "DZD": "Algerian Dinar", "EGP": "Egyptian Pound", "ERN": "Eritrean Nakfa", "ETB": "Ethiopian Birr", "FJD": "Fijian Dollar", "FKP": "Falkland Islands Pound", "GEL": "Georgian Lari", "GHS": "Ghanaian Cedi", "GIP": "Gibraltar Pound", "GMD": "Gambian Dalasi", "GNF": "Guinean Franc", "GTQ": "Guatemalan Quetzal", "GYD": "Guyanaese Dollar", "HNL": "Honduran Lempira", "HRK": "Croatian Kuna", "HTG": "Haitian Gourde", "IQD": "Iraqi Dinar", "IRR": "Iranian Rial", "JMD": "Jamaican Dollar", "JOD": "Jordanian Dinar", "KES": "Kenyan Shilling", "KGS": "Kyrgystani Som", "KHR": "Cambodian Riel", "KMF": "Comorian Franc", "KPW": "North Korean Won", "KWD": "Kuwaiti Dinar", "KYD": "Cayman Islands Dollar", "KZT": "Kazakhstani Tenge", "LAK": "Laotian Kip", "LBP": "Lebanese Pound", "LKR": "Sri Lankan Rupee", "LRD": "Liberian Dollar", "LSL": "Lesotho Loti", "LYD": "Libyan Dinar", "MAD": "Moroccan Dirham", "MDL": "Moldovan Leu", "MGA": "Malagasy Ariary", "MKD": "Macedonian Denar", "MMK": "Myanma Kyat", "MNT": "Mongolian Tugrik", "MOP": "Macanese Pataca", "MRU": "Mauritanian Ouguiya", "MUR": "Mauritian Rupee", "MVR": "Maldivian Rufiyaa", "MWK": "Malawian Kwacha", "MZN": "Mozambican Metical", "NAD": "Namibian Dollar", "NGN": "Nigerian Naira", "NIO": "Nicaraguan Cordoba", "NPR": "Nepalese Rupee", "OMR": "Omani Rial", "PAB": "Panamanian Balboa", "PEN": "Peruvian Sol", "PGK": "Papua New Guinean Kina", "PKR": "Pakistani Rupee", "PYG": "Paraguayan Guarani", "QAR": "Qatari Rial", "RSD": "Serbian Dinar", "RUB": "Russian Ruble", "RWF": "Rwandan Franc", "SAR": "Saudi Riyal", "SBD": "Solomon Islands Dollar", "SCR": "Seychellois Rupee", "SDG": "Sudanese Pound", "SHP": "Saint Helena Pound", "SLL": "Sierra Leonean Leone", "SOS": "Somali Shilling", "SRD": "Surinamese Dollar", "STN": "Sa\u0303o Tome\u0301 & Pri\u0301ncipe Dobra", "SVC": "Salvadoran Colon", "SYP": "Syrian Pound", "SZL": "Swazi Lilangeni", "TJS": "Tajikistani Somoni", "TMT": "Turkmenistani Manat", "TND": "Tunisian Dinar", "TOP": "Tongan Pa\u02bbanga", "TTD": "Trinidad & Tobago Dollar", "TWD": "New Taiwan Dollar", "TZS": "Tanzanian Shilling", "UAH": "Ukrainian Hryvnia", "UGX": "Ugandan Shilling", "UYU": "Uruguayan Peso", "UZS": "Uzbekistan Som", "VES": "Venezuelan Boli\u0301var", "VND": "Vietnamese Dong", "VUV": "Vanuatu Vatu", "WST": "Samoan Tala", "XAF": "CFA Franc BEAC", "XCD": "East Caribbean Dollar", "XOF": "CFA Franc BCEAO", "XPF": "CFP Franc", "YER": "Yemeni Rial", "ZMW": "Zambian Kwacha", "ZWL": "Zimbabwean Dollar"};
-const START_DATE = "2021-04-20";
-const END_DATE   = "2026-04-19";
-const W          = "fx_jpy_usd";
+// ── Config (edit these two lines to change defaults) ─────────────
+var DEFAULT_FROM = "JPY";
+var DEFAULT_TO   = "USD";
+// ─────────────────────────────────────────────────────────────────
 
-// State
-let rates      = {};   // current rates (units per 1 EUR from Frankfurter, or per 1 USD from er-api)
-let ratesBase  = "EUR";// base of the rates object
-let hist       = {};   // {CCY: [values...]} units per 1 EUR
-let histDates  = [];   // ISO date strings
-let histReady  = false;
-let histError  = false;
-let chartBuilt = false;
-let chart      = null;
-let per        = 9999;
-let _tMap      = {};
-let _rawDates  = [];
+var TIER1      = {"AUD": "Australian Dollar", "BGN": "Bulgarian Lev", "BRL": "Brazilian Real", "CAD": "Canadian Dollar", "CHF": "Swiss Franc", "CNY": "Chinese Yuan", "CZK": "Czech Koruna", "DKK": "Danish Krone", "EUR": "Euro", "GBP": "British Pound", "HKD": "Hong Kong Dollar", "HUF": "Hungarian Forint", "IDR": "Indonesian Rupiah", "ILS": "Israeli Shekel", "INR": "Indian Rupee", "ISK": "Icelandic Krona", "JPY": "Japanese Yen", "KRW": "South Korean Won", "MXN": "Mexican Peso", "MYR": "Malaysian Ringgit", "NOK": "Norwegian Krone", "NZD": "New Zealand Dollar", "PHP": "Philippine Peso", "PLN": "Polish Zloty", "RON": "Romanian Leu", "SEK": "Swedish Krona", "SGD": "Singapore Dollar", "THB": "Thai Baht", "TRY": "Turkish Lira", "USD": "US Dollar", "ZAR": "South African Rand"};
+var TIER2      = {"AED": "UAE Dirham", "AFN": "Afghan Afghani", "ALL": "Albanian Lek", "AMD": "Armenian Dram", "ANG": "Netherlands Antillean Guilder", "AOA": "Angolan Kwanza", "ARS": "Argentine Peso", "AWG": "Aruban Florin", "AZN": "Azerbaijani Manat", "BAM": "Bosnia-Herzegovina Mark", "BBD": "Barbadian Dollar", "BDT": "Bangladeshi Taka", "BHD": "Bahraini Dinar", "BIF": "Burundian Franc", "BMD": "Bermudian Dollar", "BND": "Brunei Dollar", "BOB": "Bolivian Boliviano", "BSD": "Bahamian Dollar", "BTN": "Bhutanese Ngultrum", "BWP": "Botswanan Pula", "BYN": "Belarusian Ruble", "BZD": "Belize Dollar", "CDF": "Congolese Franc", "CLP": "Chilean Peso", "COP": "Colombian Peso", "CRC": "Costa Rican Colon", "CUP": "Cuban Peso", "CVE": "Cape Verdean Escudo", "DJF": "Djiboutian Franc", "DOP": "Dominican Peso", "DZD": "Algerian Dinar", "EGP": "Egyptian Pound", "ERN": "Eritrean Nakfa", "ETB": "Ethiopian Birr", "FJD": "Fijian Dollar", "FKP": "Falkland Islands Pound", "GEL": "Georgian Lari", "GHS": "Ghanaian Cedi", "GIP": "Gibraltar Pound", "GMD": "Gambian Dalasi", "GNF": "Guinean Franc", "GTQ": "Guatemalan Quetzal", "GYD": "Guyanaese Dollar", "HNL": "Honduran Lempira", "HRK": "Croatian Kuna", "HTG": "Haitian Gourde", "IQD": "Iraqi Dinar", "IRR": "Iranian Rial", "JMD": "Jamaican Dollar", "JOD": "Jordanian Dinar", "KES": "Kenyan Shilling", "KGS": "Kyrgystani Som", "KHR": "Cambodian Riel", "KMF": "Comorian Franc", "KPW": "North Korean Won", "KWD": "Kuwaiti Dinar", "KYD": "Cayman Islands Dollar", "KZT": "Kazakhstani Tenge", "LAK": "Laotian Kip", "LBP": "Lebanese Pound", "LKR": "Sri Lankan Rupee", "LRD": "Liberian Dollar", "LSL": "Lesotho Loti", "LYD": "Libyan Dinar", "MAD": "Moroccan Dirham", "MDL": "Moldovan Leu", "MGA": "Malagasy Ariary", "MKD": "Macedonian Denar", "MMK": "Myanma Kyat", "MNT": "Mongolian Tugrik", "MOP": "Macanese Pataca", "MRU": "Mauritanian Ouguiya", "MUR": "Mauritian Rupee", "MVR": "Maldivian Rufiyaa", "MWK": "Malawian Kwacha", "MZN": "Mozambican Metical", "NAD": "Namibian Dollar", "NGN": "Nigerian Naira", "NIO": "Nicaraguan Cordoba", "NPR": "Nepalese Rupee", "OMR": "Omani Rial", "PAB": "Panamanian Balboa", "PEN": "Peruvian Sol", "PGK": "Papua New Guinean Kina", "PKR": "Pakistani Rupee", "PYG": "Paraguayan Guarani", "QAR": "Qatari Rial", "RSD": "Serbian Dinar", "RUB": "Russian Ruble", "RWF": "Rwandan Franc", "SAR": "Saudi Riyal", "SBD": "Solomon Islands Dollar", "SCR": "Seychellois Rupee", "SDG": "Sudanese Pound", "SHP": "Saint Helena Pound", "SLL": "Sierra Leonean Leone", "SOS": "Somali Shilling", "SRD": "Surinamese Dollar", "STN": "Sao Tome Dobra", "SVC": "Salvadoran Colon", "SYP": "Syrian Pound", "SZL": "Swazi Lilangeni", "TJS": "Tajikistani Somoni", "TMT": "Turkmenistani Manat", "TND": "Tunisian Dinar", "TOP": "Tongan Paanga", "TTD": "Trinidad Dollar", "TWD": "New Taiwan Dollar", "TZS": "Tanzanian Shilling", "UAH": "Ukrainian Hryvnia", "UGX": "Ugandan Shilling", "UYU": "Uruguayan Peso", "UZS": "Uzbekistan Som", "VES": "Venezuelan Bolivar", "VND": "Vietnamese Dong", "VUV": "Vanuatu Vatu", "WST": "Samoan Tala", "XAF": "CFA Franc BEAC", "XCD": "East Caribbean Dollar", "XOF": "CFA Franc BCEAO", "XPF": "CFP Franc", "YER": "Yemeni Rial", "ZMW": "Zambian Kwacha", "ZWL": "Zimbabwean Dollar"};
+var ALL_CCY    = Object.assign({}, TIER1, TIER2);
+var START_DATE = "2021-04-20";
+var W          = "fx_jpy_usd";
 
-const $ = s => document.getElementById(W + "_" + s);
+var rates     = {};
+var hist      = {};
+var histDates = [];
+var histReady = false;
+var histError = false;
+var chartBuilt = false;
+var fxChart   = null;
+var per       = 9999;
+var _tMap     = {};
+var _rawDates = [];
 
-// ── Utility ─────────────────────────────────────────────────
-function isTier1(ccy) { return !!TIER1[ccy]; }
+function $el(id) {
+  return document.getElementById(W + "_" + id);
+}
+
+function isTier1(c) { return !!TIER1[c]; }
 
 function fmt(n) {
   if (n == null || isNaN(n)) return "—";
-  if (n >= 10000) return n.toLocaleString("en-US", {maximumFractionDigits: 2});
+  if (n >= 10000) return n.toLocaleString("en-US", {maximumFractionDigits:2});
   if (n >= 100)   return n.toFixed(2);
   if (n >= 1)     return n.toFixed(4);
   return n.toFixed(6);
 }
 
 function setOpt(suffix, val) {
-  const el = $(suffix);
-  for (let i = 0; i < el.options.length; i++)
+  var el = $el(suffix);
+  for (var i = 0; i < el.options.length; i++) {
     if (el.options[i].value === val) { el.selectedIndex = i; return; }
+  }
 }
 
-function showSpinner(id, on) {
-  const el = $(id);
-  if (el) el.style.display = on ? "flex" : "none";
-}
-
-function showEl(id, on) {
-  const el = $(id);
+function show(id, on) {
+  var el = $el(id);
   if (el) el.style.display = on ? "block" : "none";
 }
 
-// ── Cross-rate ───────────────────────────────────────────────
-// rates object may be EUR-based or USD-based depending on source
-function xRate(from, to) {
-  if (!rates[from] || !rates[to]) return null;
-  // Convert: rate(from) and rate(to) are both in same base
-  // rate(A→B) = rates[to] / rates[from]  regardless of base
-  return rates[to] / rates[from];
+function showFlex(id, on) {
+  var el = $el(id);
+  if (el) el.style.display = on ? "flex" : "none";
 }
 
-// ── Converter display ────────────────────────────────────────
+// Cross-rate: RATES are all per 1 EUR, so A->B = rates[B]/rates[A]
+function xRate(a, b) {
+  if (!rates[a] || !rates[b]) return null;
+  return rates[b] / rates[a];
+}
+
 function updateDisplay() {
-  const f  = $("from").value;
-  const t  = $("to").value;
-  const amt = parseFloat($("fromv").value) || 1;
-  const rate = xRate(f, t);
+  var f    = $el("from").value;
+  var t    = $el("to").value;
+  var amt  = parseFloat($el("fromv").value) || 1;
+  var rate = xRate(f, t);
   if (!rate) return;
-  $("rlbl").textContent  = fmt(amt) + " " + f + " =";
-  $("rval").textContent  = fmt(amt * rate);
-  $("rmeta").textContent = t + "  ·  1 " + f + " = " + fmt(rate) + " " + t;
+  $el("rlbl").textContent  = fmt(amt) + " " + f + " =";
+  $el("rval").textContent  = fmt(amt * rate);
+  $el("rmeta").textContent = t + "  \u00b7  1 " + f + " = " + fmt(rate) + " " + t;
+  showFlex("rspinner", false);
 }
 
+// ── Converter controls ────────────────────────────────────────────
 window[W + "_fwd"] = function() {
-  const f = $("from").value, t = $("to").value;
-  const amt = parseFloat($("fromv").value);
-  const rate = xRate(f, t);
+  var f = $el("from").value, t = $el("to").value;
+  var amt = parseFloat($el("fromv").value);
+  var rate = xRate(f, t);
   if (!rate || isNaN(amt)) return;
-  $("tov").value = (amt * rate).toFixed(6);
+  $el("tov").value = (amt * rate).toFixed(6);
   updateDisplay();
 };
 
 window[W + "_rev"] = function() {
-  const f = $("from").value, t = $("to").value;
-  const amt = parseFloat($("tov").value);
-  const rate = xRate(t, f);
+  var f = $el("from").value, t = $el("to").value;
+  var amt = parseFloat($el("tov").value);
+  var rate = xRate(t, f);
   if (!rate || isNaN(amt)) return;
-  $("fromv").value = (amt * rate).toFixed(6);
+  $el("fromv").value = (amt * rate).toFixed(6);
   updateDisplay();
 };
 
 window[W + "_go"] = function() {
   window[W + "_fwd"]();
-  updateChartVisibility();
+  updateChartSection();
   if (chartBuilt) refreshChart();
 };
 
 window[W + "_swap"] = function() {
-  const f = $("from").value, t = $("to").value;
-  setOpt("from", t); setOpt("to", f);
+  var f = $el("from").value, t = $el("to").value;
+  setOpt("from", t);
+  setOpt("to", f);
   window[W + "_go"]();
 };
 
-// ── Chart visibility based on tier ──────────────────────────
-function updateChartVisibility() {
-  const f = $("from").value, t = $("to").value;
-  const bothTier1 = isTier1(f) && isTier1(t);
-  showEl("chartRow", true);  // always show the row
-  if (bothTier1) {
-    showEl("chartNoData", false);
-    showEl("chartCanvas", true);
-    $("ctitle").textContent = f + "/" + t;
+function updateChartSection() {
+  var f = $el("from").value, t = $el("to").value;
+  if (isTier1(f) && isTier1(t)) {
+    show("chartNoData", false);
+    show("chartArea",   true);
+    $el("ctitle").textContent = f + "/" + t;
   } else {
-    showEl("chartNoData", true);
-    showEl("chartCanvas", false);
-    const missing = [f, t].filter(c => !isTier1(c)).join(", ");
-    $("noDataMsg").textContent =
-      "Historical chart not available for " + missing +
-      " — ECB does not publish this rate.";
+    show("chartNoData", true);
+    show("chartArea",   false);
+    var missing = [f, t].filter(function(c) { return !isTier1(c); }).join(", ");
+    $el("noDataMsg").textContent =
+      "Historical chart unavailable for " + missing +
+      " — not published by ECB.";
   }
 }
 
-// ── DATA FETCHING ────────────────────────────────────────────
-
-// Step 1: Current rates from Frankfurter (fast)
-async function fetchCurrentRates() {
-  showSpinner("rateSpinner", true);
-  $("rval").textContent = "—";
-  try {
-    const res = await fetch("https://api.frankfurter.app/latest?base=EUR");
-    if (!res.ok) throw new Error("Frankfurter current rates failed");
-    const data = await res.json();
-    // Frankfurter returns rates relative to EUR; add EUR itself
-    rates = {...data.rates, EUR: 1.0};
-    ratesBase = "EUR";
-    showSpinner("rateSpinner", false);
-    updateDisplay();
-    return true;
-  } catch(e) {
-    console.warn("Frankfurter current failed, trying ECB...", e);
-    return fetchCurrentRatesECB();
-  }
-}
-
-// Frankfurter fallback: ECB current rates
-async function fetchCurrentRatesECB() {
-  try {
-    const res = await fetch(
-      "https://data-api.ecb.europa.eu/service/data/EXR/D..EUR.SP00.A" +
-      "?startPeriod=2026-04-19&endPeriod=2026-04-19" +
-      "&format=csvdata&detail=dataonly"
-    );
-    if (!res.ok) throw new Error("ECB current rates failed");
-    const text = await res.text();
-    rates = parseECBcsv(text);
-    rates["EUR"] = 1.0;
-    ratesBase = "EUR";
-    showSpinner("rateSpinner", false);
-    updateDisplay();
-    return true;
-  } catch(e) {
-    console.warn("ECB current also failed, trying er-api...", e);
-    return fetchCurrentRatesErApi();
-  }
-}
-
-// Last resort: open.er-api.com (broader currency coverage, USD base)
-async function fetchCurrentRatesErApi() {
-  try {
-    const res = await fetch("https://open.er-api.com/v6/latest/EUR");
-    if (!res.ok) throw new Error("er-api failed");
-    const data = await res.json();
-    rates = {...data.rates, EUR: 1.0};
-    ratesBase = "EUR";
-    showSpinner("rateSpinner", false);
-    updateDisplay();
-    return true;
-  } catch(e) {
-    console.error("All current rate sources failed", e);
-    showSpinner("rateSpinner", false);
-    $("rval").textContent = "Error";
-    return false;
-  }
-}
-
-// Step 2: 5yr history from Frankfurter (background, ~1-2s)
-async function fetchHistory() {
-  // Show spinner only if chart is already open
-  if ($("cbody") && $("cbody").style.display === "block") {
-    showSpinner("chartSpinner", true);
-    showEl("chartCanvas", false);
-  }
-  try {
-    const url = `https://api.frankfurter.app/${START_DATE}..${END_DATE}?base=EUR`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Frankfurter history failed");
-    const data = await res.json();
-    // data.rates = { "2021-04-20": { USD: 1.08, JPY: 130, ... }, ... }
-    histDates = Object.keys(data.rates).sort();
-    // Reorganise into per-currency arrays
-    hist = { EUR: histDates.map(() => 1.0) };
-    const ccys = Object.keys(data.rates[histDates[0]] || {});
-    for (const ccy of ccys) {
-      hist[ccy] = histDates.map(d => data.rates[d][ccy] ?? null);
+// ── Fetch current rates ───────────────────────────────────────────
+function fetchRates() {
+  showFlex("rspinner", true);
+  // Try Frankfurter first
+  var req = new XMLHttpRequest();
+  req.open("GET", "https://api.frankfurter.app/latest?base=EUR", true);
+  req.timeout = 8000;
+  req.onload = function() {
+    if (req.status === 200) {
+      try {
+        var data = JSON.parse(req.responseText);
+        rates = data.rates;
+        rates["EUR"] = 1.0;
+        updateDisplay();
+        return;
+      } catch(e) {}
     }
-    histReady = true;
-    onHistoryReady();
-    return;
-  } catch(e) {
-    console.warn("Frankfurter history failed, trying ECB...", e);
-    return fetchHistoryECB();
-  }
+    fetchRatesFallback();
+  };
+  req.onerror   = fetchRatesFallback;
+  req.ontimeout = fetchRatesFallback;
+  req.send();
 }
 
-// History fallback: ECB direct CSV
-async function fetchHistoryECB() {
-  try {
-    const url =
-      `https://data-api.ecb.europa.eu/service/data/EXR/D..EUR.SP00.A` +
-      `?startPeriod=${START_DATE}&endPeriod=${END_DATE}&format=csvdata&detail=dataonly`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("ECB history failed");
-    const text = await res.text();
-    const parsed = parseECBcsv(text, true); // returns {dates, byCcy}
-    histDates = parsed.dates;
-    hist      = {...parsed.byCcy, EUR: histDates.map(() => 1.0)};
-    histReady = true;
-    onHistoryReady();
-  } catch(e) {
-    console.error("All history sources failed", e);
+function fetchRatesFallback() {
+  // Fallback: open.er-api.com (broader coverage, USD base)
+  var req = new XMLHttpRequest();
+  req.open("GET", "https://open.er-api.com/v6/latest/EUR", true);
+  req.timeout = 8000;
+  req.onload = function() {
+    if (req.status === 200) {
+      try {
+        var data = JSON.parse(req.responseText);
+        rates = data.rates;
+        rates["EUR"] = 1.0;
+        updateDisplay();
+        return;
+      } catch(e) {}
+    }
+    // Both failed — show error
+    showFlex("rspinner", false);
+    $el("rval").textContent = "Unavailable";
+  };
+  req.onerror = req.ontimeout = function() {
+    showFlex("rspinner", false);
+    $el("rval").textContent = "Unavailable";
+  };
+  req.send();
+}
+
+// ── Fetch 5yr history (background) ───────────────────────────────
+function fetchHistory() {
+  var url = "https://api.frankfurter.app/" + START_DATE + "..?base=EUR";
+  var req = new XMLHttpRequest();
+  req.open("GET", url, true);
+  req.timeout = 30000;
+  req.onload = function() {
+    if (req.status === 200) {
+      try {
+        var data = JSON.parse(req.responseText);
+        histDates = Object.keys(data.rates).sort();
+        hist = { EUR: histDates.map(function() { return 1.0; }) };
+        var sample = data.rates[histDates[0]] || {};
+        Object.keys(sample).forEach(function(ccy) {
+          hist[ccy] = histDates.map(function(d) {
+            return data.rates[d][ccy] !== undefined ? data.rates[d][ccy] : null;
+          });
+        });
+        histReady = true;
+        onHistoryReady();
+        return;
+      } catch(e) {}
+    }
+    fetchHistoryFallback();
+  };
+  req.onerror = req.ontimeout = fetchHistoryFallback;
+  req.send();
+}
+
+function fetchHistoryFallback() {
+  // ECB direct CSV fallback
+  var url = "https://data-api.ecb.europa.eu/service/data/EXR/D..EUR.SP00.A" +
+            "?startPeriod=" + START_DATE + "&format=csvdata&detail=dataonly";
+  var req = new XMLHttpRequest();
+  req.open("GET", url, true);
+  req.timeout = 30000;
+  req.onload = function() {
+    if (req.status === 200) {
+      try {
+        var parsed = parseECBcsv(req.responseText);
+        histDates = parsed.dates;
+        hist      = parsed.byCcy;
+        hist["EUR"] = histDates.map(function() { return 1.0; });
+        histReady = true;
+        onHistoryReady();
+        return;
+      } catch(e) {}
+    }
     histError = true;
     onHistoryReady();
+  };
+  req.onerror = req.ontimeout = function() {
+    histError = true;
+    onHistoryReady();
+  };
+  req.send();
+}
+
+function parseECBcsv(text) {
+  var lines  = text.trim().split("\n");
+  var header = lines[0].split(",");
+  var ci = header.indexOf("CURRENCY");
+  var di = header.indexOf("TIME_PERIOD");
+  var vi = header.indexOf("OBS_VALUE");
+  var byDateCcy = {};
+  for (var i = 1; i < lines.length; i++) {
+    var cols = lines[i].split(",");
+    var ccy  = (cols[ci] || "").trim();
+    var d    = (cols[di] || "").trim();
+    var val  = parseFloat(cols[vi]);
+    if (ccy && d && !isNaN(val)) {
+      if (!byDateCcy[d]) byDateCcy[d] = {};
+      byDateCcy[d][ccy] = val;
+    }
   }
+  var dates = Object.keys(byDateCcy).sort();
+  var ccySet = {};
+  dates.forEach(function(d) {
+    Object.keys(byDateCcy[d]).forEach(function(c) { ccySet[c] = true; });
+  });
+  var byCcy = {};
+  Object.keys(ccySet).forEach(function(ccy) {
+    byCcy[ccy] = dates.map(function(d) {
+      return byDateCcy[d][ccy] !== undefined ? byDateCcy[d][ccy] : null;
+    });
+  });
+  return { dates: dates, byCcy: byCcy };
 }
 
 function onHistoryReady() {
-  const bodyOpen = $("cbody") && $("cbody").style.display === "block";
-  showSpinner("chartSpinner", false);
+  // Chart body might be open — update it
+  var body = $el("cbody");
+  var isOpen = body && body.style.display === "block";
+  show("cspinner", false);
   if (histError) {
-    showEl("chartCanvas", false);
-    showEl("chartNoData", true);
-    $("noDataMsg").textContent = "Historical data temporarily unavailable.";
+    show("chartArea",   false);
+    show("chartNoData", true);
+    $el("noDataMsg").textContent = "Historical data temporarily unavailable.";
     return;
   }
-  if (bodyOpen) {
-    showEl("chartCanvas", true);
+  if (isOpen) {
+    show("chartArea", true);
     if (!chartBuilt) { buildChart(); chartBuilt = true; }
     else refreshChart();
   }
 }
 
-// ── ECB CSV parser ────────────────────────────────────────────
-function parseECBcsv(text, withDates) {
-  const lines = text.trim().split("\n");
-  const header = lines[0].split(",");
-  const ccyIdx  = header.indexOf("CURRENCY");
-  const dateIdx = header.indexOf("TIME_PERIOD");
-  const valIdx  = header.indexOf("OBS_VALUE");
-  if (!withDates) {
-    // Return flat {CCY: value} for latest day
-    const byDateCcy = {};
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(",");
-      const ccy  = cols[ccyIdx]?.trim();
-      const d    = cols[dateIdx]?.trim();
-      const val  = parseFloat(cols[valIdx]);
-      if (ccy && d && !isNaN(val)) {
-        if (!byDateCcy[d]) byDateCcy[d] = {};
-        byDateCcy[d][ccy] = val;
-      }
-    }
-    const lastDate = Object.keys(byDateCcy).sort().pop();
-    return byDateCcy[lastDate] || {};
-  } else {
-    // Return {dates, byCcy}
-    const byDateCcy = {};
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(",");
-      const ccy  = cols[ccyIdx]?.trim();
-      const d    = cols[dateIdx]?.trim();
-      const val  = parseFloat(cols[valIdx]);
-      if (ccy && d && !isNaN(val)) {
-        if (!byDateCcy[d]) byDateCcy[d] = {};
-        byDateCcy[d][ccy] = val;
-      }
-    }
-    const dates = Object.keys(byDateCcy).sort();
-    const ccys  = [...new Set(
-      Object.values(byDateCcy).flatMap(o => Object.keys(o))
-    )];
-    const byCcy = {};
-    for (const ccy of ccys) {
-      byCcy[ccy] = dates.map(d => byDateCcy[d][ccy] ?? null);
-    }
-    return {dates, byCcy};
-  }
-}
-
-// ── Chart ────────────────────────────────────────────────────
+// ── Chart ─────────────────────────────────────────────────────────
 function series() {
-  const f  = $("from").value, t = $("to").value;
-  const n  = Math.min(per, histDates.length);
-  const fH = hist[f], tH = hist[t];
-  if (!fH || !tH) return {data: [], n: 0};
+  var f  = $el("from").value, t = $el("to").value;
+  var n  = Math.min(per, histDates.length);
+  var fH = hist[f], tH = hist[t];
+  if (!fH || !tH || n === 0) return { data: [], n: 0 };
 
-  const ds = histDates.slice(-n);
-  const fs = fH.slice(-n);
-  const ts = tH.slice(-n);
-  const data = fs.map((v, i) =>
-    v != null && ts[i] != null ? +((ts[i] / v).toFixed(5)) : null
-  );
+  var ds = histDates.slice(-n);
+  var fs = fH.slice(-n);
+  var ts = tH.slice(-n);
+  var data = fs.map(function(v, i) {
+    return (v != null && ts[i] != null) ? +((ts[i] / v).toFixed(5)) : null;
+  });
 
-  // Build _tMap: {index -> label}, only for ticks we want shown
-  const tMap = {};
-  let lastYr = -1, lastMo = -1;
-  for (let i = 0; i < n; i++) {
-    const dt  = new Date(ds[i]);
-    const yr  = dt.getFullYear();
-    const mo  = dt.getMonth();
-    const dom = dt.getDate();
-    const ms  = dt.toLocaleString("en-US", {month: "short"});
+  // Build tick map: index -> label string (only for ticks we want shown)
+  var tMap = {}, lastYr = -1, lastMo = -1;
+  for (var i = 0; i < n; i++) {
+    var dt  = new Date(ds[i]);
+    var yr  = dt.getFullYear();
+    var mo  = dt.getMonth();
+    var dom = dt.getDate();
+    var ms  = dt.toLocaleString("en-US", { month: "short" });
     if (per >= 9999) {
       if (yr !== lastYr) { tMap[i] = String(yr); lastYr = yr; }
     } else if (per >= 365) {
@@ -817,29 +786,31 @@ function series() {
         tMap[i] = ms + " '" + String(yr).slice(2); lastMo = mo;
       }
     } else {
-      const steps = [0, Math.round(n/3), Math.round(2*n/3), n-1];
-      if (steps.includes(i)) tMap[i] = ms + " " + dom;
+      var steps = [0, Math.round(n/3), Math.round(2*n/3), n-1];
+      if (steps.indexOf(i) !== -1) tMap[i] = ms + " " + dom;
     }
   }
-  _tMap = tMap;
+  _tMap     = tMap;
   _rawDates = ds;
-  return {data, n};
+  return { data: data, n: n };
 }
 
 function buildChart() {
-  const ctx = document.getElementById(W + "_c").getContext("2d");
-  const {data, n} = series();
-  chart = new Chart(ctx, {
+  var ctx = document.getElementById(W + "_c").getContext("2d");
+  var s = series();
+  if (!s.n) return;
+
+  fxChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: Array.from({length: n}, (_, i) => i),
+      labels: Array.from({ length: s.n }, function(_, i) { return i; }),
       datasets: [{
-        data,
+        data: s.data,
         borderColor: "#52B788",
         borderWidth: 1.5,
         fill: true,
-        backgroundColor: c => {
-          const g = c.chart.ctx.createLinearGradient(0, 0, 0, 110);
+        backgroundColor: function(c) {
+          var g = c.chart.ctx.createLinearGradient(0, 0, 0, 110);
           g.addColorStop(0, "rgba(82,183,136,0.15)");
           g.addColorStop(1, "rgba(82,183,136,0)");
           return g;
@@ -854,23 +825,24 @@ function buildChart() {
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      interaction: {mode: "index", intersect: false},
+      interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: {display: false},
+        legend: { display: false },
         tooltip: {
           backgroundColor: "#1E4034",
           titleColor: "rgba(201,212,197,0.9)",
           bodyColor: "#fff",
-          titleFont: {size: 10},
-          bodyFont: {size: 12, weight: "500"},
+          titleFont:  { size: 10 },
+          bodyFont:   { size: 12, weight: "500" },
           padding: 9,
           displayColors: false,
           callbacks: {
-            title: items => _rawDates[items[0].dataIndex] || "",
-            label: item => {
-              const f = $("from").value, t = $("to").value;
-              const v = item.raw;
-              return v == null ? "—" : " 1 " + f + " = " + v + " " + t;
+            title: function(items) {
+              return _rawDates[items[0].dataIndex] || "";
+            },
+            label: function(item) {
+              var f = $el("from").value, t = $el("to").value;
+              return item.raw == null ? "—" : " 1 " + f + " = " + item.raw + " " + t;
             }
           }
         }
@@ -879,25 +851,25 @@ function buildChart() {
         x: {
           type: "linear",
           min: 0,
-          max: Math.max(0, n - 1),
-          grid: {display: false},
-          border: {display: false},
+          max: Math.max(0, s.n - 1),
+          grid:   { display: false },
+          border: { display: false },
           ticks: {
             color: "#8C8C8C",
-            font: {size: 9},
+            font:  { size: 9 },
             maxRotation: 0,
             autoSkip: false,
-            callback: val => {
-              const label = _tMap[Math.round(val)];
+            callback: function(val) {
+              var label = _tMap[Math.round(val)];
               return label != null ? label : null;
             }
           }
         },
         y: {
           position: "right",
-          grid: {color: "#F2F2F2"},
-          border: {display: false},
-          ticks: {color: "#8C8C8C", font: {size: 9}, maxTicksLimit: 4}
+          grid:   { color: "#F2F2F2" },
+          border: { display: false },
+          ticks:  { color: "#8C8C8C", font: { size: 9 }, maxTicksLimit: 4 }
         }
       }
     }
@@ -905,57 +877,56 @@ function buildChart() {
 }
 
 function refreshChart() {
-  if (!chart) return;
-  const {data, n} = series();
-  chart.data.labels = Array.from({length: n}, (_, i) => i);
-  chart.data.datasets[0].data = data;
-  chart.options.scales.x.max = Math.max(0, n - 1);
-  chart.update();
+  if (!fxChart) return;
+  var s = series();
+  if (!s.n) return;
+  fxChart.data.labels = Array.from({ length: s.n }, function(_, i) { return i; });
+  fxChart.data.datasets[0].data = s.data;
+  fxChart.options.scales.x.max = Math.max(0, s.n - 1);
+  fxChart.update();
 }
 
-// ── Collapsible chart toggle ─────────────────────────────────
+// ── Collapsible chart ─────────────────────────────────────────────
 window[W + "_toggleChart"] = function() {
-  const body = $("cbody");
-  const chev = $("chev");
-  const isOpen = body.style.display === "block";
+  var body   = $el("cbody");
+  var chev   = $el("chev");
+  var isOpen = body.style.display === "block";
   body.style.display = isOpen ? "none" : "block";
   chev.style.transform = isOpen ? "" : "rotate(180deg)";
   if (!isOpen) {
-    const f = $("from").value, t = $("to").value;
-    if (!isTier1(f) || !isTier1(t)) return; // no chart for Tier 2
+    var f = $el("from").value, t = $el("to").value;
+    if (!isTier1(f) || !isTier1(t)) return;
     if (histReady) {
-      showSpinner("chartSpinner", false);
-      showEl("chartCanvas", true);
+      show("cspinner", false);
+      show("chartArea", true);
       if (!chartBuilt) { buildChart(); chartBuilt = true; }
       else refreshChart();
     } else {
-      // Still loading in background
-      showSpinner("chartSpinner", true);
-      showEl("chartCanvas", false);
+      show("cspinner", true);
+      show("chartArea", false);
     }
   }
 };
 
 window[W + "_per"] = function(days, btn) {
   per = days;
-  document.querySelectorAll("#" + W + " .pbtn")
-          .forEach(b => b.classList.remove("on"));
+  var btns = document.querySelectorAll("#" + W + " .fx-pbtn");
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("on");
   btn.classList.add("on");
   refreshChart();
 };
 
-// ── Boot sequence ────────────────────────────────────────────
-(async function init() {
-  setOpt("from", DEFAULT_FROM);
-  setOpt("to",   DEFAULT_TO);
-  updateChartVisibility();
+// ── Boot ──────────────────────────────────────────────────────────
+setOpt("from", DEFAULT_FROM);
+setOpt("to",   DEFAULT_TO);
+updateChartSection();
 
-  // Step 1: fetch current rates (shows converter immediately)
-  await fetchCurrentRates();
+// Fetch rates immediately
+fetchRates();
 
-  // Step 2: immediately kick off 5yr history in background
-  // Chart will be ready by the time user opens the dropdown
-  fetchHistory();  // intentionally not awaited
+// Kick off history fetch in background (will be ready when user opens chart)
+fetchHistory();
+
 })();
-})();</script>
+</script>
 </body></html>
