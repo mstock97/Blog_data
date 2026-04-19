@@ -27,18 +27,60 @@
       --moss-12:#E9F4EE;
       --moss-20:#DCEEE4;
     }
-    .ht-widget{font-family:'DM Sans',sans-serif;color:var(--graphite);font-size:14px;line-height:1.6;background:transparent}
+    .ht-widget{
+      font-family:'DM Sans',sans-serif;
+      color:var(--graphite);
+      font-size:14px;
+      line-height:1.6;
+      background:transparent;
+      overflow-x:hidden;
+    }
 
     /* ── Strips ── */
     .strips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-    .strip{flex:1 1 180px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-radius:6px;padding:10px 14px}
+    .strip{
+      flex:1 1 160px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+      border-radius:6px;
+      padding:10px 14px;
+      min-width:0;
+    }
     .strip-best{background:var(--forest);color:var(--white)}
     .strip-avoid{background:var(--stone);color:var(--white)}
-    .strip strong{font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.6;flex-shrink:0;font-weight:500}
-    .pill{border-radius:20px;padding:3px 10px;font-size:12px;font-weight:500;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25)}
+    .strip strong{
+      font-family:'DM Sans',sans-serif;
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      opacity:.6;
+      flex-shrink:0;
+      font-weight:500;
+      white-space:nowrap;
+    }
+    .pill{
+      border-radius:20px;
+      padding:3px 10px;
+      font-size:12px;
+      font-weight:500;
+      background:rgba(255,255,255,.15);
+      border:1px solid rgba(255,255,255,.25);
+      white-space:nowrap;
+    }
 
     /* ── Narrative ── */
-    .narrative{font-size:13px;line-height:1.85;color:var(--graphite);margin-bottom:16px;padding:14px 16px;background:var(--white);border-left:3px solid var(--driftwood);border-radius:0 5px 5px 0}
+    .narrative{
+      font-size:13px;
+      line-height:1.85;
+      color:var(--graphite);
+      margin-bottom:16px;
+      padding:14px 16px;
+      background:var(--white);
+      border-left:3px solid var(--driftwood);
+      border-radius:0 5px 5px 0;
+    }
 
     /* ── Unit toggle row ── */
     .unit-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:12px}
@@ -53,42 +95,73 @@
 
     /* ── Charts ── */
     .charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-    @media(max-width:500px){.charts{grid-template-columns:1fr}}
-    .chart-card{background:var(--white);border:1px solid var(--cloud);border-radius:8px;padding:12px 12px 8px}
+    .chart-card{background:var(--white);border:1px solid var(--cloud);border-radius:8px;padding:12px 12px 8px;min-width:0}
     .chart-title{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:8px}
 
-    /* ── Collapsible table ── */
+    /* ── Collapsible header ── */
     .collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:10px 0 8px;border-top:1px solid var(--cloud);margin-top:4px}
     .collapsible-header:hover .col-label{color:var(--canopy)}
     .col-label{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);transition:color .15s}
     .chevron{font-size:10px;color:var(--ash);transition:transform .2s;line-height:1}
     .chevron.open{transform:rotate(180deg)}
-    .table-wrap{border:1px solid var(--cloud);border-radius:8px;overflow:hidden;display:none;margin-top:6px}
+    .table-wrap{display:none;margin-top:6px}
     .table-wrap.open{display:block}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    thead{background:var(--forest)}
-    thead th{padding:8px 10px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7)}
-    tbody tr{border-bottom:1px solid var(--cloud);transition:background .1s}
-    tbody tr:last-child{border-bottom:none}
-    tbody tr:hover{background:var(--paper)}
-    tbody tr.row-best{background:var(--moss-20)}
-    tbody tr.row-worst{background:#FFF7D2}
-    td{padding:7px 10px;vertical-align:middle}
+
+    /* ── Desktop table ── */
+    .tbl-desktop{width:100%;border-collapse:collapse;font-size:12px;border:1px solid var(--cloud);border-radius:8px;overflow:hidden}
+    .tbl-desktop thead{background:var(--forest)}
+    .tbl-desktop thead th{padding:8px 10px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+    .tbl-desktop tbody tr{border-bottom:1px solid var(--cloud);transition:background .1s}
+    .tbl-desktop tbody tr:last-child{border-bottom:none}
+    .tbl-desktop tbody tr:hover{background:var(--paper)}
+    .tbl-desktop tbody tr.row-best{background:var(--moss-20)}
+    .tbl-desktop tbody tr.row-worst{background:#FFF7D2}
+    .tbl-desktop td{padding:7px 10px;vertical-align:middle}
+
+    /* ── Mobile card table ── */
+    .tbl-mobile{display:none}
+    .mob-card{border:1px solid var(--cloud);border-radius:8px;overflow:hidden;margin-bottom:8px;background:var(--white)}
+    .mob-card.row-best{background:var(--moss-20);border-color:#A3D9B5}
+    .mob-card.row-worst{background:#FFF7D2;border-color:#E8D88A}
+    .mob-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:9px 12px;background:var(--forest);color:var(--white);
+      font-weight:500;font-size:13px;
+    }
+    .mob-card.row-best .mob-head{background:var(--canopy)}
+    .mob-card.row-worst .mob-head{background:var(--stone)}
+    .mob-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;text-align:center}
+    .mob-cell{padding:8px 4px;border-right:1px solid var(--cloud)}
+    .mob-cell:last-child{border-right:none}
+    .mob-cell-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);margin-bottom:2px}
+    .mob-cell-val{font-size:13px;font-weight:500;color:var(--ink)}
+
+    /* ── Shared ── */
     .col-month{font-weight:500;white-space:nowrap;color:var(--ink)}
     .badge{display:inline-block;margin-left:6px;font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 5px;border-radius:3px;vertical-align:middle}
     .badge-best{background:var(--moss);color:var(--white)}
     .badge-avoid{background:var(--driftwood);color:var(--white)}
-
-    /* ── Meta ── */
     .meta{margin-top:12px;font-size:11px;color:var(--ash);line-height:1.8}
     .meta a{color:var(--canopy);text-decoration:none}
     .meta a:hover{text-decoration:underline}
+
+    /* ── Responsive breakpoints ── */
+    @media(max-width:540px){
+      .charts{grid-template-columns:1fr}
+    }
+    @media(max-width:600px){
+      .tbl-desktop{display:none}
+      .tbl-mobile{display:block}
+      .narrative{font-size:12px;padding:12px 13px}
+      .strips{flex-direction:column}
+      .strip{flex:none;width:100%}
+    }
   </style>
 </head>
 <body>
 <div class="ht-widget">
 
-  <!-- Best / Avoid -->
+  <!-- Best / Avoid strips -->
   <div class="strips">
     <div class="strip strip-best"><strong>Best months to visit</strong><span class="pill pill-best">June</span><span class="pill pill-best">July</span><span class="pill pill-best">September</span></div>
     <div class="strip strip-avoid"><strong>Months to avoid</strong><span class="pill pill-avoid">March</span><span class="pill pill-avoid">April</span><span class="pill pill-avoid">December</span></div>
@@ -119,13 +192,15 @@
     </div>
   </div>
 
-  <!-- Collapsible monthly table -->
+  <!-- Collapsible monthly breakdown -->
   <div class="collapsible-header" onclick="htToggleTable()">
     <span class="col-label">Monthly breakdown</span>
     <span class="chevron" id="htChev">&#9660;</span>
   </div>
   <div class="table-wrap" id="htMonthTable">
-    <table>
+
+    <!-- Desktop: traditional table (hidden ≤600px via CSS) -->
+    <table class="tbl-desktop">
       <thead>
         <tr><th>Month</th><th>High</th><th>Avg</th><th>Low</th><th>Rainfall</th></tr>
       </thead>
@@ -215,8 +290,11 @@
           <td><span class="pmm">61.6 mm</span><span class="pin" style="display:none">2.43"</span></td>
         </tr></tbody>
     </table>
-  </div>
 
+    <!-- Mobile: stacked cards (hidden >600px, built by JS) -->
+    <div class="tbl-mobile" id="htMobileCards"></div>
+
+  </div>
 
 </div>
 
@@ -231,14 +309,66 @@
   const LO_F    = [16.7,18.7,30.4,39.9,50.5,60.6,64.8,63.3,56.7,44.1,32.4,22.6];
   const PRCP_MM = [52.4,49.7,80.7,103.5,118.8,118.0,113.8,115.0,80.0,93.9,59.6,61.6];
   const PRCP_IN = [2.06,1.96,3.18,4.07,4.68,4.65,4.48,4.53,3.15,3.7,2.35,2.43];
+  const BEST    = new Set(['September', 'June', 'July']);
+  const WORST   = new Set(['December', 'April', 'March']);
 
-  // Brand colours
-  const C_HI   = '#1E4034';
-  const C_AVG  = '#2D6A4F';
-  const C_LO   = '#52B788';
-  const C_RAIN = '#A8896A';
+  const C_HI  = '#1E4034';
+  const C_AVG = '#2D6A4F';
+  const C_LO  = '#52B788';
 
   let useF = true;
+
+  // ── Build mobile month cards from JS data arrays ───────────────
+  function buildMobileCards() {
+    const container = document.getElementById('htMobileCards');
+    if (!container) return;
+    let html = '';
+    for (let i = 0; i < MONTHS.length; i++) {
+      const m   = MONTHS[i];
+      const cls = BEST.has(m)  ? 'mob-card row-best'  :
+                  WORST.has(m) ? 'mob-card row-worst' : 'mob-card';
+      const badge = BEST.has(m)  ? '<span class="badge badge-best">✦ Best</span>' :
+                    WORST.has(m) ? '<span class="badge badge-avoid">Avoid</span>' : '';
+      const mmVal = PRCP_MM[i];
+      const inVal = PRCP_IN[i];
+      html += `<div class="${cls}">
+        <div class="mob-head"><span>${m}${badge}</span></div>
+        <div class="mob-grid">
+          <div class="mob-cell">
+            <div class="mob-cell-label">High</div>
+            <div class="mob-cell-val">
+              <span class="vc">${HI_C[i]!=null?HI_C[i]+'°C':'—'}</span>
+              <span class="vf" style="display:none">${HI_F[i]!=null?HI_F[i]+'°F':'—'}</span>
+            </div>
+          </div>
+          <div class="mob-cell">
+            <div class="mob-cell-label">Avg</div>
+            <div class="mob-cell-val">
+              <span class="vc">${AVG_C[i]!=null?AVG_C[i]+'°C':'—'}</span>
+              <span class="vf" style="display:none">${AVG_F[i]!=null?AVG_F[i]+'°F':'—'}</span>
+            </div>
+          </div>
+          <div class="mob-cell">
+            <div class="mob-cell-label">Low</div>
+            <div class="mob-cell-val">
+              <span class="vc">${LO_C[i]!=null?LO_C[i]+'°C':'—'}</span>
+              <span class="vf" style="display:none">${LO_F[i]!=null?LO_F[i]+'°F':'—'}</span>
+            </div>
+          </div>
+          <div class="mob-cell">
+            <div class="mob-cell-label">Rain</div>
+            <div class="mob-cell-val">
+              <span class="pmm">${mmVal!=null?mmVal+' mm':'—'}</span>
+              <span class="pin" style="display:none">${inVal!=null?inVal+'"':'—'}</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  buildMobileCards();
 
   // ── Temperature chart ──────────────────────────────────────────
   const tempChart = new Chart(document.getElementById('htTempChart'), {
@@ -246,28 +376,29 @@
     data: {
       labels: MONTHS,
       datasets: [
-        { label:'High', data:HI_F,  borderColor:C_HI,  backgroundColor:'rgba(30,64,52,.07)',  borderWidth:2,   pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
-        { label:'Avg',  data:AVG_F, borderColor:C_AVG, backgroundColor:'rgba(45,106,79,.08)', borderWidth:2.5, pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
-        { label:'Low',  data:LO_F,  borderColor:C_LO,  backgroundColor:'rgba(82,183,136,.07)',borderWidth:2,   pointRadius:3, pointHoverRadius:6, tension:0.35, fill:false },
+        { label:'High', data:HI_F,  borderColor:C_HI,  backgroundColor:'rgba(30,64,52,.07)',  borderWidth:2,   pointRadius:2, pointHoverRadius:5, tension:0.35, fill:false },
+        { label:'Avg',  data:AVG_F, borderColor:C_AVG, backgroundColor:'rgba(45,106,79,.08)', borderWidth:2.5, pointRadius:2, pointHoverRadius:5, tension:0.35, fill:false },
+        { label:'Low',  data:LO_F,  borderColor:C_LO,  backgroundColor:'rgba(82,183,136,.07)',borderWidth:2,   pointRadius:2, pointHoverRadius:5, tension:0.35, fill:false },
       ]
     },
     options: {
       responsive:true,
+      maintainAspectRatio:true,
       interaction:{ mode:'index', intersect:false },
       plugins:{
-        legend:{ labels:{ boxWidth:10, font:{ size:11, family:"'DM Sans',sans-serif" }, color:'#3D3D3D' } },
+        legend:{ labels:{ boxWidth:10, font:{ size:10, family:"'DM Sans',sans-serif" }, color:'#3D3D3D' } },
         tooltip:{
           backgroundColor:'#1E4034', titleColor:'rgba(255,255,255,.7)',
-          bodyColor:'#fff', padding:10, cornerRadius:6,
+          bodyColor:'#fff', padding:9, cornerRadius:6,
           callbacks:{
             title: ctx => MONTHS[ctx[0].dataIndex],
-            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y + (useF?'°F':'°C') : '—'}`,
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y!=null?ctx.parsed.y+(useF?'°F':'°C'):'—'}`,
           }
         }
       },
       scales:{
-        x:{ grid:{ display:false }, ticks:{ font:{ size:11 }, color:'#8C8C8C' } },
-        y:{ grid:{ color:'#EFEFEF' }, ticks:{ font:{ size:11 }, color:'#8C8C8C', callback: v => v+(useF?'°F':'°C') } }
+        x:{ grid:{ display:false }, ticks:{ font:{ size:10 }, color:'#8C8C8C', maxRotation:0 } },
+        y:{ grid:{ color:'#EFEFEF' }, ticks:{ font:{ size:10 }, color:'#8C8C8C', callback: v => v+(useF?'°F':'°C') } }
       }
     }
   });
@@ -285,64 +416,57 @@
     },
     options: {
       responsive:true,
+      maintainAspectRatio:true,
       interaction:{ mode:'index', intersect:false },
       plugins:{
         legend:{ display:false },
         tooltip:{
           backgroundColor:'#1E4034', titleColor:'rgba(255,255,255,.7)',
-          bodyColor:'#fff', padding:10, cornerRadius:6,
+          bodyColor:'#fff', padding:9, cornerRadius:6,
           callbacks:{
             title: ctx => MONTHS[ctx[0].dataIndex],
             label: ctx => {
               const i   = ctx.dataIndex;
               const mm  = PRCP_MM[i];
               const inc = PRCP_IN[i];
-              if (mm == null) return ' —';
-              return useF
-                ? ` ${inc != null ? inc+'″' : '—'}`
-                : ` ${mm} mm (${inc != null ? inc+'″' : '—'})`;
+              if (mm==null) return ' —';
+              return useF ? ` ${inc!=null?inc+'″':'—'}` : ` ${mm} mm (${inc!=null?inc+'″':'—'})`;
             }
           }
         }
       },
       scales:{
-        x:{ grid:{ display:false }, ticks:{ font:{ size:11 }, color:'#8C8C8C' } },
-        y:{ grid:{ color:'#EFEFEF' }, ticks:{ font:{ size:11 }, color:'#8C8C8C', callback: v => useF ? v+'″' : v+'mm' } }
+        x:{ grid:{ display:false }, ticks:{ font:{ size:10 }, color:'#8C8C8C', maxRotation:0 } },
+        y:{ grid:{ color:'#EFEFEF' }, ticks:{ font:{ size:10 }, color:'#8C8C8C', callback: v => useF?v+'″':v+'mm' } }
       }
     }
   });
 
-  // ── Switch units ───────────────────────────────────────────────
+  // ── Switch °C / °F ─────────────────────────────────────────────
   window.htSwitchUnits = function(toF) {
     useF = toF;
-    // Temp chart
     tempChart.data.datasets[0].data = toF ? HI_F  : HI_C;
     tempChart.data.datasets[1].data = toF ? AVG_F : AVG_C;
     tempChart.data.datasets[2].data = toF ? LO_F  : LO_C;
     tempChart.options.scales.y.ticks.callback = v => v+(toF?'°F':'°C');
     tempChart.update();
-    // Precip chart — swap full dataset so Y axis scale is correct
     prcpChart.data.datasets[0].data = toF ? PRCP_IN : PRCP_MM;
     prcpChart.options.scales.y.ticks.callback = v => toF ? v+'″' : v+'mm';
     prcpChart.update();
-    // Table temp cells
-    document.querySelectorAll('.vc').forEach(el => el.style.display = toF?'none':'');
-    document.querySelectorAll('.vf').forEach(el => el.style.display = toF?'':'none');
-    // Table precip cells
+    document.querySelectorAll('.vc').forEach(el  => el.style.display = toF?'none':'');
+    document.querySelectorAll('.vf').forEach(el  => el.style.display = toF?'':'none');
     document.querySelectorAll('.pmm').forEach(el => el.style.display = toF?'none':'');
     document.querySelectorAll('.pin').forEach(el => el.style.display = toF?'':'none');
-    // Label highlight
     document.getElementById('lbl-c').classList.toggle('active', !toF);
-    document.getElementById('lbl-f').classList.toggle('active', toF);
+    document.getElementById('lbl-f').classList.toggle('active',  toF);
   };
 
-  // ── Collapsible table ──────────────────────────────────────────
+  // ── Collapsible table toggle ───────────────────────────────────
   window.htToggleTable = function() {
     document.getElementById('htMonthTable').classList.toggle('open');
     document.getElementById('htChev').classList.toggle('open');
   };
 
-  // Init at °F
   htSwitchUnits(true);
 })();
 </script>
