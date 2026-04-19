@@ -597,11 +597,11 @@ function updateChartVisibility() {
   showEl("chartRow", true);  // always show the row
   if (bothTier1) {
     showEl("chartNoData", false);
-    showEl("chartInner", true);
+    showEl("chartCanvas", true);
     $("ctitle").textContent = f + "/" + t;
   } else {
     showEl("chartNoData", true);
-    showEl("chartInner", false);
+    showEl("chartCanvas", false);
     const missing = [f, t].filter(c => !isTier1(c)).join(", ");
     $("noDataMsg").textContent =
       "Historical chart not available for " + missing +
@@ -726,7 +726,7 @@ function onHistoryReady() {
   const bodyOpen = $("cbody") && $("cbody").style.display === "block";
   showSpinner("chartSpinner", false);
   if (histError) {
-    showEl("chartInner", false);
+    showEl("chartCanvas", false);
     showEl("chartNoData", true);
     $("noDataMsg").textContent = "Historical data temporarily unavailable.";
     return;
