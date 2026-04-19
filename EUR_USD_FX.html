@@ -154,10 +154,15 @@
   padding:20px 0;text-align:center;
   font-size:12px;color:#8C8C8C;font-style:italic;line-height:1.6;
 }
-/* Chart canvas: taller on mobile for readability */
-#fx_eur_usd canvas{display:block;width:100%!important;height:160px!important}
+/* Chart: fixed-height wrapper, canvas fills it */
+#fx_eur_usd .chart-wrap{position:relative;height:160px;width:100%}
 @media(max-width:540px){
-  #fx_eur_usd canvas{height:200px!important}
+  #fx_eur_usd .chart-wrap{height:200px}
+}
+#fx_eur_usd canvas{
+  position:absolute;top:0;left:0;
+  width:100%!important;height:100%!important;
+  display:block;
 }
 #fx_eur_usd .gen-date{
   font-size:9px;color:#C9D4C5;text-align:right;
@@ -534,7 +539,9 @@
       </div>
     </div>
     <div id="fx_eur_usd_chartArea">
-      <canvas id="fx_eur_usd_c"></canvas>
+      <div class="chart-wrap">
+        <canvas id="fx_eur_usd_c"></canvas>
+      </div>
     </div>
     <div id="fx_eur_usd_chartNoData" class="cnodata" style="display:none">
       <span id="fx_eur_usd_noDataMsg"></span>
@@ -729,7 +736,7 @@ function buildChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { display: false },
