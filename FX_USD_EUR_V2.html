@@ -513,7 +513,8 @@ function parseHistoryInto(code, arr, window20y) {
 
   var existing = HIST[code];
   if (!existing) {
-    HIST[code] = { dates: dates, values: values, from5y: !window20y, from20y: window20y };
+    // 20Y data covers 5Y too, so from5y is always true
+    HIST[code] = { dates: dates, values: values, from5y: true, from20y: window20y };
   } else {
     // Merge: prepend older dates if extending to 20Y
     var mergedMap = {};
@@ -602,8 +603,8 @@ function fetchDefaultRates() {
     .then(function(arr) {
       parseLatestInto(arr);
       updateDisplay();
-      // Stage 2: 5Y history for default pair
-      ensurePairHist(DEFAULT_FROM, DEFAULT_TO, "5y").then(function() {
+      // Stage 2: fetch full 20Y history upfront — all period buttons work instantly
+      ensurePairHist(DEFAULT_FROM, DEFAULT_TO, "20y").then(function() {
         if (chartOpen()) tryRenderChart();
       });
       // Stage 3: all current rates (for conversion when user picks any currency)
