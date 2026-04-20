@@ -51,6 +51,7 @@
 #fx_eur_usd .pbtns{display:flex;gap:4px;flex-wrap:wrap}
 #fx_eur_usd .fx-pbtn{font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;min-height:30px;border:1px solid #EFEFEF;border-radius:3px;background:transparent;color:#8C8C8C;cursor:pointer;transition:all .15s;font-family:inherit;}
 #fx_eur_usd .fx-pbtn:hover,#fx_eur_usd .fx-pbtn:active,#fx_eur_usd .fx-pbtn.on{border-color:#2D6A4F;color:#2D6A4F;background:#EEF3F1}
+#fx_eur_usd .fx-pbtn:disabled{opacity:0.4;cursor:default;border-color:#EFEFEF;color:#8C8C8C;background:transparent;}
 #fx_eur_usd .cnodata{padding:20px 0;text-align:center;font-size:12px;color:#8C8C8C;font-style:italic;line-height:1.6}
 #fx_eur_usd .chart-wrap{position:relative;height:160px;width:100%}
 @media(max-width:540px){#fx_eur_usd .chart-wrap{height:200px}}
@@ -64,37 +65,160 @@
   <div class="inputs">
     <div class="fxg">
       <div class="fxlbl">From</div>
-      <select class="fxsel" id="fx_eur_usd_from" onchange="fx_eur_usd_go()"><optgroup label="Full history available"><option value="EUR">EUR — Euro</option>
+      <select class="fxsel" id="fx_eur_usd_from" onchange="fx_eur_usd_go()"><option value="EUR">EUR — Euro</option>
+<option value="AED">AED — UAE Dirham</option>
+<option value="AFN">AFN — Afghan Afghani</option>
+<option value="ALL">ALL — Albanian Lek</option>
+<option value="AMD">AMD — Armenian Dram</option>
+<option value="ANG">ANG — Netherlands Antillean Guilder</option>
+<option value="AOA">AOA — Angolan Kwanza</option>
+<option value="ARS">ARS — Argentine Peso</option>
 <option value="AUD">AUD — Australian Dollar</option>
+<option value="AWG">AWG — Aruban Florin</option>
+<option value="AZN">AZN — Azerbaijani Manat</option>
+<option value="BAM">BAM — Bosnia-Herzegovina Mark</option>
+<option value="BBD">BBD — Barbadian Dollar</option>
+<option value="BDT">BDT — Bangladeshi Taka</option>
 <option value="BGN">BGN — Bulgarian Lev</option>
+<option value="BHD">BHD — Bahraini Dinar</option>
+<option value="BIF">BIF — Burundian Franc</option>
+<option value="BMD">BMD — Bermudian Dollar</option>
+<option value="BND">BND — Brunei Dollar</option>
+<option value="BOB">BOB — Bolivian Boliviano</option>
 <option value="BRL">BRL — Brazilian Real</option>
+<option value="BSD">BSD — Bahamian Dollar</option>
+<option value="BTN">BTN — Bhutanese Ngultrum</option>
+<option value="BWP">BWP — Botswanan Pula</option>
+<option value="BYN">BYN — Belarusian Ruble</option>
+<option value="BZD">BZD — Belize Dollar</option>
 <option value="CAD">CAD — Canadian Dollar</option>
+<option value="CDF">CDF — Congolese Franc</option>
 <option value="CHF">CHF — Swiss Franc</option>
+<option value="CLP">CLP — Chilean Peso</option>
 <option value="CNY">CNY — Chinese Yuan</option>
+<option value="COP">COP — Colombian Peso</option>
+<option value="CRC">CRC — Costa Rican Colon</option>
+<option value="CUP">CUP — Cuban Peso</option>
+<option value="CVE">CVE — Cape Verdean Escudo</option>
 <option value="CZK">CZK — Czech Koruna</option>
+<option value="DJF">DJF — Djiboutian Franc</option>
 <option value="DKK">DKK — Danish Krone</option>
+<option value="DOP">DOP — Dominican Peso</option>
+<option value="DZD">DZD — Algerian Dinar</option>
+<option value="EGP">EGP — Egyptian Pound</option>
+<option value="ERN">ERN — Eritrean Nakfa</option>
+<option value="ETB">ETB — Ethiopian Birr</option>
+<option value="FJD">FJD — Fijian Dollar</option>
+<option value="FKP">FKP — Falkland Islands Pound</option>
 <option value="GBP">GBP — British Pound</option>
+<option value="GEL">GEL — Georgian Lari</option>
+<option value="GHS">GHS — Ghanaian Cedi</option>
+<option value="GIP">GIP — Gibraltar Pound</option>
+<option value="GMD">GMD — Gambian Dalasi</option>
+<option value="GNF">GNF — Guinean Franc</option>
+<option value="GTQ">GTQ — Guatemalan Quetzal</option>
+<option value="GYD">GYD — Guyanaese Dollar</option>
 <option value="HKD">HKD — Hong Kong Dollar</option>
+<option value="HNL">HNL — Honduran Lempira</option>
+<option value="HTG">HTG — Haitian Gourde</option>
 <option value="HUF">HUF — Hungarian Forint</option>
 <option value="IDR">IDR — Indonesian Rupiah</option>
 <option value="ILS">ILS — Israeli Shekel</option>
 <option value="INR">INR — Indian Rupee</option>
+<option value="IQD">IQD — Iraqi Dinar</option>
+<option value="IRR">IRR — Iranian Rial</option>
 <option value="ISK">ISK — Icelandic Krona</option>
+<option value="JMD">JMD — Jamaican Dollar</option>
+<option value="JOD">JOD — Jordanian Dinar</option>
 <option value="JPY">JPY — Japanese Yen</option>
+<option value="KES">KES — Kenyan Shilling</option>
+<option value="KGS">KGS — Kyrgystani Som</option>
+<option value="KHR">KHR — Cambodian Riel</option>
+<option value="KMF">KMF — Comorian Franc</option>
+<option value="KPW">KPW — North Korean Won</option>
 <option value="KRW">KRW — South Korean Won</option>
+<option value="KWD">KWD — Kuwaiti Dinar</option>
+<option value="KYD">KYD — Cayman Islands Dollar</option>
+<option value="KZT">KZT — Kazakhstani Tenge</option>
+<option value="LAK">LAK — Laotian Kip</option>
+<option value="LBP">LBP — Lebanese Pound</option>
+<option value="LKR">LKR — Sri Lankan Rupee</option>
+<option value="LRD">LRD — Liberian Dollar</option>
+<option value="LSL">LSL — Lesotho Loti</option>
+<option value="LYD">LYD — Libyan Dinar</option>
+<option value="MAD">MAD — Moroccan Dirham</option>
+<option value="MDL">MDL — Moldovan Leu</option>
+<option value="MGA">MGA — Malagasy Ariary</option>
+<option value="MKD">MKD — Macedonian Denar</option>
+<option value="MMK">MMK — Myanma Kyat</option>
+<option value="MNT">MNT — Mongolian Tugrik</option>
+<option value="MOP">MOP — Macanese Pataca</option>
+<option value="MRU">MRU — Mauritanian Ouguiya</option>
+<option value="MUR">MUR — Mauritian Rupee</option>
+<option value="MVR">MVR — Maldivian Rufiyaa</option>
+<option value="MWK">MWK — Malawian Kwacha</option>
 <option value="MXN">MXN — Mexican Peso</option>
 <option value="MYR">MYR — Malaysian Ringgit</option>
+<option value="MZN">MZN — Mozambican Metical</option>
+<option value="NAD">NAD — Namibian Dollar</option>
+<option value="NGN">NGN — Nigerian Naira</option>
+<option value="NIO">NIO — Nicaraguan Cordoba</option>
 <option value="NOK">NOK — Norwegian Krone</option>
+<option value="NPR">NPR — Nepalese Rupee</option>
 <option value="NZD">NZD — New Zealand Dollar</option>
+<option value="OMR">OMR — Omani Rial</option>
+<option value="PAB">PAB — Panamanian Balboa</option>
+<option value="PEN">PEN — Peruvian Sol</option>
+<option value="PGK">PGK — Papua New Guinean Kina</option>
 <option value="PHP">PHP — Philippine Peso</option>
+<option value="PKR">PKR — Pakistani Rupee</option>
 <option value="PLN">PLN — Polish Zloty</option>
+<option value="PYG">PYG — Paraguayan Guarani</option>
+<option value="QAR">QAR — Qatari Rial</option>
 <option value="RON">RON — Romanian Leu</option>
+<option value="RSD">RSD — Serbian Dinar</option>
+<option value="RUB">RUB — Russian Ruble</option>
+<option value="RWF">RWF — Rwandan Franc</option>
+<option value="SAR">SAR — Saudi Riyal</option>
+<option value="SBD">SBD — Solomon Islands Dollar</option>
+<option value="SCR">SCR — Seychellois Rupee</option>
+<option value="SDG">SDG — Sudanese Pound</option>
 <option value="SEK">SEK — Swedish Krone</option>
 <option value="SGD">SGD — Singapore Dollar</option>
+<option value="SHP">SHP — Saint Helena Pound</option>
+<option value="SLL">SLL — Sierra Leonean Leone</option>
+<option value="SOS">SOS — Somali Shilling</option>
+<option value="SRD">SRD — Surinamese Dollar</option>
+<option value="STN">STN — Sao Tome Dobra</option>
+<option value="SVC">SVC — Salvadoran Colon</option>
+<option value="SYP">SYP — Syrian Pound</option>
+<option value="SZL">SZL — Swazi Lilangeni</option>
 <option value="THB">THB — Thai Baht</option>
+<option value="TJS">TJS — Tajikistani Somoni</option>
+<option value="TMT">TMT — Turkmenistani Manat</option>
+<option value="TND">TND — Tunisian Dinar</option>
+<option value="TOP">TOP — Tongan Paanga</option>
 <option value="TRY">TRY — Turkish Lira</option>
+<option value="TTD">TTD — Trinidad Dollar</option>
+<option value="TWD">TWD — New Taiwan Dollar</option>
+<option value="TZS">TZS — Tanzanian Shilling</option>
+<option value="UAH">UAH — Ukrainian Hryvnia</option>
+<option value="UGX">UGX — Ugandan Shilling</option>
 <option value="USD">USD — US Dollar</option>
-<option value="ZAR">ZAR — South African Rand</option></optgroup><optgroup label="More currencies (loading…)" id="fx_eur_usd_t2grp"></optgroup></select>
+<option value="UYU">UYU — Uruguayan Peso</option>
+<option value="UZS">UZS — Uzbekistan Som</option>
+<option value="VES">VES — Venezuelan Bolivar</option>
+<option value="VND">VND — Vietnamese Dong</option>
+<option value="VUV">VUV — Vanuatu Vatu</option>
+<option value="WST">WST — Samoan Tala</option>
+<option value="XAF">XAF — CFA Franc BEAC</option>
+<option value="XCD">XCD — East Caribbean Dollar</option>
+<option value="XOF">XOF — CFA Franc BCEAO</option>
+<option value="XPF">XPF — CFP Franc</option>
+<option value="YER">YER — Yemeni Rial</option>
+<option value="ZAR">ZAR — South African Rand</option>
+<option value="ZMW">ZMW — Zambian Kwacha</option>
+<option value="ZWL">ZWL — Zimbabwean Dollar</option></select>
       <input class="fxamt" type="number" id="fx_eur_usd_fromv" value="1" min="0" step="any" placeholder="0" oninput="fx_eur_usd_fwd()"/>
     </div>
     <div class="swapcol">
@@ -106,37 +230,160 @@
     </div>
     <div class="fxg">
       <div class="fxlbl">To</div>
-      <select class="fxsel" id="fx_eur_usd_to" onchange="fx_eur_usd_go()"><optgroup label="Full history available"><option value="USD">USD — US Dollar</option>
+      <select class="fxsel" id="fx_eur_usd_to" onchange="fx_eur_usd_go()"><option value="USD">USD — US Dollar</option>
+<option value="AED">AED — UAE Dirham</option>
+<option value="AFN">AFN — Afghan Afghani</option>
+<option value="ALL">ALL — Albanian Lek</option>
+<option value="AMD">AMD — Armenian Dram</option>
+<option value="ANG">ANG — Netherlands Antillean Guilder</option>
+<option value="AOA">AOA — Angolan Kwanza</option>
+<option value="ARS">ARS — Argentine Peso</option>
 <option value="AUD">AUD — Australian Dollar</option>
+<option value="AWG">AWG — Aruban Florin</option>
+<option value="AZN">AZN — Azerbaijani Manat</option>
+<option value="BAM">BAM — Bosnia-Herzegovina Mark</option>
+<option value="BBD">BBD — Barbadian Dollar</option>
+<option value="BDT">BDT — Bangladeshi Taka</option>
 <option value="BGN">BGN — Bulgarian Lev</option>
+<option value="BHD">BHD — Bahraini Dinar</option>
+<option value="BIF">BIF — Burundian Franc</option>
+<option value="BMD">BMD — Bermudian Dollar</option>
+<option value="BND">BND — Brunei Dollar</option>
+<option value="BOB">BOB — Bolivian Boliviano</option>
 <option value="BRL">BRL — Brazilian Real</option>
+<option value="BSD">BSD — Bahamian Dollar</option>
+<option value="BTN">BTN — Bhutanese Ngultrum</option>
+<option value="BWP">BWP — Botswanan Pula</option>
+<option value="BYN">BYN — Belarusian Ruble</option>
+<option value="BZD">BZD — Belize Dollar</option>
 <option value="CAD">CAD — Canadian Dollar</option>
+<option value="CDF">CDF — Congolese Franc</option>
 <option value="CHF">CHF — Swiss Franc</option>
+<option value="CLP">CLP — Chilean Peso</option>
 <option value="CNY">CNY — Chinese Yuan</option>
+<option value="COP">COP — Colombian Peso</option>
+<option value="CRC">CRC — Costa Rican Colon</option>
+<option value="CUP">CUP — Cuban Peso</option>
+<option value="CVE">CVE — Cape Verdean Escudo</option>
 <option value="CZK">CZK — Czech Koruna</option>
+<option value="DJF">DJF — Djiboutian Franc</option>
 <option value="DKK">DKK — Danish Krone</option>
+<option value="DOP">DOP — Dominican Peso</option>
+<option value="DZD">DZD — Algerian Dinar</option>
+<option value="EGP">EGP — Egyptian Pound</option>
+<option value="ERN">ERN — Eritrean Nakfa</option>
+<option value="ETB">ETB — Ethiopian Birr</option>
 <option value="EUR">EUR — Euro</option>
+<option value="FJD">FJD — Fijian Dollar</option>
+<option value="FKP">FKP — Falkland Islands Pound</option>
 <option value="GBP">GBP — British Pound</option>
+<option value="GEL">GEL — Georgian Lari</option>
+<option value="GHS">GHS — Ghanaian Cedi</option>
+<option value="GIP">GIP — Gibraltar Pound</option>
+<option value="GMD">GMD — Gambian Dalasi</option>
+<option value="GNF">GNF — Guinean Franc</option>
+<option value="GTQ">GTQ — Guatemalan Quetzal</option>
+<option value="GYD">GYD — Guyanaese Dollar</option>
 <option value="HKD">HKD — Hong Kong Dollar</option>
+<option value="HNL">HNL — Honduran Lempira</option>
+<option value="HTG">HTG — Haitian Gourde</option>
 <option value="HUF">HUF — Hungarian Forint</option>
 <option value="IDR">IDR — Indonesian Rupiah</option>
 <option value="ILS">ILS — Israeli Shekel</option>
 <option value="INR">INR — Indian Rupee</option>
+<option value="IQD">IQD — Iraqi Dinar</option>
+<option value="IRR">IRR — Iranian Rial</option>
 <option value="ISK">ISK — Icelandic Krona</option>
+<option value="JMD">JMD — Jamaican Dollar</option>
+<option value="JOD">JOD — Jordanian Dinar</option>
 <option value="JPY">JPY — Japanese Yen</option>
+<option value="KES">KES — Kenyan Shilling</option>
+<option value="KGS">KGS — Kyrgystani Som</option>
+<option value="KHR">KHR — Cambodian Riel</option>
+<option value="KMF">KMF — Comorian Franc</option>
+<option value="KPW">KPW — North Korean Won</option>
 <option value="KRW">KRW — South Korean Won</option>
+<option value="KWD">KWD — Kuwaiti Dinar</option>
+<option value="KYD">KYD — Cayman Islands Dollar</option>
+<option value="KZT">KZT — Kazakhstani Tenge</option>
+<option value="LAK">LAK — Laotian Kip</option>
+<option value="LBP">LBP — Lebanese Pound</option>
+<option value="LKR">LKR — Sri Lankan Rupee</option>
+<option value="LRD">LRD — Liberian Dollar</option>
+<option value="LSL">LSL — Lesotho Loti</option>
+<option value="LYD">LYD — Libyan Dinar</option>
+<option value="MAD">MAD — Moroccan Dirham</option>
+<option value="MDL">MDL — Moldovan Leu</option>
+<option value="MGA">MGA — Malagasy Ariary</option>
+<option value="MKD">MKD — Macedonian Denar</option>
+<option value="MMK">MMK — Myanma Kyat</option>
+<option value="MNT">MNT — Mongolian Tugrik</option>
+<option value="MOP">MOP — Macanese Pataca</option>
+<option value="MRU">MRU — Mauritanian Ouguiya</option>
+<option value="MUR">MUR — Mauritian Rupee</option>
+<option value="MVR">MVR — Maldivian Rufiyaa</option>
+<option value="MWK">MWK — Malawian Kwacha</option>
 <option value="MXN">MXN — Mexican Peso</option>
 <option value="MYR">MYR — Malaysian Ringgit</option>
+<option value="MZN">MZN — Mozambican Metical</option>
+<option value="NAD">NAD — Namibian Dollar</option>
+<option value="NGN">NGN — Nigerian Naira</option>
+<option value="NIO">NIO — Nicaraguan Cordoba</option>
 <option value="NOK">NOK — Norwegian Krone</option>
+<option value="NPR">NPR — Nepalese Rupee</option>
 <option value="NZD">NZD — New Zealand Dollar</option>
+<option value="OMR">OMR — Omani Rial</option>
+<option value="PAB">PAB — Panamanian Balboa</option>
+<option value="PEN">PEN — Peruvian Sol</option>
+<option value="PGK">PGK — Papua New Guinean Kina</option>
 <option value="PHP">PHP — Philippine Peso</option>
+<option value="PKR">PKR — Pakistani Rupee</option>
 <option value="PLN">PLN — Polish Zloty</option>
+<option value="PYG">PYG — Paraguayan Guarani</option>
+<option value="QAR">QAR — Qatari Rial</option>
 <option value="RON">RON — Romanian Leu</option>
+<option value="RSD">RSD — Serbian Dinar</option>
+<option value="RUB">RUB — Russian Ruble</option>
+<option value="RWF">RWF — Rwandan Franc</option>
+<option value="SAR">SAR — Saudi Riyal</option>
+<option value="SBD">SBD — Solomon Islands Dollar</option>
+<option value="SCR">SCR — Seychellois Rupee</option>
+<option value="SDG">SDG — Sudanese Pound</option>
 <option value="SEK">SEK — Swedish Krone</option>
 <option value="SGD">SGD — Singapore Dollar</option>
+<option value="SHP">SHP — Saint Helena Pound</option>
+<option value="SLL">SLL — Sierra Leonean Leone</option>
+<option value="SOS">SOS — Somali Shilling</option>
+<option value="SRD">SRD — Surinamese Dollar</option>
+<option value="STN">STN — Sao Tome Dobra</option>
+<option value="SVC">SVC — Salvadoran Colon</option>
+<option value="SYP">SYP — Syrian Pound</option>
+<option value="SZL">SZL — Swazi Lilangeni</option>
 <option value="THB">THB — Thai Baht</option>
+<option value="TJS">TJS — Tajikistani Somoni</option>
+<option value="TMT">TMT — Turkmenistani Manat</option>
+<option value="TND">TND — Tunisian Dinar</option>
+<option value="TOP">TOP — Tongan Paanga</option>
 <option value="TRY">TRY — Turkish Lira</option>
-<option value="ZAR">ZAR — South African Rand</option></optgroup><optgroup label="More currencies (loading…)" id="fx_eur_usd_t2grp_to"></optgroup></select>
+<option value="TTD">TTD — Trinidad Dollar</option>
+<option value="TWD">TWD — New Taiwan Dollar</option>
+<option value="TZS">TZS — Tanzanian Shilling</option>
+<option value="UAH">UAH — Ukrainian Hryvnia</option>
+<option value="UGX">UGX — Ugandan Shilling</option>
+<option value="UYU">UYU — Uruguayan Peso</option>
+<option value="UZS">UZS — Uzbekistan Som</option>
+<option value="VES">VES — Venezuelan Bolivar</option>
+<option value="VND">VND — Vietnamese Dong</option>
+<option value="VUV">VUV — Vanuatu Vatu</option>
+<option value="WST">WST — Samoan Tala</option>
+<option value="XAF">XAF — CFA Franc BEAC</option>
+<option value="XCD">XCD — East Caribbean Dollar</option>
+<option value="XOF">XOF — CFA Franc BCEAO</option>
+<option value="XPF">XPF — CFP Franc</option>
+<option value="YER">YER — Yemeni Rial</option>
+<option value="ZAR">ZAR — South African Rand</option>
+<option value="ZMW">ZMW — Zambian Kwacha</option>
+<option value="ZWL">ZWL — Zimbabwean Dollar</option></select>
       <input class="fxamt" type="number" id="fx_eur_usd_tov" value="" min="0" step="any" placeholder="0" oninput="fx_eur_usd_rev()"/>
     </div>
     <div class="rcell">
@@ -172,7 +419,8 @@
         <button class="fx-pbtn"    onclick="fx_eur_usd_per(90,this)">90D</button>
         <button class="fx-pbtn"    onclick="fx_eur_usd_per(180,this)">180D</button>
         <button class="fx-pbtn"    onclick="fx_eur_usd_per(365,this)">1Y</button>
-        <button class="fx-pbtn on" onclick="fx_eur_usd_per(9999,this)">5Y</button>
+        <button class="fx-pbtn on" onclick="fx_eur_usd_per(1825,this)">5Y</button>
+        <button class="fx-pbtn"    onclick="fx_eur_usd_per(7300,this)" id="fx_eur_usd_btn20y">20Y</button>
       </div>
     </div>
     <div id="fx_eur_usd_chartArea">
@@ -190,186 +438,172 @@
 (function() {
 var DEFAULT_FROM = "EUR";
 var DEFAULT_TO   = "USD";
-var TIER1        = {"AUD": "Australian Dollar", "BGN": "Bulgarian Lev", "BRL": "Brazilian Real", "CAD": "Canadian Dollar", "CHF": "Swiss Franc", "CNY": "Chinese Yuan", "CZK": "Czech Koruna", "DKK": "Danish Krone", "EUR": "Euro", "GBP": "British Pound", "HKD": "Hong Kong Dollar", "HUF": "Hungarian Forint", "IDR": "Indonesian Rupiah", "ILS": "Israeli Shekel", "INR": "Indian Rupee", "ISK": "Icelandic Krona", "JPY": "Japanese Yen", "KRW": "South Korean Won", "MXN": "Mexican Peso", "MYR": "Malaysian Ringgit", "NOK": "Norwegian Krone", "NZD": "New Zealand Dollar", "PHP": "Philippine Peso", "PLN": "Polish Zloty", "RON": "Romanian Leu", "SEK": "Swedish Krone", "SGD": "Singapore Dollar", "THB": "Thai Baht", "TRY": "Turkish Lira", "USD": "US Dollar", "ZAR": "South African Rand"};
-var TIER2        = {"AED": "UAE Dirham", "AFN": "Afghan Afghani", "ALL": "Albanian Lek", "AMD": "Armenian Dram", "ANG": "Netherlands Antillean Guilder", "AOA": "Angolan Kwanza", "ARS": "Argentine Peso", "AWG": "Aruban Florin", "AZN": "Azerbaijani Manat", "BAM": "Bosnia-Herzegovina Mark", "BBD": "Barbadian Dollar", "BDT": "Bangladeshi Taka", "BHD": "Bahraini Dinar", "BIF": "Burundian Franc", "BMD": "Bermudian Dollar", "BND": "Brunei Dollar", "BOB": "Bolivian Boliviano", "BSD": "Bahamian Dollar", "BTN": "Bhutanese Ngultrum", "BWP": "Botswanan Pula", "BYN": "Belarusian Ruble", "BZD": "Belize Dollar", "CDF": "Congolese Franc", "CLP": "Chilean Peso", "COP": "Colombian Peso", "CRC": "Costa Rican Colon", "CUP": "Cuban Peso", "CVE": "Cape Verdean Escudo", "DJF": "Djiboutian Franc", "DOP": "Dominican Peso", "DZD": "Algerian Dinar", "EGP": "Egyptian Pound", "ERN": "Eritrean Nakfa", "ETB": "Ethiopian Birr", "FJD": "Fijian Dollar", "FKP": "Falkland Islands Pound", "GEL": "Georgian Lari", "GHS": "Ghanaian Cedi", "GIP": "Gibraltar Pound", "GMD": "Gambian Dalasi", "GNF": "Guinean Franc", "GTQ": "Guatemalan Quetzal", "GYD": "Guyanaese Dollar", "HNL": "Honduran Lempira", "HTG": "Haitian Gourde", "IQD": "Iraqi Dinar", "IRR": "Iranian Rial", "JMD": "Jamaican Dollar", "JOD": "Jordanian Dinar", "KES": "Kenyan Shilling", "KGS": "Kyrgystani Som", "KHR": "Cambodian Riel", "KMF": "Comorian Franc", "KPW": "North Korean Won", "KWD": "Kuwaiti Dinar", "KYD": "Cayman Islands Dollar", "KZT": "Kazakhstani Tenge", "LAK": "Laotian Kip", "LBP": "Lebanese Pound", "LKR": "Sri Lankan Rupee", "LRD": "Liberian Dollar", "LSL": "Lesotho Loti", "LYD": "Libyan Dinar", "MAD": "Moroccan Dirham", "MDL": "Moldovan Leu", "MGA": "Malagasy Ariary", "MKD": "Macedonian Denar", "MMK": "Myanma Kyat", "MNT": "Mongolian Tugrik", "MOP": "Macanese Pataca", "MRU": "Mauritanian Ouguiya", "MUR": "Mauritian Rupee", "MVR": "Maldivian Rufiyaa", "MWK": "Malawian Kwacha", "MZN": "Mozambican Metical", "NAD": "Namibian Dollar", "NGN": "Nigerian Naira", "NIO": "Nicaraguan Cordoba", "NPR": "Nepalese Rupee", "OMR": "Omani Rial", "PAB": "Panamanian Balboa", "PEN": "Peruvian Sol", "PGK": "Papua New Guinean Kina", "PKR": "Pakistani Rupee", "PYG": "Paraguayan Guarani", "QAR": "Qatari Rial", "RSD": "Serbian Dinar", "RUB": "Russian Ruble", "RWF": "Rwandan Franc", "SAR": "Saudi Riyal", "SBD": "Solomon Islands Dollar", "SCR": "Seychellois Rupee", "SDG": "Sudanese Pound", "SHP": "Saint Helena Pound", "SLL": "Sierra Leonean Leone", "SOS": "Somali Shilling", "SRD": "Surinamese Dollar", "STN": "Sao Tome Dobra", "SVC": "Salvadoran Colon", "SYP": "Syrian Pound", "SZL": "Swazi Lilangeni", "TJS": "Tajikistani Somoni", "TMT": "Turkmenistani Manat", "TND": "Tunisian Dinar", "TOP": "Tongan Paanga", "TTD": "Trinidad Dollar", "TWD": "New Taiwan Dollar", "TZS": "Tanzanian Shilling", "UAH": "Ukrainian Hryvnia", "UGX": "Ugandan Shilling", "UYU": "Uruguayan Peso", "UZS": "Uzbekistan Som", "VES": "Venezuelan Bolivar", "VND": "Vietnamese Dong", "VUV": "Vanuatu Vatu", "WST": "Samoan Tala", "XAF": "CFA Franc BEAC", "XCD": "East Caribbean Dollar", "XOF": "CFA Franc BCEAO", "XPF": "CFP Franc", "YER": "Yemeni Rial", "ZMW": "Zambian Kwacha", "ZWL": "Zimbabwean Dollar"};
+var CURRENCIES   = {"AED": "UAE Dirham", "AFN": "Afghan Afghani", "ALL": "Albanian Lek", "AMD": "Armenian Dram", "ANG": "Netherlands Antillean Guilder", "AOA": "Angolan Kwanza", "ARS": "Argentine Peso", "AUD": "Australian Dollar", "AWG": "Aruban Florin", "AZN": "Azerbaijani Manat", "BAM": "Bosnia-Herzegovina Mark", "BBD": "Barbadian Dollar", "BDT": "Bangladeshi Taka", "BGN": "Bulgarian Lev", "BHD": "Bahraini Dinar", "BIF": "Burundian Franc", "BMD": "Bermudian Dollar", "BND": "Brunei Dollar", "BOB": "Bolivian Boliviano", "BRL": "Brazilian Real", "BSD": "Bahamian Dollar", "BTN": "Bhutanese Ngultrum", "BWP": "Botswanan Pula", "BYN": "Belarusian Ruble", "BZD": "Belize Dollar", "CAD": "Canadian Dollar", "CDF": "Congolese Franc", "CHF": "Swiss Franc", "CLP": "Chilean Peso", "CNY": "Chinese Yuan", "COP": "Colombian Peso", "CRC": "Costa Rican Colon", "CUP": "Cuban Peso", "CVE": "Cape Verdean Escudo", "CZK": "Czech Koruna", "DJF": "Djiboutian Franc", "DKK": "Danish Krone", "DOP": "Dominican Peso", "DZD": "Algerian Dinar", "EGP": "Egyptian Pound", "ERN": "Eritrean Nakfa", "ETB": "Ethiopian Birr", "EUR": "Euro", "FJD": "Fijian Dollar", "FKP": "Falkland Islands Pound", "GBP": "British Pound", "GEL": "Georgian Lari", "GHS": "Ghanaian Cedi", "GIP": "Gibraltar Pound", "GMD": "Gambian Dalasi", "GNF": "Guinean Franc", "GTQ": "Guatemalan Quetzal", "GYD": "Guyanaese Dollar", "HKD": "Hong Kong Dollar", "HNL": "Honduran Lempira", "HTG": "Haitian Gourde", "HUF": "Hungarian Forint", "IDR": "Indonesian Rupiah", "ILS": "Israeli Shekel", "INR": "Indian Rupee", "IQD": "Iraqi Dinar", "IRR": "Iranian Rial", "ISK": "Icelandic Krona", "JMD": "Jamaican Dollar", "JOD": "Jordanian Dinar", "JPY": "Japanese Yen", "KES": "Kenyan Shilling", "KGS": "Kyrgystani Som", "KHR": "Cambodian Riel", "KMF": "Comorian Franc", "KPW": "North Korean Won", "KRW": "South Korean Won", "KWD": "Kuwaiti Dinar", "KYD": "Cayman Islands Dollar", "KZT": "Kazakhstani Tenge", "LAK": "Laotian Kip", "LBP": "Lebanese Pound", "LKR": "Sri Lankan Rupee", "LRD": "Liberian Dollar", "LSL": "Lesotho Loti", "LYD": "Libyan Dinar", "MAD": "Moroccan Dirham", "MDL": "Moldovan Leu", "MGA": "Malagasy Ariary", "MKD": "Macedonian Denar", "MMK": "Myanma Kyat", "MNT": "Mongolian Tugrik", "MOP": "Macanese Pataca", "MRU": "Mauritanian Ouguiya", "MUR": "Mauritian Rupee", "MVR": "Maldivian Rufiyaa", "MWK": "Malawian Kwacha", "MXN": "Mexican Peso", "MYR": "Malaysian Ringgit", "MZN": "Mozambican Metical", "NAD": "Namibian Dollar", "NGN": "Nigerian Naira", "NIO": "Nicaraguan Cordoba", "NOK": "Norwegian Krone", "NPR": "Nepalese Rupee", "NZD": "New Zealand Dollar", "OMR": "Omani Rial", "PAB": "Panamanian Balboa", "PEN": "Peruvian Sol", "PGK": "Papua New Guinean Kina", "PHP": "Philippine Peso", "PKR": "Pakistani Rupee", "PLN": "Polish Zloty", "PYG": "Paraguayan Guarani", "QAR": "Qatari Rial", "RON": "Romanian Leu", "RSD": "Serbian Dinar", "RUB": "Russian Ruble", "RWF": "Rwandan Franc", "SAR": "Saudi Riyal", "SBD": "Solomon Islands Dollar", "SCR": "Seychellois Rupee", "SDG": "Sudanese Pound", "SEK": "Swedish Krone", "SGD": "Singapore Dollar", "SHP": "Saint Helena Pound", "SLL": "Sierra Leonean Leone", "SOS": "Somali Shilling", "SRD": "Surinamese Dollar", "STN": "Sao Tome Dobra", "SVC": "Salvadoran Colon", "SYP": "Syrian Pound", "SZL": "Swazi Lilangeni", "THB": "Thai Baht", "TJS": "Tajikistani Somoni", "TMT": "Turkmenistani Manat", "TND": "Tunisian Dinar", "TOP": "Tongan Paanga", "TRY": "Turkish Lira", "TTD": "Trinidad Dollar", "TWD": "New Taiwan Dollar", "TZS": "Tanzanian Shilling", "UAH": "Ukrainian Hryvnia", "UGX": "Ugandan Shilling", "USD": "US Dollar", "UYU": "Uruguayan Peso", "UZS": "Uzbekistan Som", "VES": "Venezuelan Bolivar", "VND": "Vietnamese Dong", "VUV": "Vanuatu Vatu", "WST": "Samoan Tala", "XAF": "CFA Franc BEAC", "XCD": "East Caribbean Dollar", "XOF": "CFA Franc BCEAO", "XPF": "CFP Franc", "YER": "Yemeni Rial", "ZAR": "South African Rand", "ZMW": "Zambian Kwacha", "ZWL": "Zimbabwean Dollar"};
 var W            = "fx_eur_usd";
 var API          = "https://api.frankfurter.dev/v2";
 
-var _5Y_FROM = (function() {
-  var d = new Date(); d.setFullYear(d.getFullYear() - 5);
-  return d.toISOString().slice(0, 10);
-})();
+// Start dates for each history window
+var DATE_5Y  = (function() { var d=new Date(); d.setFullYear(d.getFullYear()-5);  return d.toISOString().slice(0,10); })();
+var DATE_20Y = (function() { var d=new Date(); d.setFullYear(d.getFullYear()-20); return d.toISOString().slice(0,10); })();
 
 // ---- State ----
-var RATES      = {};
-var HIST_CACHE = { "EUR": null };  // null = synthetic 1.0 array, filled on demand
-var HIST_DATES = [];
-var histFetching = {};
+// RATES[code] = rate vs EUR (EUR=1.0). Cross-rate A->B = RATES[B]/RATES[A]
+var RATES = {};
+
+// History cache keyed by currency code.
+// Each entry: { dates: [...], values: [...] } — own date axis per currency
+// because different currencies may have different history start dates.
+// When building a chart series we intersect the two currencies' date axes.
+// "EUR" is synthetic: values are all 1.0.
+var HIST = {};   // HIST[code] = { from5y: bool, from20y: bool, dates: [], values: [] }
+
+// In-flight fetch promises, keyed by "CODE:window" e.g. "USD:5y" or "GBP:20y"
+var fetching = {};
+
 var chartBuilt = false;
 var fxChart    = null;
-var per        = 9999;
+var per        = 1825;   // current period in days (default 5Y)
 var _rawDates  = [];
 
 // ---- Helpers ----
-function $el(id) { return document.getElementById(W + "_" + id); }
-function isTier1(c) { return !!TIER1[c]; }
-function chartPanelOpen() { return $el("cbody").style.display === "block"; }
+function $el(id) { return document.getElementById(W+"_"+id); }
+function chartOpen() { return $el("cbody").style.display==="block"; }
 
 function fmt(n) {
-  if (n == null || isNaN(n)) return "—";
-  if (n >= 10000) return n.toLocaleString("en-US", {maximumFractionDigits:2});
-  if (n >= 100)   return n.toFixed(2);
-  if (n >= 1)     return n.toFixed(4);
+  if (n==null||isNaN(n)) return "—";
+  if (n>=10000) return n.toLocaleString("en-US",{maximumFractionDigits:2});
+  if (n>=100)   return n.toFixed(2);
+  if (n>=1)     return n.toFixed(4);
   return n.toFixed(6);
 }
 
-function show(id, on) { var el=$el(id); if(el) el.style.display=on?"block":"none"; }
+function show(id,on) { var e=$el(id); if(e) e.style.display=on?"block":"none"; }
 
-function xRate(a, b) {
-  if (RATES[a]==null || RATES[b]==null) return null;
-  return RATES[b] / RATES[a];
+function xRate(a,b) {
+  if (RATES[a]==null||RATES[b]==null) return null;
+  return RATES[b]/RATES[a];
+}
+
+// ---- EUR synthetic history ----
+function eurEntry(from20y) {
+  // Generate a synthetic date array of weekdays for the requested window.
+  // We don't know the real Frankfurter date axis for EUR yet (it's the base),
+  // so we generate it on demand from real data once any other currency is fetched.
+  // Simplest: return a sentinel and handle in getHistPair.
+  return { dates:[], values:[], from5y: !from20y, from20y: from20y, synthetic: true };
 }
 
 // ---- v2 parsers ----
-// v2 always returns: [ { date, base, quote, rate }, ... ]
-
+// v2 returns flat array: [{ date, base, quote, rate }, ...]
 function parseLatestInto(arr) {
   RATES["EUR"] = 1.0;
   for (var i=0; i<arr.length; i++) RATES[arr[i].quote] = arr[i].rate;
 }
 
-function parseHistoryInto(arr) {
-  if (!arr.length) return;
+function parseHistoryInto(code, arr, window20y) {
+  // Build sorted date+value arrays for this currency
+  var dateMap = {};
+  for (var i=0; i<arr.length; i++) dateMap[arr[i].date] = arr[i].rate;
+  var dates  = Object.keys(dateMap).sort();
+  var values = dates.map(function(d) { return dateMap[d]; });
 
-  // Collect unique dates from this response
-  var newDateSet = {};
-  for (var i=0; i<arr.length; i++) newDateSet[arr[i].date] = true;
+  var existing = HIST[code];
+  if (!existing) {
+    HIST[code] = { dates: dates, values: values, from5y: !window20y, from20y: window20y };
+  } else {
+    // Merge: prepend older dates if extending to 20Y
+    var mergedMap = {};
+    for (var j=0; j<existing.dates.length; j++) mergedMap[existing.dates[j]] = existing.values[j];
+    for (var k=0; k<dates.length; k++) mergedMap[dates[k]] = values[k];
+    var merged = Object.keys(mergedMap).sort();
+    HIST[code] = {
+      dates:  merged,
+      values: merged.map(function(d) { return mergedMap[d]; }),
+      from5y:  true,
+      from20y: window20y || existing.from20y
+    };
+  }
+}
 
-  // Merge with existing HIST_DATES
-  var mergedSet = {};
-  for (var j=0; j<HIST_DATES.length; j++) mergedSet[HIST_DATES[j]] = true;
-  for (var d in newDateSet) mergedSet[d] = true;
-  var mergedDates = Object.keys(mergedSet).sort();
-  var n = mergedDates.length;
+// ---- Get aligned series for a pair ----
+// Returns { dates, fromVals, toVals } with a shared date axis (intersection).
+function getHistPair(f, t) {
+  var fEntry = HIST[f], tEntry = HIST[t];
 
-  var dateIdx = {};
-  for (var m=0; m<n; m++) dateIdx[mergedDates[m]] = m;
+  // EUR is synthetic: values = 1.0 on whatever axis the other currency uses
+  if (f === "EUR" && tEntry) {
+    return { dates: tEntry.dates, fromVals: tEntry.dates.map(function(){return 1.0;}), toVals: tEntry.values };
+  }
+  if (t === "EUR" && fEntry) {
+    return { dates: fEntry.dates, fromVals: fEntry.values, toVals: fEntry.dates.map(function(){return 1.0;})};
+  }
+  if (!fEntry || !tEntry) return null;
 
-  // Re-align existing cache arrays to the new axis if dates were added
-  if (n !== HIST_DATES.length) {
-    for (var code in HIST_CACHE) {
-      if (HIST_CACHE[code] === null) continue;
-      var old = HIST_CACHE[code];
-      var realigned = new Array(n).fill(null);
-      for (var p=0; p<HIST_DATES.length; p++) {
-        var np = dateIdx[HIST_DATES[p]];
-        if (np !== undefined) realigned[np] = old[p];
-      }
-      HIST_CACHE[code] = realigned;
+  // Intersect date axes
+  var tSet = {};
+  for (var i=0; i<tEntry.dates.length; i++) tSet[tEntry.dates[i]] = tEntry.values[i];
+  var dates=[], fVals=[], tVals=[];
+  for (var j=0; j<fEntry.dates.length; j++) {
+    var d = fEntry.dates[j];
+    if (tSet[d] !== undefined) {
+      dates.push(d); fVals.push(fEntry.values[j]); tVals.push(tSet[d]);
     }
-    // Invalidate EUR sentinel so it gets rematerialised at correct length
-    if (HIST_CACHE["EUR"] !== null) HIST_CACHE["EUR"] = null;
   }
-
-  HIST_DATES = mergedDates;
-
-  // Initialise arrays for any new currencies seen in this response
-  for (var i=0; i<arr.length; i++) {
-    var q = arr[i].quote;
-    if (HIST_CACHE[q] === undefined) HIST_CACHE[q] = new Array(n).fill(null);
-  }
-
-  // Fill values
-  for (var r=0; r<arr.length; r++) {
-    var row = arr[r];
-    var idx = dateIdx[row.date];
-    if (idx !== undefined && HIST_CACHE[row.quote] !== undefined)
-      HIST_CACHE[row.quote][idx] = row.rate;
-  }
+  return { dates: dates, fromVals: fVals, toVals: tVals };
 }
 
-function getHist(code) {
-  if (code === "EUR") {
-    if (!HIST_DATES.length) return null;
-    if (HIST_CACHE["EUR"] === null)
-      HIST_CACHE["EUR"] = new Array(HIST_DATES.length).fill(1.0);
-    return HIST_CACHE["EUR"];
-  }
-  return HIST_CACHE[code] || null;
-}
+// ---- History fetching ----
+// window: "5y" or "20y"
+function fetchHist(code, window) {
+  if (code === "EUR") return Promise.resolve();  // synthetic, no fetch needed
+  var key = code + ":" + window;
+  if (fetching[key]) return fetching[key];
 
-// ---- History fetching — lazy, per-currency, deduplicated ----
+  var entry = HIST[code];
+  if (window === "5y"  && entry && entry.from5y)  return Promise.resolve();
+  if (window === "20y" && entry && entry.from20y) return Promise.resolve();
 
-function ensureHistory(codes) {
-  var needed = codes.filter(function(c) {
-    return c !== "EUR" && HIST_CACHE[c] === undefined && !histFetching[c];
-  });
+  var fromDate = window === "20y" ? DATE_20Y : DATE_5Y;
+  var url = API + "/rates?from=" + fromDate + "&base=EUR&quotes=" + code;
 
-  var inFlight = codes.filter(function(c) { return !!histFetching[c]; })
-                      .map(function(c) { return histFetching[c]; });
-
-  if (!needed.length) {
-    return inFlight.length ? Promise.all(inFlight) : Promise.resolve();
-  }
-
-  var p = fetch(API + "/rates?from=" + _5Y_FROM + "&base=EUR&quotes=" + needed.join(","))
+  var p = fetch(url)
     .then(function(r) { return r.json(); })
     .then(function(arr) {
-      parseHistoryInto(arr);
-      for (var i=0; i<needed.length; i++) delete histFetching[needed[i]];
+      parseHistoryInto(code, arr, window === "20y");
+      // Also update RATES if we don't have it yet
+      if (RATES[code] == null && arr.length) RATES[code] = arr[arr.length-1].rate;
+      delete fetching[key];
     })
     .catch(function(e) {
-      console.error("[FX] history fetch error:", e);
-      for (var i=0; i<needed.length; i++) {
-        if (HIST_CACHE[needed[i]] === undefined) HIST_CACHE[needed[i]] = [];
-        delete histFetching[needed[i]];
-      }
+      console.error("[FX] hist fetch error "+key+":", e);
+      // Ensure entry exists so we don't retry forever
+      if (!HIST[code]) HIST[code] = { dates:[], values:[], from5y:true, from20y:true };
+      delete fetching[key];
     });
 
-  for (var i=0; i<needed.length; i++) histFetching[needed[i]] = p;
-  return inFlight.length ? Promise.all([p].concat(inFlight)) : p;
+  fetching[key] = p;
+  return p;
 }
 
-// ---- Chart render helpers ----
-// Single entry point: call this whenever data may have changed or pair changed.
-// It decides whether to build, refresh, or do nothing based on state.
-function tryRenderChart() {
-  var f = $el("from").value, t = $el("to").value;
-
-  if (!isTier1(f) || !isTier1(t)) {
-    show("chartNoData", true); show("chartArea", false);
-    var missing = [f,t].filter(function(c){return !isTier1(c);}).join(", ");
-    $el("noDataMsg").textContent = "Historical data not available for " + missing + ".";
-    return;
-  }
-
-  var fH = getHist(f), tH = getHist(t);
-  if (!fH || !tH || !fH.length || !tH.length) {
-    // Data not ready yet — leave any existing loading message in place
-    return;
-  }
-
-  show("chartNoData", false); show("chartArea", true);
-  $el("ctitle").textContent = f + "/" + t;
-
-  if (!chartBuilt) {
-    buildChart(); chartBuilt = true;
-  } else {
-    refreshChart();
-  }
+function ensurePairHist(f, t, window) {
+  return Promise.all([fetchHist(f, window), fetchHist(t, window)]);
 }
 
 // ---- Stage 1: latest rate for default pair ----
 function fetchDefaultRates() {
-  var needed = [DEFAULT_FROM, DEFAULT_TO].filter(function(c){ return c!=="EUR"; });
+  var needed = [DEFAULT_FROM, DEFAULT_TO].filter(function(c){return c!=="EUR";});
   var qs = needed.length ? "?base=EUR&quotes="+needed.join(",") : "?base=EUR&quotes=USD";
   fetch(API+"/rates"+qs)
     .then(function(r){ return r.json(); })
     .then(function(arr) {
       parseLatestInto(arr);
       updateDisplay();
-      fetchPairHistory(DEFAULT_FROM, DEFAULT_TO);  // Stage 2
-      fetchAllRates();                              // Stage 3
+      // Stage 2: 5Y history for default pair
+      ensurePairHist(DEFAULT_FROM, DEFAULT_TO, "5y").then(function() {
+        if (chartOpen()) tryRenderChart();
+      });
+      // Stage 3: all current rates (for conversion when user picks any currency)
+      fetchAllRates();
     })
     .catch(function(e) {
       $el("rval").classList.remove("loading-pulse");
@@ -379,42 +613,15 @@ function fetchDefaultRates() {
     });
 }
 
-// ---- Stage 2: history for a specific pair ----
-function fetchPairHistory(f, t) {
-  var codes = [f,t].filter(function(c){ return c!=="EUR"; });
-  if (!codes.length) { onHistoryReady(f, t); return; }
-  ensureHistory(codes).then(function() { onHistoryReady(f, t); });
-}
-
-function onHistoryReady(f, t) {
-  // Guard: ignore if user has changed currency since this fetch was kicked off
-  if ($el("from").value !== f || $el("to").value !== t) return;
-  if (chartPanelOpen()) tryRenderChart();
-}
-
-// ---- Stage 3: all current rates (background) ----
+// Stage 3: all current rates so any currency pair can convert immediately
 function fetchAllRates() {
   fetch(API+"/rates?base=EUR")
     .then(function(r){ return r.json(); })
-    .then(function(arr) {
-      parseLatestInto(arr);
-      // Populate both Tier2 optgroups (From and To dropdowns)
-      ["t2grp","t2grp_to"].forEach(function(grpId) {
-        var grp = document.getElementById(W+"_"+grpId);
-        if (!grp) return;
-        grp.label = "Current rate only";
-        var html = "";
-        Object.keys(TIER2).sort().forEach(function(c) {
-          if (RATES[c] != null)
-            html += '<option value="'+c+'">'+c+' — '+TIER2[c]+'</option>';
-        });
-        grp.innerHTML = html;
-      });
-    })
-    .catch(function(e){ console.error("[FX] Stage 3 error:", e); });
+    .then(function(arr) { parseLatestInto(arr); })
+    .catch(function(e) { console.error("[FX] all-rates error:", e); });
 }
 
-// ---- Converter display ----
+// ---- Display ----
 function updateDisplay() {
   var f=$el("from").value, t=$el("to").value;
   var amt=parseFloat($el("fromv").value)||1;
@@ -430,153 +637,83 @@ function updateDisplay() {
   var lbl=fmt(amt)+" "+f+" =";
   if($el("rlbl"))     $el("rlbl").textContent=lbl;
   if($el("rlbl_mob")) $el("rlbl_mob").textContent=lbl;
-  rv.textContent=$el("rmeta").textContent="";
   rv.textContent=fmt(result);
   $el("rmeta").textContent=t+"  ·  1 "+f+" = "+fmt(rate)+" "+t;
   $el("tov").value=result.toFixed(6);
 }
 
-// ---- Interactions ----
-window[W+"_fwd"] = function() {
-  var amt=parseFloat($el("fromv").value), rate=xRate($el("from").value,$el("to").value);
-  if(!rate||isNaN(amt)) return;
-  $el("tov").value=(amt*rate).toFixed(6); updateDisplay();
-};
-
-window[W+"_rev"] = function() {
-  var amt=parseFloat($el("tov").value), rate=xRate($el("to").value,$el("from").value);
-  if(!rate||isNaN(amt)) return;
-  $el("fromv").value=(amt*rate).toFixed(6); updateDisplay();
-};
-
-window[W+"_go"] = function() {
+// ---- Chart rendering ----
+function tryRenderChart() {
   var f=$el("from").value, t=$el("to").value;
   $el("ctitle").textContent=f+"/"+t;
-  updateDisplay();
 
-  if (!isTier1(f) || !isTier1(t)) {
+  var need20y = (per >= 7300);
+  var pair = getHistPair(f, t);
+
+  if (!pair || !pair.dates.length) {
     show("chartNoData",true); show("chartArea",false);
-    var missing=[f,t].filter(function(c){return !isTier1(c);}).join(", ");
-    $el("noDataMsg").textContent="Historical data not available for "+missing+".";
+    $el("noDataMsg").textContent = "Loading history…";
     return;
   }
 
-  var fCached = (f==="EUR" || HIST_CACHE[f]!==undefined);
-  var tCached = (t==="EUR" || HIST_CACHE[t]!==undefined);
-
-  if (fCached && tCached) {
-    if (chartPanelOpen()) tryRenderChart();
-  } else {
-    if (chartPanelOpen()) {
-      show("chartNoData",true); show("chartArea",false);
-      $el("noDataMsg").textContent="Loading history…";
-    }
-    fetchPairHistory(f, t);
+  // Filter to requested period
+  var cutoff = need20y ? DATE_20Y : DATE_5Y;
+  var n = 0;
+  for (var k=pair.dates.length-1; k>=0; k--) {
+    if (pair.dates[k] >= cutoff) n++; else break;
   }
-};
+  if (n===0) n=pair.dates.length; // show what we have
 
-window[W+"_swap"] = function() {
-  var f=$el("from").value, t=$el("to").value;
-  // Swap selected index on both dropdowns
-  var fromSel=$el("from"), toSel=$el("to");
-  var fromVal=f, toVal=t;
-  for(var i=0;i<fromSel.options.length;i++) if(fromSel.options[i].value===toVal){fromSel.selectedIndex=i;break;}
-  for(var i=0;i<toSel.options.length;i++)   if(toSel.options[i].value===fromVal){toSel.selectedIndex=i;break;}
-  window[W+"_go"]();
-};
+  show("chartNoData",false); show("chartArea",true);
 
-window[W+"_toggleChart"] = function() {
-  var body=$el("cbody"), chev=$el("chev");
-  var isOpen=body.style.display==="block";
-  body.style.display  =isOpen?"none":"block";
-  chev.style.transform=isOpen?"":"rotate(180deg)";
-  if (!isOpen) {
-    var f=$el("from").value, t=$el("to").value;
-    if (!isTier1(f)||!isTier1(t)) {
-      show("chartNoData",true); show("chartArea",false);
-      var missing=[f,t].filter(function(c){return !isTier1(c);}).join(", ");
-      $el("noDataMsg").textContent="Historical data not available for "+missing+".";
-      return;
-    }
-    var fCached=(f==="EUR"||HIST_CACHE[f]!==undefined);
-    var tCached=(t==="EUR"||HIST_CACHE[t]!==undefined);
-    if (fCached && tCached) {
-      tryRenderChart();
-    } else {
-      show("chartNoData",true); show("chartArea",false);
-      $el("noDataMsg").textContent="Loading history…";
-      fetchPairHistory(f, t);
-    }
-  }
-};
-
-window[W+"_per"] = function(days, btn) {
-  per=days;
-  var btns=document.querySelectorAll("#fx_eur_usd .fx-pbtn");
-  for(var i=0;i<btns.length;i++) btns[i].classList.remove("on");
-  btn.classList.add("on");
-  if(chartBuilt) refreshChart();
-};
-
-// ---- Chart ----
-function series() {
-  var f=$el("from").value, t=$el("to").value;
-  var fH=getHist(f), tH=getHist(t);
-  if(!fH||!tH||!HIST_DATES.length) return {data:[],n:0};
-
-  var n;
-  if (per>=9999) {
-    n=HIST_DATES.length;
-  } else {
-    var last=new Date(HIST_DATES[HIST_DATES.length-1]);
-    var cutoff=last.getTime()-per*86400000;
-    n=0;
-    for(var k=HIST_DATES.length-1;k>=0;k--) {
-      if(new Date(HIST_DATES[k]).getTime()>=cutoff) n++; else break;
-    }
-    if(n===0) n=1;
-  }
-
-  var ds=HIST_DATES.slice(-n), fs=fH.slice(-n), ts=tH.slice(-n);
-  var data=fs.map(function(v,i){
-    return (v!=null&&ts[i]!=null)?+((ts[i]/v).toFixed(5)):null;
+  var ds    = pair.dates.slice(-n);
+  var fVals = pair.fromVals.slice(-n);
+  var tVals = pair.toVals.slice(-n);
+  var data  = fVals.map(function(v,i) {
+    return (v!=null&&tVals[i]!=null) ? +((tVals[i]/v).toFixed(5)) : null;
   });
 
-  var tMap={},lastYr=-1,lastWeek=-1,seenLabel={};
+  // Tick labels
+  var tMap={}, lastYr=-1, lastWeek=-1, seen={};
   var EPOCH=Date.UTC(1970,0,1);
-  for(var i=0;i<n;i++) {
+  for (var i=0; i<n; i++) {
     var dt=new Date(ds[i]);
-    var yr=dt.getUTCFullYear(),mo=dt.getUTCMonth(),dom=dt.getUTCDate(),day=dt.getUTCDay();
+    var yr=dt.getUTCFullYear(), mo=dt.getUTCMonth(), dom=dt.getUTCDate(), day=dt.getUTCDay();
     var ms=dt.toLocaleString("en-US",{month:"short",timeZone:"UTC"});
     var absW=Math.floor((dt.getTime()-EPOCH)/604800000);
-    if(per>=9999)      { if(yr!==lastYr)                      {tMap[i]=String(yr);lastYr=yr;} }
-    else if(per>=365)  { if(mo%2===0&&!seenLabel[ms])         {tMap[i]=ms;seenLabel[ms]=true;} }
-    else if(per>=90)   { if(!seenLabel[ms])                   {tMap[i]=ms;seenLabel[ms]=true;} }
-    else               { if(day===1&&absW!==lastWeek)          {tMap[i]=ms+" "+dom;lastWeek=absW;} }
+    if      (per>=7300) { if(yr!==lastYr)                     {tMap[i]=String(yr);lastYr=yr;} }
+    else if (per>=1825) { if(yr!==lastYr)                     {tMap[i]=String(yr);lastYr=yr;} }
+    else if (per>=365)  { if(mo%2===0&&!seen[ms])             {tMap[i]=ms;seen[ms]=true;} }
+    else if (per>=90)   { if(!seen[ms])                       {tMap[i]=ms;seen[ms]=true;} }
+    else                { if(day===1&&absW!==lastWeek)         {tMap[i]=ms+" "+dom;lastWeek=absW;} }
   }
   var labels=[];
-  for(var j=0;j<n;j++) labels.push(tMap[j]!==undefined?tMap[j]:"");
+  for (var j=0; j<n; j++) labels.push(tMap[j]!==undefined?tMap[j]:"");
   _rawDates=ds;
-  return {data:data,labels:labels,n:n};
+
+  if (!chartBuilt) {
+    buildChart(labels, data); chartBuilt=true;
+  } else {
+    fxChart.data.labels=labels;
+    fxChart.data.datasets[0].data=data;
+    fxChart.update();
+  }
 }
 
-function buildChart() {
+function buildChart(labels, data) {
   var ctx=document.getElementById(W+"_c").getContext("2d");
-  var s=series(); if(!s.n) return;
   fxChart=new Chart(ctx,{
     type:"line",
     data:{
-      labels:s.labels,
+      labels:labels,
       datasets:[{
-        data:s.data, borderColor:"#52B788", borderWidth:1.5, fill:true,
+        data:data, borderColor:"#52B788", borderWidth:1.5, fill:true,
         backgroundColor:function(c){
           var g=c.chart.ctx.createLinearGradient(0,0,0,150);
           g.addColorStop(0,"rgba(82,183,136,0.15)");
-          g.addColorStop(1,"rgba(82,183,136,0)");
-          return g;
+          g.addColorStop(1,"rgba(82,183,136,0)"); return g;
         },
-        pointRadius:0, pointHoverRadius:3,
-        pointHoverBackgroundColor:"#52B788",
+        pointRadius:0, pointHoverRadius:3, pointHoverBackgroundColor:"#52B788",
         tension:0.3, spanGaps:true
       }]
     },
@@ -586,9 +723,9 @@ function buildChart() {
       plugins:{
         legend:{display:false},
         tooltip:{
-          backgroundColor:"#1E4034",titleColor:"rgba(201,212,197,0.9)",
-          bodyColor:"#fff",titleFont:{size:10},bodyFont:{size:12,weight:"500"},
-          padding:9,displayColors:false,
+          backgroundColor:"#1E4034", titleColor:"rgba(201,212,197,0.9)",
+          bodyColor:"#fff", titleFont:{size:10}, bodyFont:{size:12,weight:"500"},
+          padding:9, displayColors:false,
           callbacks:{
             title:function(items){return _rawDates[items[0].dataIndex]||"";},
             label:function(item){
@@ -608,13 +745,81 @@ function buildChart() {
   });
 }
 
-function refreshChart() {
-  if(!fxChart) return;
-  var s=series(); if(!s.n) return;
-  fxChart.data.labels=s.labels;
-  fxChart.data.datasets[0].data=s.data;
-  fxChart.update();
-}
+// ---- Interactions ----
+window[W+"_fwd"] = function() {
+  var amt=parseFloat($el("fromv").value), rate=xRate($el("from").value,$el("to").value);
+  if(!rate||isNaN(amt)) return;
+  $el("tov").value=(amt*rate).toFixed(6); updateDisplay();
+};
+window[W+"_rev"] = function() {
+  var amt=parseFloat($el("tov").value), rate=xRate($el("to").value,$el("from").value);
+  if(!rate||isNaN(amt)) return;
+  $el("fromv").value=(amt*rate).toFixed(6); updateDisplay();
+};
+
+window[W+"_go"] = function() {
+  var f=$el("from").value, t=$el("to").value;
+  updateDisplay();
+  if (!chartOpen()) return;
+  var window = (per>=7300) ? "20y" : "5y";
+  var pair = getHistPair(f, t);
+  var ready = pair && pair.dates.length > 0;
+  // Check we have the right window loaded
+  if (per>=7300) {
+    var fOk = f==="EUR" || (HIST[f] && HIST[f].from20y);
+    var tOk = t==="EUR" || (HIST[t] && HIST[t].from20y);
+    ready = ready && fOk && tOk;
+  }
+  if (ready) {
+    tryRenderChart();
+  } else {
+    show("chartNoData",true); show("chartArea",false);
+    $el("noDataMsg").textContent="Loading history…";
+    ensurePairHist(f, t, window).then(function() {
+      if ($el("from").value===f && $el("to").value===t) tryRenderChart();
+    });
+  }
+};
+
+window[W+"_swap"] = function() {
+  var f=$el("from").value, t=$el("to").value;
+  var fs=$el("from"), ts=$el("to");
+  for(var i=0;i<fs.options.length;i++) if(fs.options[i].value===t){fs.selectedIndex=i;break;}
+  for(var i=0;i<ts.options.length;i++) if(ts.options[i].value===f){ts.selectedIndex=i;break;}
+  window[W+"_go"]();
+};
+
+window[W+"_toggleChart"] = function() {
+  var body=$el("cbody"), chev=$el("chev");
+  var isOpen=body.style.display==="block";
+  body.style.display=isOpen?"none":"block";
+  chev.style.transform=isOpen?"":"rotate(180deg)";
+  if (!isOpen) window[W+"_go"]();
+};
+
+window[W+"_per"] = function(days, btn) {
+  per=days;
+  var btns=document.querySelectorAll("#fx_eur_usd .fx-pbtn");
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove("on");
+  btn.classList.add("on");
+
+  var f=$el("from").value, t=$el("to").value;
+  var window = (per>=7300) ? "20y" : "5y";
+  var fOk = f==="EUR" || (HIST[f] && (per<7300 ? HIST[f].from5y : HIST[f].from20y));
+  var tOk = t==="EUR" || (HIST[t] && (per<7300 ? HIST[t].from5y : HIST[t].from20y));
+
+  if (fOk && tOk) {
+    tryRenderChart();
+  } else {
+    show("chartNoData",true); show("chartArea",false);
+    $el("noDataMsg").textContent="Loading history…";
+    btn.disabled=true;
+    ensurePairHist(f, t, window).then(function() {
+      btn.disabled=false;
+      if ($el("from").value===f && $el("to").value===t) tryRenderChart();
+    });
+  }
+};
 
 // ---- Boot ----
 fetchDefaultRates();
