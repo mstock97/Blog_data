@@ -648,94 +648,133 @@ function tryRenderChart() {
   $el("ctitle").textContent=f+"/"+t;
 
   var pair = getHistPair(f, t);
-
   if (!pair || !pair.dates.length) {
     show("chartNoData",true); show("chartArea",false);
     $el("noDataMsg").textContent = "Loading history…";
     return;
   }
 
-  // Use all data in cache for the current window — _per() already gated on readiness
   show("chartNoData",false); show("chartArea",true);
 
-  var n     = pair.dates.length;
+  // ds = full "YYYY-MM-DD" strings — passed as labels so autoSkip can space them
   var ds    = pair.dates;
   var fVals = pair.fromVals;
   var tVals = pair.toVals;
   var data  = fVals.map(function(v,i) {
-    return (v!=null&&tVals[i]!=null) ? +((tVals[i]/v).toFixed(5)) : null;
+    return (v!=null && tVals[i]!=null) ? +((tVals[i]/v).toFixed(5)) : null;
   });
-
-  // Tick labels — null means no tick drawn (Chart.js skips nulls on category axis)
-  // 20Y/5Y : one label per calendar year
-  // 1Y     : one label per month (all 12)
-  // 180D   : one label per month
-  // 90D    : one label per month
-  // 30D    : one label per Monday
-  var labels=[], lastYr=-1, lastWeek=-1, seen={};
-  var EPOCH=Date.UTC(1970,0,1);
-  for (var i=0; i<n; i++) {
-    var dt=new Date(ds[i]);
-    var yr=dt.getUTCFullYear(), mo=dt.getUTCMonth(), dom=dt.getUTCDate(), day=dt.getUTCDay();
-    var ms=dt.toLocaleString("en-US",{month:"short",timeZone:"UTC"});
-    var absW=Math.floor((dt.getTime()-EPOCH)/604800000);
-    var lbl=null;
-    if      (per>=1825) { if(yr!==lastYr)            {lbl=String(yr);lastYr=yr;} }
-    else if (per>=90)   { if(!seen[ms])              {lbl=ms;seen[ms]=true;} }
-    else                { if(day===1&&absW!==lastWeek){lbl=ms+" "+dom;lastWeek=absW;} }
-    labels.push(lbl);
-  }
-  _rawDates=ds;
+  _rawDates = ds;
 
   if (!chartBuilt) {
-    buildChart(labels, data); chartBuilt=true;
+    buildChart(ds.slice(), data);
+    chartBuilt = true;
   } else {
-    fxChart.data.labels=labels;
-    fxChart.data.datasets[0].data=data;
+    fxChart.data.labels = ds.slice();
+    fxChart.data.datasets[0].data = data;
+    // Update tick limit and formatter for the new period, then redraw
+    fxChart.options.scales.x.ticks.maxTicksLimit = tickLimit();
     fxChart.update();
   }
 }
 
+// How many x-axis ticks to show for each period
+function tickLimit() {
+  if (per >= 7300) return 8;   // 20Y  → ~one per 2-3 years
+  if (per >= 1825) return 6;   // 5Y   → one per year
+  if (per >= 365)  return 7;   // 1Y   → ~every 7 weeks
+  if (per >= 180)  return 6;   // 180D → ~monthly
+  if (per >= 90)   return 4;   // 90D  → ~monthly
+  return 5;                    // 30D  → ~weekly
+}
+
+// Format a "YYYY-MM-DD" string for the x-axis based on current period
+function fmtTick(dateStr) {
+  var p = dateStr.split("-");
+  var yr = p[0], mo = parseInt(p[1],10)-1, dom = parseInt(p[2],10);
+  var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  if (per >= 1825) return yr;             // 5Y / 20Y  → "2022"
+  if (per >= 90)   return M[mo]+" "+yr;  // 90D – 1Y  → "Jan 2024"
+  return M[mo]+" "+dom;                  // 30D        → "Mar 14"
+}
+
 function buildChart(labels, data) {
-  var ctx=document.getElementById(W+"_c").getContext("2d");
-  fxChart=new Chart(ctx,{
-    type:"line",
-    data:{
-      labels:labels,
-      datasets:[{
-        data:data, borderColor:"#52B788", borderWidth:1.5, fill:true,
-        backgroundColor:function(c){
-          var g=c.chart.ctx.createLinearGradient(0,0,0,150);
-          g.addColorStop(0,"rgba(82,183,136,0.15)");
-          g.addColorStop(1,"rgba(82,183,136,0)"); return g;
+  var ctx = document.getElementById(W+"_c").getContext("2d");
+  fxChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        borderColor: "#52B788",
+        borderWidth: 1.5,
+        fill: true,
+        backgroundColor: function(c) {
+          var g = c.chart.ctx.createLinearGradient(0, 0, 0, 150);
+          g.addColorStop(0, "rgba(82,183,136,0.15)");
+          g.addColorStop(1, "rgba(82,183,136,0)");
+          return g;
         },
-        pointRadius:0, pointHoverRadius:3, pointHoverBackgroundColor:"#52B788",
-        tension:0.3, spanGaps:true
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: "#52B788",
+        tension: 0.3,
+        spanGaps: true
       }]
     },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      interaction:{mode:"index",intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:"#1E4034", titleColor:"rgba(201,212,197,0.9)",
-          bodyColor:"#fff", titleFont:{size:10}, bodyFont:{size:12,weight:"500"},
-          padding:9, displayColors:false,
-          callbacks:{
-            title:function(items){return _rawDates[items[0].dataIndex]||"";},
-            label:function(item){
-              var f=$el("from").value,t=$el("to").value;
-              return item.raw==null?"—":" 1 "+f+" = "+item.raw+" "+t;
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1E4034",
+          titleColor: "rgba(201,212,197,0.9)",
+          bodyColor: "#fff",
+          titleFont: { size: 10 },
+          bodyFont: { size: 12, weight: "500" },
+          padding: 9,
+          displayColors: false,
+          callbacks: {
+            title: function(items) {
+              return _rawDates[items[0].dataIndex] || "";
+            },
+            label: function(item) {
+              var f = $el("from").value, t = $el("to").value;
+              return item.raw == null ? "—" : " 1 "+f+" = "+item.raw+" "+t;
             }
           }
         }
       },
-      scales:{
-        x:{type:"category",grid:{display:false},border:{display:false},
-            ticks:{color:"#8C8C8C",font:{size:9},maxRotation:0,autoSkip:false}},
-        y:{position:"right",grid:{color:"#F2F2F2"},border:{display:false},
-            ticks:{color:"#8C8C8C",font:{size:9},maxTicksLimit:4}}
+      scales: {
+        x: {
+          type: "category",
+          grid: { display: false },
+          border: { display: false },
+          ticks: {
+            color: "#8C8C8C",
+            font: { size: 9 },
+            maxRotation: 0,
+            autoSkip: true,
+            autoSkipPadding: 12,
+            maxTicksLimit: tickLimit(),
+            callback: function(val) {
+              // In Chart.js 4.x category scale, val is the index — get label via getLabelForValue
+              var dateStr = this.getLabelForValue(val);
+              return dateStr ? fmtTick(dateStr) : "";
+            }
+          }
+        },
+        y: {
+          position: "right",
+          grid: { color: "#F2F2F2" },
+          border: { display: false },
+          ticks: {
+            color: "#8C8C8C",
+            font: { size: 9 },
+            maxTicksLimit: 5
+          }
+        }
       }
     }
   });
