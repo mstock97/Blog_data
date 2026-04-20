@@ -647,7 +647,6 @@ function tryRenderChart() {
   var f=$el("from").value, t=$el("to").value;
   $el("ctitle").textContent=f+"/"+t;
 
-  var need20y = (per >= 7300);
   var pair = getHistPair(f, t);
 
   if (!pair || !pair.dates.length) {
@@ -656,39 +655,36 @@ function tryRenderChart() {
     return;
   }
 
-  // Filter to requested period
-  var cutoff = need20y ? DATE_20Y : DATE_5Y;
-  var n = 0;
-  for (var k=pair.dates.length-1; k>=0; k--) {
-    if (pair.dates[k] >= cutoff) n++; else break;
-  }
-  if (n===0) n=pair.dates.length; // show what we have
-
+  // Use all data in cache for the current window — _per() already gated on readiness
   show("chartNoData",false); show("chartArea",true);
 
-  var ds    = pair.dates.slice(-n);
-  var fVals = pair.fromVals.slice(-n);
-  var tVals = pair.toVals.slice(-n);
+  var n     = pair.dates.length;
+  var ds    = pair.dates;
+  var fVals = pair.fromVals;
+  var tVals = pair.toVals;
   var data  = fVals.map(function(v,i) {
     return (v!=null&&tVals[i]!=null) ? +((tVals[i]/v).toFixed(5)) : null;
   });
 
-  // Tick labels
-  var tMap={}, lastYr=-1, lastWeek=-1, seen={};
+  // Tick labels — null means no tick drawn (Chart.js skips nulls on category axis)
+  // 20Y/5Y : one label per calendar year
+  // 1Y     : one label per month (all 12)
+  // 180D   : one label per month
+  // 90D    : one label per month
+  // 30D    : one label per Monday
+  var labels=[], lastYr=-1, lastWeek=-1, seen={};
   var EPOCH=Date.UTC(1970,0,1);
   for (var i=0; i<n; i++) {
     var dt=new Date(ds[i]);
     var yr=dt.getUTCFullYear(), mo=dt.getUTCMonth(), dom=dt.getUTCDate(), day=dt.getUTCDay();
     var ms=dt.toLocaleString("en-US",{month:"short",timeZone:"UTC"});
     var absW=Math.floor((dt.getTime()-EPOCH)/604800000);
-    if      (per>=7300) { if(yr!==lastYr)                     {tMap[i]=String(yr);lastYr=yr;} }
-    else if (per>=1825) { if(yr!==lastYr)                     {tMap[i]=String(yr);lastYr=yr;} }
-    else if (per>=365)  { if(mo%2===0&&!seen[ms])             {tMap[i]=ms;seen[ms]=true;} }
-    else if (per>=90)   { if(!seen[ms])                       {tMap[i]=ms;seen[ms]=true;} }
-    else                { if(day===1&&absW!==lastWeek)         {tMap[i]=ms+" "+dom;lastWeek=absW;} }
+    var lbl=null;
+    if      (per>=1825) { if(yr!==lastYr)            {lbl=String(yr);lastYr=yr;} }
+    else if (per>=90)   { if(!seen[ms])              {lbl=ms;seen[ms]=true;} }
+    else                { if(day===1&&absW!==lastWeek){lbl=ms+" "+dom;lastWeek=absW;} }
+    labels.push(lbl);
   }
-  var labels=[];
-  for (var j=0; j<n; j++) labels.push(tMap[j]!==undefined?tMap[j]:"");
   _rawDates=ds;
 
   if (!chartBuilt) {
