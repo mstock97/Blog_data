@@ -18,8 +18,7 @@
 @media(max-width:540px){
   #fx_eur_usd .inputs{grid-template-columns:1fr 36px 1fr;grid-template-rows:auto auto;gap:8px;}
   #fx_eur_usd .rcell{grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;padding:10px 12px;margin:0 -12px -12px;background:#1E4034;border-radius:0 0 4px 4px;gap:2px;}
-  #fx_eur_usd .rcell-left{display:none}
-  #fx_eur_usd .rcell-right{width:100%}
+  #fx_eur_usd .rcell-left{display:none} #fx_eur_usd .rcell-right{width:100%}
   #fx_eur_usd .rval{color:#fff!important;font-size:2rem;font-family:'Bebas Neue',Georgia,serif;letter-spacing:.04em;line-height:1}
   #fx_eur_usd .rmeta{color:#C9D4C5!important;font-size:11px;white-space:normal;line-height:1.4;margin-top:2px}
   #fx_eur_usd .fxlbl-result{display:block!important;color:rgba(201,212,197,0.7);font-size:9px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2px}
@@ -65,7 +64,8 @@
   <div class="inputs">
     <div class="fxg">
       <div class="fxlbl">From</div>
-      <select class="fxsel" id="fx_eur_usd_from" onchange="fx_eur_usd_go()"><optgroup label="Full history available"><option value="AUD">AUD — Australian Dollar</option>
+      <select class="fxsel" id="fx_eur_usd_from" onchange="fx_eur_usd_go()"><optgroup label="Full history available"><option value="EUR">EUR — Euro</option>
+<option value="AUD">AUD — Australian Dollar</option>
 <option value="BGN">BGN — Bulgarian Lev</option>
 <option value="BRL">BRL — Brazilian Real</option>
 <option value="CAD">CAD — Canadian Dollar</option>
@@ -73,7 +73,6 @@
 <option value="CNY">CNY — Chinese Yuan</option>
 <option value="CZK">CZK — Czech Koruna</option>
 <option value="DKK">DKK — Danish Krone</option>
-<option value="EUR">EUR — Euro</option>
 <option value="GBP">GBP — British Pound</option>
 <option value="HKD">HKD — Hong Kong Dollar</option>
 <option value="HUF">HUF — Hungarian Forint</option>
@@ -107,7 +106,8 @@
     </div>
     <div class="fxg">
       <div class="fxlbl">To</div>
-      <select class="fxsel" id="fx_eur_usd_to" onchange="fx_eur_usd_go()"><optgroup label="Full history available"><option value="AUD">AUD — Australian Dollar</option>
+      <select class="fxsel" id="fx_eur_usd_to" onchange="fx_eur_usd_go()"><optgroup label="Full history available"><option value="USD">USD — US Dollar</option>
+<option value="AUD">AUD — Australian Dollar</option>
 <option value="BGN">BGN — Bulgarian Lev</option>
 <option value="BRL">BRL — Brazilian Real</option>
 <option value="CAD">CAD — Canadian Dollar</option>
@@ -136,8 +136,7 @@
 <option value="SGD">SGD — Singapore Dollar</option>
 <option value="THB">THB — Thai Baht</option>
 <option value="TRY">TRY — Turkish Lira</option>
-<option value="USD">USD — US Dollar</option>
-<option value="ZAR">ZAR — South African Rand</option></optgroup><optgroup label="More currencies (loading…)" id="fx_eur_usd_t2grp"></optgroup></select>
+<option value="ZAR">ZAR — South African Rand</option></optgroup><optgroup label="More currencies (loading…)" id="fx_eur_usd_t2grp_to"></optgroup></select>
       <input class="fxamt" type="number" id="fx_eur_usd_tov" value="" min="0" step="any" placeholder="0" oninput="fx_eur_usd_rev()"/>
     </div>
     <div class="rcell">
@@ -185,8 +184,8 @@
   </div>
   <div class="gen-date">Rates updated live &middot; April 20, 2026</div>
 </div>
-
 </div>
+
 <script>
 (function() {
 var DEFAULT_FROM = "EUR";
@@ -196,40 +195,25 @@ var TIER2        = {"AED": "UAE Dirham", "AFN": "Afghan Afghani", "ALL": "Albani
 var W            = "fx_eur_usd";
 var API          = "https://api.frankfurter.dev/v2";
 
-// Five-year start date, computed once
 var _5Y_FROM = (function() {
-  var d = new Date();
-  d.setFullYear(d.getFullYear() - 5);
+  var d = new Date(); d.setFullYear(d.getFullYear() - 5);
   return d.toISOString().slice(0, 10);
 })();
 
-// ---------------------------------------------------------------------------
-//  State
-// ---------------------------------------------------------------------------
-// RATES[code] = rate vs EUR (EUR = 1.0 always)
-// Cross-rate A->B = RATES[B] / RATES[A]
-var RATES = {};
-
-// HIST_CACHE[code] = array of daily rates vs EUR, aligned to HIST_DATES
-// EUR is pre-populated as a special case (all 1.0s, same length as HIST_DATES)
-// HIST_DATES = sorted "YYYY-MM-DD" strings; all cached arrays share this index
-var HIST_CACHE = { "EUR": null };  // null sentinel = "always 1.0, fill on demand"
+// ---- State ----
+var RATES      = {};
+var HIST_CACHE = { "EUR": null };  // null = synthetic 1.0 array, filled on demand
 var HIST_DATES = [];
-
-// In-flight history fetches: histFetching[code] = Promise
-// Prevents duplicate requests when the same currency is requested twice
 var histFetching = {};
-
 var chartBuilt = false;
 var fxChart    = null;
 var per        = 9999;
 var _rawDates  = [];
 
-// ---------------------------------------------------------------------------
-//  Helpers
-// ---------------------------------------------------------------------------
+// ---- Helpers ----
 function $el(id) { return document.getElementById(W + "_" + id); }
 function isTier1(c) { return !!TIER1[c]; }
+function chartPanelOpen() { return $el("cbody").style.display === "block"; }
 
 function fmt(n) {
   if (n == null || isNaN(n)) return "—";
@@ -239,167 +223,153 @@ function fmt(n) {
   return n.toFixed(6);
 }
 
-function setOpt(s, v) {
-  var el = $el(s);
-  for (var i = 0; i < el.options.length; i++)
-    if (el.options[i].value === v) { el.selectedIndex = i; return; }
-}
-
-function show(id, on) {
-  var el = $el(id); if (el) el.style.display = on ? "block" : "none";
-}
+function show(id, on) { var el=$el(id); if(el) el.style.display=on?"block":"none"; }
 
 function xRate(a, b) {
-  if (RATES[a] == null || RATES[b] == null) return null;
+  if (RATES[a]==null || RATES[b]==null) return null;
   return RATES[b] / RATES[a];
 }
 
-// ---------------------------------------------------------------------------
-//  v2 response parsers
-//  Both endpoints return the same flat array format:
-//  [ { date, base, quote, rate }, ... ]
-// ---------------------------------------------------------------------------
+// ---- v2 parsers ----
+// v2 always returns: [ { date, base, quote, rate }, ... ]
 
 function parseLatestInto(arr) {
-  // Merge latest rates into RATES. EUR base -> RATES[quote] = rate.
   RATES["EUR"] = 1.0;
-  for (var i = 0; i < arr.length; i++) RATES[arr[i].quote] = arr[i].rate;
+  for (var i=0; i<arr.length; i++) RATES[arr[i].quote] = arr[i].rate;
 }
 
-// Merge a time-series array into HIST_CACHE.
-// Aligns new data to HIST_DATES, extending it if necessary.
-// Only stores currencies present in the array.
 function parseHistoryInto(arr) {
   if (!arr.length) return;
 
-  // Collect all dates in this response
+  // Collect unique dates from this response
   var newDateSet = {};
-  for (var i = 0; i < arr.length; i++) newDateSet[arr[i].date] = true;
-  var newDates = Object.keys(newDateSet).sort();
+  for (var i=0; i<arr.length; i++) newDateSet[arr[i].date] = true;
 
-  // Merge with existing HIST_DATES to get the full unified date axis
+  // Merge with existing HIST_DATES
   var mergedSet = {};
-  for (var j = 0; j < HIST_DATES.length; j++) mergedSet[HIST_DATES[j]] = true;
-  for (var k = 0; k < newDates.length; k++) mergedSet[newDates[k]] = true;
+  for (var j=0; j<HIST_DATES.length; j++) mergedSet[HIST_DATES[j]] = true;
+  for (var d in newDateSet) mergedSet[d] = true;
   var mergedDates = Object.keys(mergedSet).sort();
   var n = mergedDates.length;
 
-  // Build an index map for the new date axis
   var dateIdx = {};
-  for (var m = 0; m < n; m++) dateIdx[mergedDates[m]] = m;
+  for (var m=0; m<n; m++) dateIdx[mergedDates[m]] = m;
 
-  // Re-align all existing cached arrays to the new (potentially longer) axis
-  if (mergedDates.length !== HIST_DATES.length) {
-    var oldIdx = {};
-    for (var o = 0; o < HIST_DATES.length; o++) oldIdx[HIST_DATES[o]] = o;
+  // Re-align existing cache arrays to the new axis if dates were added
+  if (n !== HIST_DATES.length) {
     for (var code in HIST_CACHE) {
-      if (HIST_CACHE[code] === null) continue;  // EUR sentinel
+      if (HIST_CACHE[code] === null) continue;
       var old = HIST_CACHE[code];
       var realigned = new Array(n).fill(null);
-      for (var p = 0; p < HIST_DATES.length; p++) {
-        var newPos = dateIdx[HIST_DATES[p]];
-        if (newPos !== undefined) realigned[newPos] = old[p];
+      for (var p=0; p<HIST_DATES.length; p++) {
+        var np = dateIdx[HIST_DATES[p]];
+        if (np !== undefined) realigned[np] = old[p];
       }
       HIST_CACHE[code] = realigned;
     }
+    // Invalidate EUR sentinel so it gets rematerialised at correct length
+    if (HIST_CACHE["EUR"] !== null) HIST_CACHE["EUR"] = null;
   }
 
   HIST_DATES = mergedDates;
 
-  // Collect which codes appear in this response
-  var codeSeen = {};
-  for (var q = 0; q < arr.length; q++) codeSeen[arr[q].quote] = true;
-
-  // Initialise cache arrays for any newly seen codes
-  for (var code2 in codeSeen) {
-    if (HIST_CACHE[code2] === undefined) HIST_CACHE[code2] = new Array(n).fill(null);
+  // Initialise arrays for any new currencies seen in this response
+  for (var i=0; i<arr.length; i++) {
+    var q = arr[i].quote;
+    if (HIST_CACHE[q] === undefined) HIST_CACHE[q] = new Array(n).fill(null);
   }
 
   // Fill values
-  for (var r = 0; r < arr.length; r++) {
+  for (var r=0; r<arr.length; r++) {
     var row = arr[r];
     var idx = dateIdx[row.date];
-    if (idx !== undefined && HIST_CACHE[row.quote] !== undefined) {
+    if (idx !== undefined && HIST_CACHE[row.quote] !== undefined)
       HIST_CACHE[row.quote][idx] = row.rate;
-    }
   }
 }
 
-// Return the cached history array for a currency (EUR returns synthetic 1.0 array)
 function getHist(code) {
   if (code === "EUR") {
     if (!HIST_DATES.length) return null;
-    // Materialise EUR on demand
-    if (HIST_CACHE["EUR"] === null) {
+    if (HIST_CACHE["EUR"] === null)
       HIST_CACHE["EUR"] = new Array(HIST_DATES.length).fill(1.0);
-    }
     return HIST_CACHE["EUR"];
   }
   return HIST_CACHE[code] || null;
 }
 
-// ---------------------------------------------------------------------------
-//  History fetching — lazy, per-currency, deduplicated
-// ---------------------------------------------------------------------------
+// ---- History fetching — lazy, per-currency, deduplicated ----
 
-// Returns a Promise that resolves when history for `codes` is in HIST_CACHE.
-// Skips codes already cached or in-flight. EUR is always considered cached.
 function ensureHistory(codes) {
   var needed = codes.filter(function(c) {
     return c !== "EUR" && HIST_CACHE[c] === undefined && !histFetching[c];
   });
 
+  var inFlight = codes.filter(function(c) { return !!histFetching[c]; })
+                      .map(function(c) { return histFetching[c]; });
+
   if (!needed.length) {
-    // Check if any are still in-flight — return combined promise
-    var inFlight = codes.filter(function(c) { return histFetching[c]; })
-                        .map(function(c) { return histFetching[c]; });
     return inFlight.length ? Promise.all(inFlight) : Promise.resolve();
   }
 
-  var quotesParam = needed.join(",");
-  var url = API + "/rates?from=" + _5Y_FROM + "&base=EUR&quotes=" + quotesParam;
-
-  var p = fetch(url)
+  var p = fetch(API + "/rates?from=" + _5Y_FROM + "&base=EUR&quotes=" + needed.join(","))
     .then(function(r) { return r.json(); })
     .then(function(arr) {
       parseHistoryInto(arr);
-      // Clear in-flight markers
-      for (var i = 0; i < needed.length; i++) delete histFetching[needed[i]];
+      for (var i=0; i<needed.length; i++) delete histFetching[needed[i]];
     })
     .catch(function(e) {
-      console.error("[FX] History fetch error for " + needed.join(",") + ":", e);
-      // Mark as failed so we don't retry forever — store empty array as sentinel
-      for (var i = 0; i < needed.length; i++) {
+      console.error("[FX] history fetch error:", e);
+      for (var i=0; i<needed.length; i++) {
         if (HIST_CACHE[needed[i]] === undefined) HIST_CACHE[needed[i]] = [];
         delete histFetching[needed[i]];
       }
     });
 
-  // Register the same promise for all currencies in this batch
-  for (var i = 0; i < needed.length; i++) histFetching[needed[i]] = p;
-
-  // Also wait on any already-in-flight fetches for the other requested codes
-  var others = codes.filter(function(c) { return histFetching[c] && needed.indexOf(c) === -1; })
-                    .map(function(c) { return histFetching[c]; });
-  return others.length ? Promise.all([p].concat(others)) : p;
+  for (var i=0; i<needed.length; i++) histFetching[needed[i]] = p;
+  return inFlight.length ? Promise.all([p].concat(inFlight)) : p;
 }
 
-// ---------------------------------------------------------------------------
-//  STAGE 1 — latest rate for default pair only (fast)
-// ---------------------------------------------------------------------------
-function fetchDefaultRates() {
-  var needed = [DEFAULT_FROM, DEFAULT_TO].filter(function(c) { return c !== "EUR"; });
-  var qs = needed.length ? "?base=EUR&quotes=" + needed.join(",") : "?base=EUR&quotes=USD";
+// ---- Chart render helpers ----
+// Single entry point: call this whenever data may have changed or pair changed.
+// It decides whether to build, refresh, or do nothing based on state.
+function tryRenderChart() {
+  var f = $el("from").value, t = $el("to").value;
 
-  fetch(API + "/rates" + qs)
-    .then(function(r) { return r.json(); })
+  if (!isTier1(f) || !isTier1(t)) {
+    show("chartNoData", true); show("chartArea", false);
+    var missing = [f,t].filter(function(c){return !isTier1(c);}).join(", ");
+    $el("noDataMsg").textContent = "Historical data not available for " + missing + ".";
+    return;
+  }
+
+  var fH = getHist(f), tH = getHist(t);
+  if (!fH || !tH || !fH.length || !tH.length) {
+    // Data not ready yet — leave any existing loading message in place
+    return;
+  }
+
+  show("chartNoData", false); show("chartArea", true);
+  $el("ctitle").textContent = f + "/" + t;
+
+  if (!chartBuilt) {
+    buildChart(); chartBuilt = true;
+  } else {
+    refreshChart();
+  }
+}
+
+// ---- Stage 1: latest rate for default pair ----
+function fetchDefaultRates() {
+  var needed = [DEFAULT_FROM, DEFAULT_TO].filter(function(c){ return c!=="EUR"; });
+  var qs = needed.length ? "?base=EUR&quotes="+needed.join(",") : "?base=EUR&quotes=USD";
+  fetch(API+"/rates"+qs)
+    .then(function(r){ return r.json(); })
     .then(function(arr) {
       parseLatestInto(arr);
       updateDisplay();
-      // Stage 2 — history for default pair only
-      fetchPairHistory(DEFAULT_FROM, DEFAULT_TO);
-      // Stage 3 — all latest rates for full dropdowns
-      fetchAllRates();
+      fetchPairHistory(DEFAULT_FROM, DEFAULT_TO);  // Stage 2
+      fetchAllRates();                              // Stage 3
     })
     .catch(function(e) {
       $el("rval").classList.remove("loading-pulse");
@@ -409,298 +379,245 @@ function fetchDefaultRates() {
     });
 }
 
-// ---------------------------------------------------------------------------
-//  STAGE 2 — history for a specific pair (called for default pair on load,
-//            then ad-hoc whenever the user changes a currency)
-// ---------------------------------------------------------------------------
+// ---- Stage 2: history for a specific pair ----
 function fetchPairHistory(f, t) {
-  var codes = [f, t].filter(function(c) { return c !== "EUR"; });
-  if (!codes.length) {
-    // Both are EUR — nothing to fetch, history trivially available
-    onHistoryReady(f, t);
-    return;
-  }
-
+  var codes = [f,t].filter(function(c){ return c!=="EUR"; });
+  if (!codes.length) { onHistoryReady(f, t); return; }
   ensureHistory(codes).then(function() { onHistoryReady(f, t); });
 }
 
-// Called once history for the current pair is confirmed ready
 function onHistoryReady(f, t) {
-  // Only act if the current selection still matches what was requested
+  // Guard: ignore if user has changed currency since this fetch was kicked off
   if ($el("from").value !== f || $el("to").value !== t) return;
-  updateChartSection();
-  if (chartBuilt) refreshChart();
+  if (chartPanelOpen()) tryRenderChart();
 }
 
-// ---------------------------------------------------------------------------
-//  STAGE 3 — all latest rates (background, for full dropdown population)
-// ---------------------------------------------------------------------------
+// ---- Stage 3: all current rates (background) ----
 function fetchAllRates() {
-  fetch(API + "/rates?base=EUR")
-    .then(function(r) { return r.json(); })
+  fetch(API+"/rates?base=EUR")
+    .then(function(r){ return r.json(); })
     .then(function(arr) {
       parseLatestInto(arr);
-
-      var t2grp = document.getElementById(W + "_t2grp");
-      if (t2grp) {
-        t2grp.label = "Current rate only";
+      // Populate both Tier2 optgroups (From and To dropdowns)
+      ["t2grp","t2grp_to"].forEach(function(grpId) {
+        var grp = document.getElementById(W+"_"+grpId);
+        if (!grp) return;
+        grp.label = "Current rate only";
         var html = "";
-        var t2keys = Object.keys(TIER2).sort();
-        for (var i = 0; i < t2keys.length; i++) {
-          var c = t2keys[i];
-          if (RATES[c] != null) html += '<option value="' + c + '">' + c + ' — ' + TIER2[c] + '</option>';
-        }
-        t2grp.innerHTML = html;
-      }
+        Object.keys(TIER2).sort().forEach(function(c) {
+          if (RATES[c] != null)
+            html += '<option value="'+c+'">'+c+' — '+TIER2[c]+'</option>';
+        });
+        grp.innerHTML = html;
+      });
     })
-    .catch(function(e) { console.error("[FX] Stage 3 error:", e); });
+    .catch(function(e){ console.error("[FX] Stage 3 error:", e); });
 }
 
-// ---------------------------------------------------------------------------
-//  Display
-// ---------------------------------------------------------------------------
+// ---- Converter display ----
 function updateDisplay() {
-  var f    = $el("from").value;
-  var t    = $el("to").value;
-  var amt  = parseFloat($el("fromv").value) || 1;
-  var rate = xRate(f, t);
-  var rv   = $el("rval");
-
-  if (rate == null) {
-    rv.textContent = "—";
-    $el("rmeta").textContent = RATES[f] == null || RATES[t] == null ? "Loading…" : "Rate unavailable";
+  var f=$el("from").value, t=$el("to").value;
+  var amt=parseFloat($el("fromv").value)||1;
+  var rate=xRate(f,t);
+  var rv=$el("rval");
+  if (rate==null) {
+    rv.textContent="—";
+    $el("rmeta").textContent=(RATES[f]==null||RATES[t]==null)?"Loading…":"Rate unavailable";
     return;
   }
   rv.classList.remove("loading-pulse");
-  var result = amt * rate;
-  var lbl = fmt(amt) + " " + f + " =";
-  if ($el("rlbl"))     $el("rlbl").textContent     = lbl;
-  if ($el("rlbl_mob")) $el("rlbl_mob").textContent = lbl;
-  rv.textContent           = fmt(result);
-  $el("rmeta").textContent = t + "  ·  1 " + f + " = " + fmt(rate) + " " + t;
-  $el("tov").value         = result.toFixed(6);
+  var result=amt*rate;
+  var lbl=fmt(amt)+" "+f+" =";
+  if($el("rlbl"))     $el("rlbl").textContent=lbl;
+  if($el("rlbl_mob")) $el("rlbl_mob").textContent=lbl;
+  rv.textContent=$el("rmeta").textContent="";
+  rv.textContent=fmt(result);
+  $el("rmeta").textContent=t+"  ·  1 "+f+" = "+fmt(rate)+" "+t;
+  $el("tov").value=result.toFixed(6);
 }
 
-// ---------------------------------------------------------------------------
-//  Converter interactions
-// ---------------------------------------------------------------------------
-window[W + "_fwd"] = function() {
-  var amt = parseFloat($el("fromv").value);
-  var rate = xRate($el("from").value, $el("to").value);
-  if (!rate || isNaN(amt)) return;
-  $el("tov").value = (amt * rate).toFixed(6);
-  updateDisplay();
+// ---- Interactions ----
+window[W+"_fwd"] = function() {
+  var amt=parseFloat($el("fromv").value), rate=xRate($el("from").value,$el("to").value);
+  if(!rate||isNaN(amt)) return;
+  $el("tov").value=(amt*rate).toFixed(6); updateDisplay();
 };
 
-window[W + "_rev"] = function() {
-  var amt = parseFloat($el("tov").value);
-  var rate = xRate($el("to").value, $el("from").value);
-  if (!rate || isNaN(amt)) return;
-  $el("fromv").value = (amt * rate).toFixed(6);
-  updateDisplay();
+window[W+"_rev"] = function() {
+  var amt=parseFloat($el("tov").value), rate=xRate($el("to").value,$el("from").value);
+  if(!rate||isNaN(amt)) return;
+  $el("fromv").value=(amt*rate).toFixed(6); updateDisplay();
 };
 
-window[W + "_go"] = function() {
-  var f = $el("from").value, t = $el("to").value;
+window[W+"_go"] = function() {
+  var f=$el("from").value, t=$el("to").value;
+  $el("ctitle").textContent=f+"/"+t;
   updateDisplay();
-  $el("ctitle").textContent = f + "/" + t;
 
   if (!isTier1(f) || !isTier1(t)) {
-    // Tier2 currency selected — no history available
-    show("chartNoData", true); show("chartArea", false);
-    var missing = [f,t].filter(function(c){return !isTier1(c);}).join(", ");
-    $el("noDataMsg").textContent = "Historical data not available for " + missing + ".";
+    show("chartNoData",true); show("chartArea",false);
+    var missing=[f,t].filter(function(c){return !isTier1(c);}).join(", ");
+    $el("noDataMsg").textContent="Historical data not available for "+missing+".";
     return;
   }
 
-  var fReady = f === "EUR" || HIST_CACHE[f] !== undefined;
-  var tReady = t === "EUR" || HIST_CACHE[t] !== undefined;
+  var fCached = (f==="EUR" || HIST_CACHE[f]!==undefined);
+  var tCached = (t==="EUR" || HIST_CACHE[t]!==undefined);
 
-  if (fReady && tReady) {
-    // Both already cached — update chart immediately
-    updateChartSection();
-    if (chartBuilt) refreshChart();
+  if (fCached && tCached) {
+    if (chartPanelOpen()) tryRenderChart();
   } else {
-    // Need to fetch — show loading state in chart area
-    show("chartNoData", true); show("chartArea", false);
-    $el("noDataMsg").textContent = "Loading history…";
+    if (chartPanelOpen()) {
+      show("chartNoData",true); show("chartArea",false);
+      $el("noDataMsg").textContent="Loading history…";
+    }
     fetchPairHistory(f, t);
   }
 };
 
-window[W + "_swap"] = function() {
-  var f = $el("from").value, t = $el("to").value;
-  setOpt("from", t); setOpt("to", f);
-  window[W + "_go"]();
+window[W+"_swap"] = function() {
+  var f=$el("from").value, t=$el("to").value;
+  // Swap selected index on both dropdowns
+  var fromSel=$el("from"), toSel=$el("to");
+  var fromVal=f, toVal=t;
+  for(var i=0;i<fromSel.options.length;i++) if(fromSel.options[i].value===toVal){fromSel.selectedIndex=i;break;}
+  for(var i=0;i<toSel.options.length;i++)   if(toSel.options[i].value===fromVal){toSel.selectedIndex=i;break;}
+  window[W+"_go"]();
 };
 
-// ---------------------------------------------------------------------------
-//  Chart
-// ---------------------------------------------------------------------------
-function updateChartSection() {
-  var f = $el("from").value, t = $el("to").value;
-  var fH = getHist(f), tH = getHist(t);
-
-  if (!isTier1(f) || !isTier1(t)) {
-    show("chartNoData", true); show("chartArea", false);
-    var missing = [f,t].filter(function(c){return !isTier1(c);}).join(", ");
-    $el("noDataMsg").textContent = "Historical data not available for " + missing + ".";
-    return;
+window[W+"_toggleChart"] = function() {
+  var body=$el("cbody"), chev=$el("chev");
+  var isOpen=body.style.display==="block";
+  body.style.display  =isOpen?"none":"block";
+  chev.style.transform=isOpen?"":"rotate(180deg)";
+  if (!isOpen) {
+    var f=$el("from").value, t=$el("to").value;
+    if (!isTier1(f)||!isTier1(t)) {
+      show("chartNoData",true); show("chartArea",false);
+      var missing=[f,t].filter(function(c){return !isTier1(c);}).join(", ");
+      $el("noDataMsg").textContent="Historical data not available for "+missing+".";
+      return;
+    }
+    var fCached=(f==="EUR"||HIST_CACHE[f]!==undefined);
+    var tCached=(t==="EUR"||HIST_CACHE[t]!==undefined);
+    if (fCached && tCached) {
+      tryRenderChart();
+    } else {
+      show("chartNoData",true); show("chartArea",false);
+      $el("noDataMsg").textContent="Loading history…";
+      fetchPairHistory(f, t);
+    }
   }
-  if (!fH || !tH || !fH.length || !tH.length) {
-    show("chartNoData", true); show("chartArea", false);
-    $el("noDataMsg").textContent = "History not available for this pair.";
-    return;
-  }
-  show("chartNoData", false); show("chartArea", true);
-  $el("ctitle").textContent = f + "/" + t;
-}
+};
 
+window[W+"_per"] = function(days, btn) {
+  per=days;
+  var btns=document.querySelectorAll("#fx_eur_usd .fx-pbtn");
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove("on");
+  btn.classList.add("on");
+  if(chartBuilt) refreshChart();
+};
+
+// ---- Chart ----
 function series() {
-  var f = $el("from").value, t = $el("to").value;
-  var fH = getHist(f), tH = getHist(t);
-  if (!fH || !tH || !HIST_DATES.length) return { data: [], n: 0 };
+  var f=$el("from").value, t=$el("to").value;
+  var fH=getHist(f), tH=getHist(t);
+  if(!fH||!tH||!HIST_DATES.length) return {data:[],n:0};
 
   var n;
-  if (per >= 9999) {
-    n = HIST_DATES.length;
+  if (per>=9999) {
+    n=HIST_DATES.length;
   } else {
-    var last    = new Date(HIST_DATES[HIST_DATES.length - 1]);
-    var cutoff  = last.getTime() - per * 86400000;
-    n = 0;
-    for (var k = HIST_DATES.length - 1; k >= 0; k--) {
-      if (new Date(HIST_DATES[k]).getTime() >= cutoff) n++;
-      else break;
+    var last=new Date(HIST_DATES[HIST_DATES.length-1]);
+    var cutoff=last.getTime()-per*86400000;
+    n=0;
+    for(var k=HIST_DATES.length-1;k>=0;k--) {
+      if(new Date(HIST_DATES[k]).getTime()>=cutoff) n++; else break;
     }
-    if (n === 0) n = 1;
+    if(n===0) n=1;
   }
 
-  var ds   = HIST_DATES.slice(-n);
-  var fs   = fH.slice(-n);
-  var ts   = tH.slice(-n);
-  var data = fs.map(function(v, i) {
-    return (v != null && ts[i] != null) ? +((ts[i] / v).toFixed(5)) : null;
+  var ds=HIST_DATES.slice(-n), fs=fH.slice(-n), ts=tH.slice(-n);
+  var data=fs.map(function(v,i){
+    return (v!=null&&ts[i]!=null)?+((ts[i]/v).toFixed(5)):null;
   });
 
-  var tMap = {}, lastYr = -1, lastWeek = -1, seenLabel = {};
-  var EPOCH = Date.UTC(1970, 0, 1);
-  for (var i = 0; i < n; i++) {
-    var dt   = new Date(ds[i]);
-    var yr   = dt.getUTCFullYear(), mo = dt.getUTCMonth();
-    var dom  = dt.getUTCDate(),    day = dt.getUTCDay();
-    var ms   = dt.toLocaleString("en-US", {month:"short", timeZone:"UTC"});
-    var absW = Math.floor((dt.getTime() - EPOCH) / 604800000);
-    if (per >= 9999) {
-      if (yr !== lastYr) { tMap[i] = String(yr); lastYr = yr; }
-    } else if (per >= 365) {
-      if (mo % 2 === 0 && !seenLabel[ms]) { tMap[i] = ms; seenLabel[ms] = true; }
-    } else if (per >= 90) {
-      if (!seenLabel[ms]) { tMap[i] = ms; seenLabel[ms] = true; }
-    } else {
-      if (day === 1 && absW !== lastWeek) { tMap[i] = ms + " " + dom; lastWeek = absW; }
-    }
+  var tMap={},lastYr=-1,lastWeek=-1,seenLabel={};
+  var EPOCH=Date.UTC(1970,0,1);
+  for(var i=0;i<n;i++) {
+    var dt=new Date(ds[i]);
+    var yr=dt.getUTCFullYear(),mo=dt.getUTCMonth(),dom=dt.getUTCDate(),day=dt.getUTCDay();
+    var ms=dt.toLocaleString("en-US",{month:"short",timeZone:"UTC"});
+    var absW=Math.floor((dt.getTime()-EPOCH)/604800000);
+    if(per>=9999)      { if(yr!==lastYr)                      {tMap[i]=String(yr);lastYr=yr;} }
+    else if(per>=365)  { if(mo%2===0&&!seenLabel[ms])         {tMap[i]=ms;seenLabel[ms]=true;} }
+    else if(per>=90)   { if(!seenLabel[ms])                   {tMap[i]=ms;seenLabel[ms]=true;} }
+    else               { if(day===1&&absW!==lastWeek)          {tMap[i]=ms+" "+dom;lastWeek=absW;} }
   }
-
-  var labels = [];
-  for (var j = 0; j < n; j++) labels.push(tMap[j] !== undefined ? tMap[j] : "");
-  _rawDates = ds;
-  return { data: data, labels: labels, n: n };
+  var labels=[];
+  for(var j=0;j<n;j++) labels.push(tMap[j]!==undefined?tMap[j]:"");
+  _rawDates=ds;
+  return {data:data,labels:labels,n:n};
 }
 
 function buildChart() {
-  var ctx = document.getElementById(W + "_c").getContext("2d");
-  var s = series(); if (!s.n) return;
-  fxChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: s.labels,
-      datasets: [{
-        data: s.data,
-        borderColor: "#52B788", borderWidth: 1.5, fill: true,
-        backgroundColor: function(c) {
-          var g = c.chart.ctx.createLinearGradient(0,0,0,150);
+  var ctx=document.getElementById(W+"_c").getContext("2d");
+  var s=series(); if(!s.n) return;
+  fxChart=new Chart(ctx,{
+    type:"line",
+    data:{
+      labels:s.labels,
+      datasets:[{
+        data:s.data, borderColor:"#52B788", borderWidth:1.5, fill:true,
+        backgroundColor:function(c){
+          var g=c.chart.ctx.createLinearGradient(0,0,0,150);
           g.addColorStop(0,"rgba(82,183,136,0.15)");
           g.addColorStop(1,"rgba(82,183,136,0)");
           return g;
         },
-        pointRadius: 0, pointHoverRadius: 3,
-        pointHoverBackgroundColor: "#52B788",
-        tension: 0.3, spanGaps: true
+        pointRadius:0, pointHoverRadius:3,
+        pointHoverBackgroundColor:"#52B788",
+        tension:0.3, spanGaps:true
       }]
     },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: "index", intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "#1E4034", titleColor: "rgba(201,212,197,0.9)",
-          bodyColor: "#fff", titleFont: {size:10}, bodyFont: {size:12, weight:"500"},
-          padding: 9, displayColors: false,
-          callbacks: {
-            title: function(items) { return _rawDates[items[0].dataIndex] || ""; },
-            label: function(item) {
-              var f = $el("from").value, t = $el("to").value;
-              return item.raw == null ? "—" : " 1 "+f+" = "+item.raw+" "+t;
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:"index",intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:"#1E4034",titleColor:"rgba(201,212,197,0.9)",
+          bodyColor:"#fff",titleFont:{size:10},bodyFont:{size:12,weight:"500"},
+          padding:9,displayColors:false,
+          callbacks:{
+            title:function(items){return _rawDates[items[0].dataIndex]||"";},
+            label:function(item){
+              var f=$el("from").value,t=$el("to").value;
+              return item.raw==null?"—":" 1 "+f+" = "+item.raw+" "+t;
             }
           }
         }
       },
-      scales: {
-        x: { type:"category", grid:{display:false}, border:{display:false},
-              ticks:{color:"#8C8C8C", font:{size:9}, maxRotation:0, autoSkip:false} },
-        y: { position:"right", grid:{color:"#F2F2F2"}, border:{display:false},
-              ticks:{color:"#8C8C8C", font:{size:9}, maxTicksLimit:4} }
+      scales:{
+        x:{type:"category",grid:{display:false},border:{display:false},
+            ticks:{color:"#8C8C8C",font:{size:9},maxRotation:0,autoSkip:false}},
+        y:{position:"right",grid:{color:"#F2F2F2"},border:{display:false},
+            ticks:{color:"#8C8C8C",font:{size:9},maxTicksLimit:4}}
       }
     }
   });
 }
 
 function refreshChart() {
-  if (!fxChart) return;
-  var s = series(); if (!s.n) return;
-  fxChart.data.labels = s.labels;
-  fxChart.data.datasets[0].data = s.data;
+  if(!fxChart) return;
+  var s=series(); if(!s.n) return;
+  fxChart.data.labels=s.labels;
+  fxChart.data.datasets[0].data=s.data;
   fxChart.update();
 }
 
-window[W + "_toggleChart"] = function() {
-  var body = $el("cbody"), chev = $el("chev");
-  var isOpen = body.style.display === "block";
-  body.style.display   = isOpen ? "none" : "block";
-  chev.style.transform = isOpen ? "" : "rotate(180deg)";
-  if (!isOpen) {
-    var f = $el("from").value, t = $el("to").value;
-    updateChartSection();
-    var fReady = f === "EUR" || HIST_CACHE[f] !== undefined;
-    var tReady = t === "EUR" || HIST_CACHE[t] !== undefined;
-    if (isTier1(f) && isTier1(t)) {
-      if (fReady && tReady) {
-        if (!chartBuilt) { buildChart(); chartBuilt = true; }
-        else refreshChart();
-      } else {
-        show("chartNoData", true); show("chartArea", false);
-        $el("noDataMsg").textContent = "Loading history…";
-        fetchPairHistory(f, t);
-      }
-    }
-  }
-};
-
-window[W + "_per"] = function(days, btn) {
-  per = days;
-  var btns = document.querySelectorAll("#fx_eur_usd .fx-pbtn");
-  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("on");
-  btn.classList.add("on");
-  if (chartBuilt) refreshChart();
-};
-
-// ---------------------------------------------------------------------------
-//  Boot
-// ---------------------------------------------------------------------------
-setOpt("from", DEFAULT_FROM);
-setOpt("to",   DEFAULT_TO);
-fetchDefaultRates();  // Stage 1 → triggers Stage 2 + 3 on success
+// ---- Boot ----
+fetchDefaultRates();
 
 })();
 </script>
