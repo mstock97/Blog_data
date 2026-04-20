@@ -824,21 +824,15 @@ window[W+"_go"] = function() {
   var f=$el("from").value, t=$el("to").value;
   updateDisplay();
   if (!chartOpen()) return;
-  var window = (per>=7300) ? "20y" : "5y";
-  var pair = getHistPair(f, t);
-  var ready = pair && pair.dates.length > 0;
-  // Check we have the right window loaded
-  if (per>=7300) {
-    var fOk = f==="EUR" || (HIST[f] && HIST[f].from20y);
-    var tOk = t==="EUR" || (HIST[t] && HIST[t].from20y);
-    ready = ready && fOk && tOk;
-  }
-  if (ready) {
+  // Check if 20Y data is ready (we always fetch 20Y upfront)
+  var fReady = f==="EUR" || (HIST[f] && HIST[f].from20y);
+  var tReady = t==="EUR" || (HIST[t] && HIST[t].from20y);
+  if (fReady && tReady) {
     tryRenderChart();
   } else {
     show("chartNoData",true); show("chartArea",false);
     $el("noDataMsg").textContent="Loading history…";
-    ensurePairHist(f, t, window).then(function() {
+    ensurePairHist(f, t, "20y").then(function() {
       if ($el("from").value===f && $el("to").value===t) tryRenderChart();
     });
   }
@@ -865,23 +859,8 @@ window[W+"_per"] = function(days, btn) {
   var btns=document.querySelectorAll("#fx_eur_usd .fx-pbtn");
   for(var i=0;i<btns.length;i++) btns[i].classList.remove("on");
   btn.classList.add("on");
-
-  var f=$el("from").value, t=$el("to").value;
-  var window = (per>=7300) ? "20y" : "5y";
-  var fOk = f==="EUR" || (HIST[f] && (per<7300 ? HIST[f].from5y : HIST[f].from20y));
-  var tOk = t==="EUR" || (HIST[t] && (per<7300 ? HIST[t].from5y : HIST[t].from20y));
-
-  if (fOk && tOk) {
-    tryRenderChart();
-  } else {
-    show("chartNoData",true); show("chartArea",false);
-    $el("noDataMsg").textContent="Loading history…";
-    btn.disabled=true;
-    ensurePairHist(f, t, window).then(function() {
-      btn.disabled=false;
-      if ($el("from").value===f && $el("to").value===t) tryRenderChart();
-    });
-  }
+  // 20Y always loaded upfront — all buttons render instantly
+  tryRenderChart();
 };
 
 // ---- Boot ----
