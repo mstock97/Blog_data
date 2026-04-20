@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EUR/USD FX Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body style="margin:0;padding:16px;background:#F7F5F0">
+<div id="fx_eur_usd" style="font-family:'DM Sans',sans-serif;font-size:13px;color:#3D3D3D;line-height:1.4;max-width:900px">
+<style>
+#fx_eur_usd *{box-sizing:border-box;margin:0;padding:0}
+#fx_eur_usd .card{
+  background:#fff;border:1px solid #EFEFEF;
+  border-radius:4px 4px 0 0;border-bottom:none;padding:12px;
+}
+#fx_eur_usd .inputs{
+  display:grid;grid-template-columns:1fr 36px 1fr 1fr;
+  gap:8px;align-items:end;
+}
+@media(max-width:540px){
+  #fx_eur_usd .inputs{grid-template-columns:1fr 36px 1fr;grid-template-rows:auto auto;gap:8px;}
+  #fx_eur_usd .rcell{
+    grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;
+    padding:10px 12px;margin:0 -12px -12px;
+    background:#1E4034;border-radius:0 0 4px 4px;gap:2px;
+  }
+  #fx_eur_usd .rcell-left{display:none}
+  #fx_eur_usd .rcell-right{width:100%}
+  #fx_eur_usd .rval{color:#fff!important;font-size:2rem;font-family:'Bebas Neue',Georgia,serif;letter-spacing:.04em;line-height:1}
+  #fx_eur_usd .rmeta{color:#C9D4C5!important;font-size:11px;white-space:normal;line-height:1.4;margin-top:2px}
+  #fx_eur_usd .fxlbl-result{display:block!important;color:rgba(201,212,197,0.7);font-size:9px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2px}
+}
+#fx_eur_usd .fxg{display:flex;flex-direction:column;gap:4px;min-width:0}
+#fx_eur_usd .fxlbl{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#8C8C8C;font-weight:500}
+#fx_eur_usd .fxlbl-result{display:none}
+#fx_eur_usd .fxsel{
+  background:#F7F5F0;border:1.5px solid #EFEFEF;border-radius:3px;
+  padding:8px 28px 8px 10px;font-family:inherit;font-size:0.85rem;color:#0F0F0F;
+  appearance:none;cursor:pointer;width:100%;transition:border-color .15s;min-height:38px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%238C8C8C' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+}
+#fx_eur_usd .fxsel:focus{outline:none;border-color:#2D6A4F}
+#fx_eur_usd .fxamt{
+  background:#F7F5F0;border:1.5px solid #EFEFEF;border-radius:3px;
+  padding:7px 10px;font-family:'Bebas Neue','DM Sans',sans-serif;
+  font-size:1.3rem;letter-spacing:.03em;color:#0F0F0F;width:100%;
+  transition:border-color .15s;min-height:38px;
+}
+#fx_eur_usd .fxamt:focus{outline:none;border-color:#2D6A4F}
+#fx_eur_usd .fxamt::placeholder{color:#ccc}
+#fx_eur_usd input[type=number]::-webkit-inner-spin-button,
+#fx_eur_usd input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+#fx_eur_usd .swapcol{display:flex;align-items:flex-end;justify-content:center;padding-bottom:1px}
+#fx_eur_usd .swapbtn{
+  background:#1E4034;color:#fff;border:none;width:36px;height:36px;
+  border-radius:50%;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:background .2s,transform .3s;min-width:36px;
+}
+#fx_eur_usd .swapbtn:hover,#fx_eur_usd .swapbtn:active{background:#2D6A4F;transform:rotate(180deg)}
+#fx_eur_usd .swapbtn svg{width:14px;height:14px}
+#fx_eur_usd .rcell{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;min-width:0}
+#fx_eur_usd .rval{
+  font-family:'Bebas Neue','DM Sans',sans-serif;font-size:1.6rem;
+  color:#1E4034;line-height:1;letter-spacing:.02em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#fx_eur_usd .rmeta{font-size:9px;color:#8C8C8C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#fx_eur_usd .rcell-left{display:none}
+#fx_eur_usd .row2{background:#fff;border:1px solid #EFEFEF;border-radius:0 0 4px 4px}
+#fx_eur_usd .ctoggle{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:10px 12px;background:none;border:none;
+  border-top:1px solid #EFEFEF;cursor:pointer;font-family:inherit;
+  font-size:10px;color:#8C8C8C;letter-spacing:.1em;text-transform:uppercase;
+  transition:background .15s;min-height:40px;
+}
+#fx_eur_usd .ctoggle:hover,#fx_eur_usd .ctoggle:active{background:#F7F5F0}
+#fx_eur_usd .ctgl{display:flex;align-items:center;gap:6px}
+#fx_eur_usd .chev{transition:transform .25s;display:flex;align-items:center}
+#fx_eur_usd .cbody{display:none;padding:10px 12px 12px}
+#fx_eur_usd .chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+#fx_eur_usd .ctitle{font-size:10px;font-weight:500;color:#3D3D3D;letter-spacing:.02em}
+#fx_eur_usd .pbtns{display:flex;gap:4px;flex-wrap:wrap}
+#fx_eur_usd .fx-pbtn{
+  font-size:10px;letter-spacing:.04em;text-transform:uppercase;
+  padding:5px 10px;min-height:30px;border:1px solid #EFEFEF;border-radius:3px;
+  background:transparent;color:#8C8C8C;cursor:pointer;transition:all .15s;font-family:inherit;
+}
+#fx_eur_usd .fx-pbtn:hover,#fx_eur_usd .fx-pbtn:active,#fx_eur_usd .fx-pbtn.on{border-color:#2D6A4F;color:#2D6A4F;background:#EEF3F1}
+#fx_eur_usd .cnodata{padding:20px 0;text-align:center;font-size:12px;color:#8C8C8C;font-style:italic;line-height:1.6}
+#fx_eur_usd .chart-wrap{position:relative;height:160px;width:100%}
+@media(max-width:540px){#fx_eur_usd .chart-wrap{height:200px}}
+#fx_eur_usd canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important;display:block}
+#fx_eur_usd .gen-date{font-size:9px;color:#C9D4C5;text-align:right;padding:4px 12px 6px}
+#fx_eur_usd .loading-pulse{animation:fxpulse 1.4s ease-in-out infinite}
+@keyframes fxpulse{0%,100%{opacity:1}50%{opacity:0.4}}
+</style>
+
+<div class="card">
+  <div class="inputs">
+    <div class="fxg">
+      <div class="fxlbl">From</div>
+      <select class="fxsel" id="fx_eur_usd_from" onchange="fx_eur_usd_go()"><optgroup label="Full history available"><option value="AUD">AUD — Australian Dollar</option>
+<option value="BGN">BGN — Bulgarian Lev</option>
+<option value="BRL">BRL — Brazilian Real</option>
+<option value="CAD">CAD — Canadian Dollar</option>
+<option value="CHF">CHF — Swiss Franc</option>
+<option value="CNY">CNY — Chinese Yuan</option>
+<option value="CZK">CZK — Czech Koruna</option>
+<option value="DKK">DKK — Danish Krone</option>
+<option value="EUR">EUR — Euro</option>
+<option value="GBP">GBP — British Pound</option>
+<option value="HKD">HKD — Hong Kong Dollar</option>
+<option value="HUF">HUF — Hungarian Forint</option>
+<option value="IDR">IDR — Indonesian Rupiah</option>
+<option value="ILS">ILS — Israeli Shekel</option>
+<option value="INR">INR — Indian Rupee</option>
+<option value="ISK">ISK — Icelandic Krona</option>
+<option value="JPY">JPY — Japanese Yen</option>
+<option value="KRW">KRW — South Korean Won</option>
+<option value="MXN">MXN — Mexican Peso</option>
+<option value="MYR">MYR — Malaysian Ringgit</option>
+<option value="NOK">NOK — Norwegian Krone</option>
+<option value="NZD">NZD — New Zealand Dollar</option>
+<option value="PHP">PHP — Philippine Peso</option>
+<option value="PLN">PLN — Polish Zloty</option>
+<option value="RON">RON — Romanian Leu</option>
+<option value="SEK">SEK — Swedish Krone</option>
+<option value="SGD">SGD — Singapore Dollar</option>
+<option value="THB">THB — Thai Baht</option>
+<option value="TRY">TRY — Turkish Lira</option>
+<option value="USD">USD — US Dollar</option>
+<option value="ZAR">ZAR — South African Rand</option></optgroup><optgroup label="More currencies (loading…)" id="fx_eur_usd_t2grp"></optgroup></select>
+      <input class="fxamt" type="number" id="fx_eur_usd_fromv"
+             value="1" min="0" step="any" placeholder="0" oninput="fx_eur_usd_fwd()"/>
+    </div>
+    <div class="swapcol">
+      <button class="swapbtn" onclick="fx_eur_usd_swap()" title="Swap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+        </svg>
+      </button>
+    </div>
+    <div class="fxg">
+      <div class="fxlbl">To</div>
+      <select class="fxsel" id="fx_eur_usd_to" onchange="fx_eur_usd_go()"><optgroup label="Full history available"><option value="AUD">AUD — Australian Dollar</option>
+<option value="BGN">BGN — Bulgarian Lev</option>
+<option value="BRL">BRL — Brazilian Real</option>
+<option value="CAD">CAD — Canadian Dollar</option>
+<option value="CHF">CHF — Swiss Franc</option>
+<option value="CNY">CNY — Chinese Yuan</option>
+<option value="CZK">CZK — Czech Koruna</option>
+<option value="DKK">DKK — Danish Krone</option>
+<option value="EUR">EUR — Euro</option>
+<option value="GBP">GBP — British Pound</option>
+<option value="HKD">HKD — Hong Kong Dollar</option>
+<option value="HUF">HUF — Hungarian Forint</option>
+<option value="IDR">IDR — Indonesian Rupiah</option>
+<option value="ILS">ILS — Israeli Shekel</option>
+<option value="INR">INR — Indian Rupee</option>
+<option value="ISK">ISK — Icelandic Krona</option>
+<option value="JPY">JPY — Japanese Yen</option>
+<option value="KRW">KRW — South Korean Won</option>
+<option value="MXN">MXN — Mexican Peso</option>
+<option value="MYR">MYR — Malaysian Ringgit</option>
+<option value="NOK">NOK — Norwegian Krone</option>
+<option value="NZD">NZD — New Zealand Dollar</option>
+<option value="PHP">PHP — Philippine Peso</option>
+<option value="PLN">PLN — Polish Zloty</option>
+<option value="RON">RON — Romanian Leu</option>
+<option value="SEK">SEK — Swedish Krone</option>
+<option value="SGD">SGD — Singapore Dollar</option>
+<option value="THB">THB — Thai Baht</option>
+<option value="TRY">TRY — Turkish Lira</option>
+<option value="USD">USD — US Dollar</option>
+<option value="ZAR">ZAR — South African Rand</option></optgroup><optgroup label="More currencies (loading…)" id="fx_eur_usd_t2grp"></optgroup></select>
+      <input class="fxamt" type="number" id="fx_eur_usd_tov"
+             value="" min="0" step="any" placeholder="0" oninput="fx_eur_usd_rev()"/>
+    </div>
+    <div class="rcell">
+      <div class="fxlbl fxlbl-result" id="fx_eur_usd_rlbl">1 EUR =</div>
+      <div class="rcell-left" id="fx_eur_usd_rlbl_mob">1 EUR =</div>
+      <div class="rcell-right">
+        <div class="rval loading-pulse" id="fx_eur_usd_rval">&mdash;</div>
+        <div class="rmeta" id="fx_eur_usd_rmeta">Loading&hellip;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row2">
+  <button class="ctoggle" onclick="fx_eur_usd_toggleChart()">
+    <span class="ctgl">
+      <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+        <path d="M1 1.5h9M1 4.5h6M1 7.5h3" stroke="#8C8C8C" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      Rate history
+    </span>
+    <span class="chev" id="fx_eur_usd_chev">
+      <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+        <path d="M1 1l4 4 4-4" stroke="#8C8C8C" stroke-width="1.3"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+  </button>
+  <div class="cbody" id="fx_eur_usd_cbody">
+    <div class="chead">
+      <span class="ctitle" id="fx_eur_usd_ctitle">EUR/USD</span>
+      <div class="pbtns">
+        <button class="fx-pbtn"    onclick="fx_eur_usd_per(30,this)">30D</button>
+        <button class="fx-pbtn"    onclick="fx_eur_usd_per(90,this)">90D</button>
+        <button class="fx-pbtn"    onclick="fx_eur_usd_per(180,this)">180D</button>
+        <button class="fx-pbtn"    onclick="fx_eur_usd_per(365,this)">1Y</button>
+        <button class="fx-pbtn on" onclick="fx_eur_usd_per(9999,this)">5Y</button>
+      </div>
+    </div>
+    <div id="fx_eur_usd_chartArea">
+      <div class="chart-wrap"><canvas id="fx_eur_usd_c"></canvas></div>
+    </div>
+    <div id="fx_eur_usd_chartNoData" class="cnodata" style="display:none">
+      <span id="fx_eur_usd_noDataMsg"></span>
+    </div>
+  </div>
+  <div class="gen-date">Rates updated live &middot; April 20, 2026</div>
+</div>
+
+</div>
+<script>
+(function() {
+var DEFAULT_FROM = "EUR";
+var DEFAULT_TO   = "USD";
+var TIER1      = {"AUD": "Australian Dollar", "BGN": "Bulgarian Lev", "BRL": "Brazilian Real", "CAD": "Canadian Dollar", "CHF": "Swiss Franc", "CNY": "Chinese Yuan", "CZK": "Czech Koruna", "DKK": "Danish Krone", "EUR": "Euro", "GBP": "British Pound", "HKD": "Hong Kong Dollar", "HUF": "Hungarian Forint", "IDR": "Indonesian Rupiah", "ILS": "Israeli Shekel", "INR": "Indian Rupee", "ISK": "Icelandic Krona", "JPY": "Japanese Yen", "KRW": "South Korean Won", "MXN": "Mexican Peso", "MYR": "Malaysian Ringgit", "NOK": "Norwegian Krone", "NZD": "New Zealand Dollar", "PHP": "Philippine Peso", "PLN": "Polish Zloty", "RON": "Romanian Leu", "SEK": "Swedish Krone", "SGD": "Singapore Dollar", "THB": "Thai Baht", "TRY": "Turkish Lira", "USD": "US Dollar", "ZAR": "South African Rand"};
+var TIER2      = {"AED": "UAE Dirham", "AFN": "Afghan Afghani", "ALL": "Albanian Lek", "AMD": "Armenian Dram", "ANG": "Netherlands Antillean Guilder", "AOA": "Angolan Kwanza", "ARS": "Argentine Peso", "AWG": "Aruban Florin", "AZN": "Azerbaijani Manat", "BAM": "Bosnia-Herzegovina Mark", "BBD": "Barbadian Dollar", "BDT": "Bangladeshi Taka", "BHD": "Bahraini Dinar", "BIF": "Burundian Franc", "BMD": "Bermudian Dollar", "BND": "Brunei Dollar", "BOB": "Bolivian Boliviano", "BSD": "Bahamian Dollar", "BTN": "Bhutanese Ngultrum", "BWP": "Botswanan Pula", "BYN": "Belarusian Ruble", "BZD": "Belize Dollar", "CDF": "Congolese Franc", "CLP": "Chilean Peso", "COP": "Colombian Peso", "CRC": "Costa Rican Colon", "CUP": "Cuban Peso", "CVE": "Cape Verdean Escudo", "DJF": "Djiboutian Franc", "DOP": "Dominican Peso", "DZD": "Algerian Dinar", "EGP": "Egyptian Pound", "ERN": "Eritrean Nakfa", "ETB": "Ethiopian Birr", "FJD": "Fijian Dollar", "FKP": "Falkland Islands Pound", "GEL": "Georgian Lari", "GHS": "Ghanaian Cedi", "GIP": "Gibraltar Pound", "GMD": "Gambian Dalasi", "GNF": "Guinean Franc", "GTQ": "Guatemalan Quetzal", "GYD": "Guyanaese Dollar", "HNL": "Honduran Lempira", "HTG": "Haitian Gourde", "IQD": "Iraqi Dinar", "IRR": "Iranian Rial", "JMD": "Jamaican Dollar", "JOD": "Jordanian Dinar", "KES": "Kenyan Shilling", "KGS": "Kyrgystani Som", "KHR": "Cambodian Riel", "KMF": "Comorian Franc", "KPW": "North Korean Won", "KWD": "Kuwaiti Dinar", "KYD": "Cayman Islands Dollar", "KZT": "Kazakhstani Tenge", "LAK": "Laotian Kip", "LBP": "Lebanese Pound", "LKR": "Sri Lankan Rupee", "LRD": "Liberian Dollar", "LSL": "Lesotho Loti", "LYD": "Libyan Dinar", "MAD": "Moroccan Dirham", "MDL": "Moldovan Leu", "MGA": "Malagasy Ariary", "MKD": "Macedonian Denar", "MMK": "Myanma Kyat", "MNT": "Mongolian Tugrik", "MOP": "Macanese Pataca", "MRU": "Mauritanian Ouguiya", "MUR": "Mauritian Rupee", "MVR": "Maldivian Rufiyaa", "MWK": "Malawian Kwacha", "MZN": "Mozambican Metical", "NAD": "Namibian Dollar", "NGN": "Nigerian Naira", "NIO": "Nicaraguan Cordoba", "NPR": "Nepalese Rupee", "OMR": "Omani Rial", "PAB": "Panamanian Balboa", "PEN": "Peruvian Sol", "PGK": "Papua New Guinean Kina", "PKR": "Pakistani Rupee", "PYG": "Paraguayan Guarani", "QAR": "Qatari Rial", "RSD": "Serbian Dinar", "RUB": "Russian Ruble", "RWF": "Rwandan Franc", "SAR": "Saudi Riyal", "SBD": "Solomon Islands Dollar", "SCR": "Seychellois Rupee", "SDG": "Sudanese Pound", "SHP": "Saint Helena Pound", "SLL": "Sierra Leonean Leone", "SOS": "Somali Shilling", "SRD": "Surinamese Dollar", "STN": "Sao Tome Dobra", "SVC": "Salvadoran Colon", "SYP": "Syrian Pound", "SZL": "Swazi Lilangeni", "TJS": "Tajikistani Somoni", "TMT": "Turkmenistani Manat", "TND": "Tunisian Dinar", "TOP": "Tongan Paanga", "TTD": "Trinidad Dollar", "TWD": "New Taiwan Dollar", "TZS": "Tanzanian Shilling", "UAH": "Ukrainian Hryvnia", "UGX": "Ugandan Shilling", "UYU": "Uruguayan Peso", "UZS": "Uzbekistan Som", "VES": "Venezuelan Bolivar", "VND": "Vietnamese Dong", "VUV": "Vanuatu Vatu", "WST": "Samoan Tala", "XAF": "CFA Franc BEAC", "XCD": "East Caribbean Dollar", "XOF": "CFA Franc BCEAO", "XPF": "CFP Franc", "YER": "Yemeni Rial", "ZMW": "Zambian Kwacha", "ZWL": "Zimbabwean Dollar"};
+var TIER1_CODES = ["AUD", "BGN", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP", "HKD", "HUF", "IDR", "ILS", "INR", "ISK", "JPY", "KRW", "MXN", "MYR", "NOK", "NZD", "PHP", "PLN", "RON", "SEK", "SGD", "THB", "TRY", "USD", "ZAR"];
+var W          = "fx_eur_usd";
+var API        = "https://api.frankfurter.dev/v2";
+
+// ---------------------------------------------------------------------------
+//  State
+// ---------------------------------------------------------------------------
+var RATES      = {};          // currency -> rate vs EUR (EUR=1)
+var HIST       = {};          // currency -> [daily values vs EUR]
+var DATES      = [];           // date strings for history
+var histReady  = false;        // true once history fetch completes
+var allRatesReady = false;     // true once tier2 rates loaded
+var chartBuilt = false;
+var fxChart    = null;
+var per        = 9999;
+var _rawDates  = [];
+var chartOpenPending = false;  // user opened chart before history arrived
+
+// ---------------------------------------------------------------------------
+//  Helpers
+// ---------------------------------------------------------------------------
+function $el(id) { return document.getElementById(W + "_" + id); }
+function isTier1(c) { return !!TIER1[c]; }
+
+function fmt(n) {
+  if (n == null || isNaN(n)) return "—";
+  if (n >= 10000) return n.toLocaleString("en-US", {maximumFractionDigits:2});
+  if (n >= 100)   return n.toFixed(2);
+  if (n >= 1)     return n.toFixed(4);
+  return n.toFixed(6);
+}
+
+function setOpt(s, v) {
+  var el = $el(s);
+  for (var i = 0; i < el.options.length; i++)
+    if (el.options[i].value === v) { el.selectedIndex = i; return; }
+}
+
+function show(id, on) {
+  var el = $el(id);
+  if (el) el.style.display = on ? "block" : "none";
+}
+
+function xRate(a, b) {
+  if (RATES[a] == null || RATES[b] == null) return null;
+  // RATES stored as units-per-EUR; cross via EUR
+  return RATES[b] / RATES[a];
+}
+
+// ---------------------------------------------------------------------------
+//  Display update
+// ---------------------------------------------------------------------------
+function updateDisplay() {
+  var f   = $el("from").value, t = $el("to").value;
+  var amt = parseFloat($el("fromv").value) || 1;
+  var rate = xRate(f, t);
+  var rvalEl = $el("rval");
+
+  if (rate == null) {
+    rvalEl.textContent = "—";
+    $el("rmeta").textContent = "Rate not available";
+    return;
+  }
+
+  rvalEl.classList.remove("loading-pulse");
+  var result = amt * rate;
+  var lbl = fmt(amt) + " " + f + " =";
+  if ($el("rlbl"))     $el("rlbl").textContent     = lbl;
+  if ($el("rlbl_mob")) $el("rlbl_mob").textContent = lbl;
+  rvalEl.textContent  = fmt(result);
+  $el("rmeta").textContent = t + "  ·  1 " + f + " = " + fmt(rate) + " " + t;
+  $el("tov").value = result.toFixed(6);
+}
+
+// ---------------------------------------------------------------------------
+//  STAGE 1 — fetch rates for default pair currencies immediately
+// ---------------------------------------------------------------------------
+function fetchDefaultRates() {
+  // Frankfurter: base=EUR, quotes=FROM,TO
+  // Always include EUR so RATES["EUR"]=1.0 is implicit via the base
+  var needed = [DEFAULT_FROM, DEFAULT_TO].filter(function(c){ return c !== "EUR"; });
+  var qs = needed.length ? "?base=EUR&quotes=" + needed.join(",") : "?base=EUR";
+  fetch(API + "/rates" + qs)
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      // d.rates is { "USD": 1.09, ... } relative to base=EUR
+      RATES["EUR"] = 1.0;
+      for (var k in d.rates) RATES[k] = d.rates[k];
+      updateDisplay();
+      // Now kick off background loads
+      fetchHistory();
+      fetchAllRates();
+    })
+    .catch(function(e) {
+      $el("rval").textContent = "Error";
+      $el("rmeta").textContent = "Could not load rates";
+      console.error("FX rates error:", e);
+    });
+}
+
+// ---------------------------------------------------------------------------
+//  STAGE 2 — fetch 5yr history for TIER1 in background
+//  Frankfurter time series: /rates?from=YYYY-MM-DD&base=EUR&quotes=AUD,BGN,...
+//  We request all TIER1 currencies in one call.
+// ---------------------------------------------------------------------------
+function fetchHistory() {
+  var from5y = new Date();
+  from5y.setFullYear(from5y.getFullYear() - 5);
+  var fromStr = from5y.toISOString().slice(0, 10);
+
+  // Exclude EUR from quotes (it's the base, always 1)
+  var quoteCodes = TIER1_CODES.filter(function(c){ return c !== "EUR"; }).join(",");
+  var url = API + "/rates?from=" + fromStr + "&base=EUR&quotes=" + quoteCodes;
+
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      // d.rates is { "2020-01-02": { "USD": 1.12, ... }, ... }
+      var sortedDates = Object.keys(d.rates).sort();
+      DATES = sortedDates;
+
+      // Build per-currency arrays aligned to DATES
+      HIST["EUR"] = sortedDates.map(function(){ return 1.0; });
+      TIER1_CODES.forEach(function(c) {
+        if (c === "EUR") return;
+        HIST[c] = sortedDates.map(function(dt) {
+          var v = d.rates[dt] && d.rates[dt][c];
+          return (v != null) ? v : null;
+        });
+      });
+
+      histReady = true;
+
+      // If user already opened the chart, render it now
+      if (chartOpenPending) {
+        var f = $el("from").value, t = $el("to").value;
+        if (isTier1(f) && isTier1(t)) {
+          updateChartSection();
+          if (!chartBuilt) { buildChart(); chartBuilt = true; }
+          else refreshChart();
+        }
+        chartOpenPending = false;
+      }
+    })
+    .catch(function(e) {
+      console.error("FX history error:", e);
+      // Non-fatal — chart just won't work
+    });
+}
+
+// ---------------------------------------------------------------------------
+//  STAGE 3 — fetch ALL remaining currency rates in background
+//  Fill out RATES for all Tier2 currencies so conversions work once selected
+// ---------------------------------------------------------------------------
+function fetchAllRates() {
+  fetch(API + "/rates?base=EUR")
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      RATES["EUR"] = 1.0;
+      for (var k in d.rates) {
+        if (RATES[k] == null) RATES[k] = d.rates[k];
+      }
+      allRatesReady = true;
+
+      // Populate Tier2 optgroups now that we have names & rates
+      var t2grp = document.getElementById(W + "_t2grp");
+      if (t2grp) {
+        t2grp.label = "Current rate only";
+        var html = "";
+        Object.keys(TIER2).sort().forEach(function(c) {
+          if (RATES[c] != null) {
+            html += '<option value="' + c + '">' + c + ' — ' + TIER2[c] + '</option>';
+          }
+        });
+        t2grp.innerHTML = html;
+      }
+    })
+    .catch(function(e) {
+      console.error("FX all-rates error:", e);
+    });
+}
+
+// ---------------------------------------------------------------------------
+//  Converter interactions
+// ---------------------------------------------------------------------------
+window[W + "_fwd"] = function() {
+  var f = $el("from").value, t = $el("to").value;
+  var amt = parseFloat($el("fromv").value);
+  var rate = xRate(f, t);
+  if (!rate || isNaN(amt)) return;
+  $el("tov").value = (amt * rate).toFixed(6);
+  updateDisplay();
+};
+
+window[W + "_rev"] = function() {
+  var f = $el("from").value, t = $el("to").value;
+  var amt = parseFloat($el("tov").value);
+  var rate = xRate(t, f);
+  if (!rate || isNaN(amt)) return;
+  $el("fromv").value = (amt * rate).toFixed(6);
+  updateDisplay();
+};
+
+window[W + "_go"] = function() {
+  window[W + "_fwd"]();
+  updateChartSection();
+  if (chartBuilt) refreshChart();
+};
+
+window[W + "_swap"] = function() {
+  var f = $el("from").value, t = $el("to").value;
+  setOpt("from", t); setOpt("to", f);
+  window[W + "_go"]();
+};
+
+// ---------------------------------------------------------------------------
+//  Chart section
+// ---------------------------------------------------------------------------
+function updateChartSection() {
+  var f = $el("from").value, t = $el("to").value;
+  if (isTier1(f) && isTier1(t)) {
+    show("chartNoData", false); show("chartArea", true);
+    $el("ctitle").textContent = f + "/" + t;
+  } else {
+    show("chartNoData", true); show("chartArea", false);
+    var missing = [f,t].filter(function(c){return !isTier1(c);}).join(", ");
+    $el("noDataMsg").textContent = "Historical data not available for " + missing + ".";
+  }
+}
+
+function series() {
+  var f = $el("from").value, t = $el("to").value;
+  var n;
+  if (per >= 9999) {
+    n = DATES.length;
+  } else {
+    var lastDate  = new Date(DATES[DATES.length - 1]);
+    var cutoffMs  = lastDate.getTime() - per * 86400000;
+    n = 0;
+    for (var k = DATES.length - 1; k >= 0; k--) {
+      if (new Date(DATES[k]).getTime() >= cutoffMs) n++;
+      else break;
+    }
+    if (n === 0) n = 1;
+  }
+  var fH = HIST[f], tH = HIST[t];
+  if (!fH || !tH || n === 0) return { data: [], n: 0 };
+
+  var ds = DATES.slice(-n);
+  var fs = fH.slice(-n);
+  var ts = tH.slice(-n);
+  var data = fs.map(function(v, i) {
+    return (v != null && ts[i] != null) ? +((ts[i] / v).toFixed(5)) : null;
+  });
+
+  var tMap      = {};
+  var lastYr    = -1;
+  var seenLabel = {};
+  var lastWeek  = -1;
+  var EPOCH     = Date.UTC(1970, 0, 1);
+
+  for (var i = 0; i < n; i++) {
+    var dt   = new Date(ds[i]);
+    var yr   = dt.getUTCFullYear();
+    var mo   = dt.getUTCMonth();
+    var dom  = dt.getUTCDate();
+    var day  = dt.getUTCDay();
+    var ms   = dt.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+    var absW = Math.floor((dt.getTime() - EPOCH) / 604800000);
+
+    if (per >= 9999) {
+      if (yr !== lastYr) { tMap[i] = String(yr); lastYr = yr; }
+    } else if (per >= 365) {
+      if (mo % 2 === 0 && !seenLabel[ms]) { tMap[i] = ms; seenLabel[ms] = true; }
+    } else if (per >= 90) {
+      if (!seenLabel[ms]) { tMap[i] = ms; seenLabel[ms] = true; }
+    } else {
+      if (day === 1 && absW !== lastWeek) { tMap[i] = ms + " " + dom; lastWeek = absW; }
+    }
+  }
+
+  var labels = [];
+  for (var j = 0; j < n; j++) {
+    labels.push(tMap[j] !== undefined ? tMap[j] : "");
+  }
+
+  _rawDates = ds;
+  return { data: data, labels: labels, n: n };
+}
+
+function buildChart() {
+  var ctx = document.getElementById(W + "_c").getContext("2d");
+  var s = series();
+  if (!s.n) return;
+  fxChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: s.labels,
+      datasets: [{
+        data: s.data,
+        borderColor: "#52B788", borderWidth: 1.5,
+        fill: true,
+        backgroundColor: function(c) {
+          var g = c.chart.ctx.createLinearGradient(0, 0, 0, 150);
+          g.addColorStop(0, "rgba(82,183,136,0.15)");
+          g.addColorStop(1, "rgba(82,183,136,0)");
+          return g;
+        },
+        pointRadius: 0, pointHoverRadius: 3,
+        pointHoverBackgroundColor: "#52B788",
+        tension: 0.3, spanGaps: true
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1E4034", titleColor: "rgba(201,212,197,0.9)",
+          bodyColor: "#fff", titleFont: { size: 10 },
+          bodyFont: { size: 12, weight: "500" },
+          padding: 9, displayColors: false,
+          callbacks: {
+            title: function(items) { return _rawDates[items[0].dataIndex] || ""; },
+            label: function(item) {
+              var f = $el("from").value, t = $el("to").value;
+              return item.raw == null ? "—" : " 1 " + f + " = " + item.raw + " " + t;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: "category",
+          grid: { display: false }, border: { display: false },
+          ticks: {
+            color: "#8C8C8C", font: { size: 9 },
+            maxRotation: 0, autoSkip: false
+          }
+        },
+        y: {
+          position: "right", grid: { color: "#F2F2F2" },
+          border: { display: false },
+          ticks: { color: "#8C8C8C", font: { size: 9 }, maxTicksLimit: 4 }
+        }
+      }
+    }
+  });
+}
+
+function refreshChart() {
+  if (!fxChart) return;
+  var s = series();
+  if (!s.n) return;
+  fxChart.data.labels = s.labels;
+  fxChart.data.datasets[0].data = s.data;
+  fxChart.update();
+}
+
+window[W + "_toggleChart"] = function() {
+  var body = $el("cbody"), chev = $el("chev");
+  var isOpen = body.style.display === "block";
+  body.style.display = isOpen ? "none" : "block";
+  chev.style.transform = isOpen ? "" : "rotate(180deg)";
+  if (!isOpen) {
+    var f = $el("from").value, t = $el("to").value;
+    if (!isTier1(f) || !isTier1(t)) { updateChartSection(); return; }
+    if (!histReady) {
+      // Mark pending — will render when history arrives
+      chartOpenPending = true;
+      show("chartNoData", true); show("chartArea", false);
+      $el("noDataMsg").textContent = "Loading history…";
+      return;
+    }
+    if (!chartBuilt) { buildChart(); chartBuilt = true; }
+    else refreshChart();
+  }
+};
+
+window[W + "_per"] = function(days, btn) {
+  per = days;
+  var btns = document.querySelectorAll("#fx_eur_usd .fx-pbtn");
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("on");
+  btn.classList.add("on");
+  refreshChart();
+};
+
+// ---------------------------------------------------------------------------
+//  Boot
+// ---------------------------------------------------------------------------
+setOpt("from", DEFAULT_FROM);
+setOpt("to",   DEFAULT_TO);
+fetchDefaultRates();   // Stage 1 — immediate, kicks off 2 & 3 on success
+
+})();
+</script>
+</body></html>
