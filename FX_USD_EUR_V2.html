@@ -656,10 +656,30 @@ function tryRenderChart() {
 
   show("chartNoData",false); show("chartArea",true);
 
-  // ds = full "YYYY-MM-DD" strings — passed as labels so autoSkip can space them
-  var ds    = pair.dates;
-  var fVals = pair.fromVals;
-  var tVals = pair.toVals;
+  // Slice to the selected period window
+  var cutoff = (per >= 7300) ? DATE_20Y : DATE_5Y;
+  var startIdx = 0;
+  // Binary-search for first date >= cutoff (dates are sorted ascending)
+  var lo = 0, hi = pair.dates.length - 1;
+  while (lo < hi) {
+    var mid = (lo + hi) >> 1;
+    if (pair.dates[mid] < cutoff) lo = mid + 1; else hi = mid;
+  }
+  startIdx = (pair.dates[lo] >= cutoff) ? lo : pair.dates.length;
+
+  // For sub-5Y periods, further slice by calendar days from the end
+  var endIdx = pair.dates.length;
+  if (per < 1825) {
+    var lastDate = new Date(pair.dates[endIdx - 1]);
+    var cutMs = lastDate.getTime() - per * 86400000;
+    var j = endIdx - 1;
+    while (j > startIdx && new Date(pair.dates[j - 1]).getTime() >= cutMs) j--;
+    startIdx = Math.max(startIdx, j);
+  }
+
+  var ds    = pair.dates.slice(startIdx);
+  var fVals = pair.fromVals.slice(startIdx);
+  var tVals = pair.toVals.slice(startIdx);
   var data  = fVals.map(function(v,i) {
     return (v!=null && tVals[i]!=null) ? +((tVals[i]/v).toFixed(5)) : null;
   });
