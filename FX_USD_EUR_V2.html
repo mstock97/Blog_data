@@ -13,21 +13,11 @@
 <div id="fx_eur_usd" style="font-family:'DM Sans',sans-serif;font-size:13px;color:#3D3D3D;line-height:1.4;max-width:900px">
 <style>
 #fx_eur_usd *{box-sizing:border-box;margin:0;padding:0}
-#fx_eur_usd .card{
-  background:#fff;border:1px solid #EFEFEF;
-  border-radius:4px 4px 0 0;border-bottom:none;padding:12px;
-}
-#fx_eur_usd .inputs{
-  display:grid;grid-template-columns:1fr 36px 1fr 1fr;
-  gap:8px;align-items:end;
-}
+#fx_eur_usd .card{background:#fff;border:1px solid #EFEFEF;border-radius:4px 4px 0 0;border-bottom:none;padding:12px;}
+#fx_eur_usd .inputs{display:grid;grid-template-columns:1fr 36px 1fr 1fr;gap:8px;align-items:end;}
 @media(max-width:540px){
   #fx_eur_usd .inputs{grid-template-columns:1fr 36px 1fr;grid-template-rows:auto auto;gap:8px;}
-  #fx_eur_usd .rcell{
-    grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;
-    padding:10px 12px;margin:0 -12px -12px;
-    background:#1E4034;border-radius:0 0 4px 4px;gap:2px;
-  }
+  #fx_eur_usd .rcell{grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;padding:10px 12px;margin:0 -12px -12px;background:#1E4034;border-radius:0 0 4px 4px;gap:2px;}
   #fx_eur_usd .rcell-left{display:none}
   #fx_eur_usd .rcell-right{width:100%}
   #fx_eur_usd .rval{color:#fff!important;font-size:2rem;font-family:'Bebas Neue',Georgia,serif;letter-spacing:.04em;line-height:1}
@@ -37,48 +27,22 @@
 #fx_eur_usd .fxg{display:flex;flex-direction:column;gap:4px;min-width:0}
 #fx_eur_usd .fxlbl{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#8C8C8C;font-weight:500}
 #fx_eur_usd .fxlbl-result{display:none}
-#fx_eur_usd .fxsel{
-  background:#F7F5F0;border:1.5px solid #EFEFEF;border-radius:3px;
-  padding:8px 28px 8px 10px;font-family:inherit;font-size:0.85rem;color:#0F0F0F;
-  appearance:none;cursor:pointer;width:100%;transition:border-color .15s;min-height:38px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%238C8C8C' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center;
-}
+#fx_eur_usd .fxsel{background:#F7F5F0;border:1.5px solid #EFEFEF;border-radius:3px;padding:8px 28px 8px 10px;font-family:inherit;font-size:0.85rem;color:#0F0F0F;appearance:none;cursor:pointer;width:100%;transition:border-color .15s;min-height:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%238C8C8C' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
 #fx_eur_usd .fxsel:focus{outline:none;border-color:#2D6A4F}
-#fx_eur_usd .fxamt{
-  background:#F7F5F0;border:1.5px solid #EFEFEF;border-radius:3px;
-  padding:7px 10px;font-family:'Bebas Neue','DM Sans',sans-serif;
-  font-size:1.3rem;letter-spacing:.03em;color:#0F0F0F;width:100%;
-  transition:border-color .15s;min-height:38px;
-}
+#fx_eur_usd .fxamt{background:#F7F5F0;border:1.5px solid #EFEFEF;border-radius:3px;padding:7px 10px;font-family:'Bebas Neue','DM Sans',sans-serif;font-size:1.3rem;letter-spacing:.03em;color:#0F0F0F;width:100%;transition:border-color .15s;min-height:38px;}
 #fx_eur_usd .fxamt:focus{outline:none;border-color:#2D6A4F}
 #fx_eur_usd .fxamt::placeholder{color:#ccc}
-#fx_eur_usd input[type=number]::-webkit-inner-spin-button,
-#fx_eur_usd input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+#fx_eur_usd input[type=number]::-webkit-inner-spin-button,#fx_eur_usd input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
 #fx_eur_usd .swapcol{display:flex;align-items:flex-end;justify-content:center;padding-bottom:1px}
-#fx_eur_usd .swapbtn{
-  background:#1E4034;color:#fff;border:none;width:36px;height:36px;
-  border-radius:50%;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;transition:background .2s,transform .3s;min-width:36px;
-}
+#fx_eur_usd .swapbtn{background:#1E4034;color:#fff;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .3s;min-width:36px;}
 #fx_eur_usd .swapbtn:hover,#fx_eur_usd .swapbtn:active{background:#2D6A4F;transform:rotate(180deg)}
 #fx_eur_usd .swapbtn svg{width:14px;height:14px}
 #fx_eur_usd .rcell{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;min-width:0}
-#fx_eur_usd .rval{
-  font-family:'Bebas Neue','DM Sans',sans-serif;font-size:1.6rem;
-  color:#1E4034;line-height:1;letter-spacing:.02em;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
+#fx_eur_usd .rval{font-family:'Bebas Neue','DM Sans',sans-serif;font-size:1.6rem;color:#1E4034;line-height:1;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #fx_eur_usd .rmeta{font-size:9px;color:#8C8C8C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #fx_eur_usd .rcell-left{display:none}
 #fx_eur_usd .row2{background:#fff;border:1px solid #EFEFEF;border-radius:0 0 4px 4px}
-#fx_eur_usd .ctoggle{
-  display:flex;align-items:center;justify-content:space-between;
-  width:100%;padding:10px 12px;background:none;border:none;
-  border-top:1px solid #EFEFEF;cursor:pointer;font-family:inherit;
-  font-size:10px;color:#8C8C8C;letter-spacing:.1em;text-transform:uppercase;
-  transition:background .15s;min-height:40px;
-}
+#fx_eur_usd .ctoggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 12px;background:none;border:none;border-top:1px solid #EFEFEF;cursor:pointer;font-family:inherit;font-size:10px;color:#8C8C8C;letter-spacing:.1em;text-transform:uppercase;transition:background .15s;min-height:40px;}
 #fx_eur_usd .ctoggle:hover,#fx_eur_usd .ctoggle:active{background:#F7F5F0}
 #fx_eur_usd .ctgl{display:flex;align-items:center;gap:6px}
 #fx_eur_usd .chev{transition:transform .25s;display:flex;align-items:center}
@@ -86,11 +50,7 @@
 #fx_eur_usd .chead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
 #fx_eur_usd .ctitle{font-size:10px;font-weight:500;color:#3D3D3D;letter-spacing:.02em}
 #fx_eur_usd .pbtns{display:flex;gap:4px;flex-wrap:wrap}
-#fx_eur_usd .fx-pbtn{
-  font-size:10px;letter-spacing:.04em;text-transform:uppercase;
-  padding:5px 10px;min-height:30px;border:1px solid #EFEFEF;border-radius:3px;
-  background:transparent;color:#8C8C8C;cursor:pointer;transition:all .15s;font-family:inherit;
-}
+#fx_eur_usd .fx-pbtn{font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;min-height:30px;border:1px solid #EFEFEF;border-radius:3px;background:transparent;color:#8C8C8C;cursor:pointer;transition:all .15s;font-family:inherit;}
 #fx_eur_usd .fx-pbtn:hover,#fx_eur_usd .fx-pbtn:active,#fx_eur_usd .fx-pbtn.on{border-color:#2D6A4F;color:#2D6A4F;background:#EEF3F1}
 #fx_eur_usd .cnodata{padding:20px 0;text-align:center;font-size:12px;color:#8C8C8C;font-style:italic;line-height:1.6}
 #fx_eur_usd .chart-wrap{position:relative;height:160px;width:100%}
@@ -136,13 +96,11 @@
 <option value="TRY">TRY — Turkish Lira</option>
 <option value="USD">USD — US Dollar</option>
 <option value="ZAR">ZAR — South African Rand</option></optgroup><optgroup label="More currencies (loading…)" id="fx_eur_usd_t2grp"></optgroup></select>
-      <input class="fxamt" type="number" id="fx_eur_usd_fromv"
-             value="1" min="0" step="any" placeholder="0" oninput="fx_eur_usd_fwd()"/>
+      <input class="fxamt" type="number" id="fx_eur_usd_fromv" value="1" min="0" step="any" placeholder="0" oninput="fx_eur_usd_fwd()"/>
     </div>
     <div class="swapcol">
       <button class="swapbtn" onclick="fx_eur_usd_swap()" title="Swap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
         </svg>
       </button>
@@ -180,8 +138,7 @@
 <option value="TRY">TRY — Turkish Lira</option>
 <option value="USD">USD — US Dollar</option>
 <option value="ZAR">ZAR — South African Rand</option></optgroup><optgroup label="More currencies (loading…)" id="fx_eur_usd_t2grp"></optgroup></select>
-      <input class="fxamt" type="number" id="fx_eur_usd_tov"
-             value="" min="0" step="any" placeholder="0" oninput="fx_eur_usd_rev()"/>
+      <input class="fxamt" type="number" id="fx_eur_usd_tov" value="" min="0" step="any" placeholder="0" oninput="fx_eur_usd_rev()"/>
     </div>
     <div class="rcell">
       <div class="fxlbl fxlbl-result" id="fx_eur_usd_rlbl">1 EUR =</div>
@@ -204,8 +161,7 @@
     </span>
     <span class="chev" id="fx_eur_usd_chev">
       <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
-        <path d="M1 1l4 4 4-4" stroke="#8C8C8C" stroke-width="1.3"
-              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M1 1l4 4 4-4" stroke="#8C8C8C" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </span>
   </button>
@@ -237,26 +193,37 @@ var DEFAULT_FROM = "EUR";
 var DEFAULT_TO   = "USD";
 var TIER1        = {"AUD": "Australian Dollar", "BGN": "Bulgarian Lev", "BRL": "Brazilian Real", "CAD": "Canadian Dollar", "CHF": "Swiss Franc", "CNY": "Chinese Yuan", "CZK": "Czech Koruna", "DKK": "Danish Krone", "EUR": "Euro", "GBP": "British Pound", "HKD": "Hong Kong Dollar", "HUF": "Hungarian Forint", "IDR": "Indonesian Rupiah", "ILS": "Israeli Shekel", "INR": "Indian Rupee", "ISK": "Icelandic Krona", "JPY": "Japanese Yen", "KRW": "South Korean Won", "MXN": "Mexican Peso", "MYR": "Malaysian Ringgit", "NOK": "Norwegian Krone", "NZD": "New Zealand Dollar", "PHP": "Philippine Peso", "PLN": "Polish Zloty", "RON": "Romanian Leu", "SEK": "Swedish Krone", "SGD": "Singapore Dollar", "THB": "Thai Baht", "TRY": "Turkish Lira", "USD": "US Dollar", "ZAR": "South African Rand"};
 var TIER2        = {"AED": "UAE Dirham", "AFN": "Afghan Afghani", "ALL": "Albanian Lek", "AMD": "Armenian Dram", "ANG": "Netherlands Antillean Guilder", "AOA": "Angolan Kwanza", "ARS": "Argentine Peso", "AWG": "Aruban Florin", "AZN": "Azerbaijani Manat", "BAM": "Bosnia-Herzegovina Mark", "BBD": "Barbadian Dollar", "BDT": "Bangladeshi Taka", "BHD": "Bahraini Dinar", "BIF": "Burundian Franc", "BMD": "Bermudian Dollar", "BND": "Brunei Dollar", "BOB": "Bolivian Boliviano", "BSD": "Bahamian Dollar", "BTN": "Bhutanese Ngultrum", "BWP": "Botswanan Pula", "BYN": "Belarusian Ruble", "BZD": "Belize Dollar", "CDF": "Congolese Franc", "CLP": "Chilean Peso", "COP": "Colombian Peso", "CRC": "Costa Rican Colon", "CUP": "Cuban Peso", "CVE": "Cape Verdean Escudo", "DJF": "Djiboutian Franc", "DOP": "Dominican Peso", "DZD": "Algerian Dinar", "EGP": "Egyptian Pound", "ERN": "Eritrean Nakfa", "ETB": "Ethiopian Birr", "FJD": "Fijian Dollar", "FKP": "Falkland Islands Pound", "GEL": "Georgian Lari", "GHS": "Ghanaian Cedi", "GIP": "Gibraltar Pound", "GMD": "Gambian Dalasi", "GNF": "Guinean Franc", "GTQ": "Guatemalan Quetzal", "GYD": "Guyanaese Dollar", "HNL": "Honduran Lempira", "HTG": "Haitian Gourde", "IQD": "Iraqi Dinar", "IRR": "Iranian Rial", "JMD": "Jamaican Dollar", "JOD": "Jordanian Dinar", "KES": "Kenyan Shilling", "KGS": "Kyrgystani Som", "KHR": "Cambodian Riel", "KMF": "Comorian Franc", "KPW": "North Korean Won", "KWD": "Kuwaiti Dinar", "KYD": "Cayman Islands Dollar", "KZT": "Kazakhstani Tenge", "LAK": "Laotian Kip", "LBP": "Lebanese Pound", "LKR": "Sri Lankan Rupee", "LRD": "Liberian Dollar", "LSL": "Lesotho Loti", "LYD": "Libyan Dinar", "MAD": "Moroccan Dirham", "MDL": "Moldovan Leu", "MGA": "Malagasy Ariary", "MKD": "Macedonian Denar", "MMK": "Myanma Kyat", "MNT": "Mongolian Tugrik", "MOP": "Macanese Pataca", "MRU": "Mauritanian Ouguiya", "MUR": "Mauritian Rupee", "MVR": "Maldivian Rufiyaa", "MWK": "Malawian Kwacha", "MZN": "Mozambican Metical", "NAD": "Namibian Dollar", "NGN": "Nigerian Naira", "NIO": "Nicaraguan Cordoba", "NPR": "Nepalese Rupee", "OMR": "Omani Rial", "PAB": "Panamanian Balboa", "PEN": "Peruvian Sol", "PGK": "Papua New Guinean Kina", "PKR": "Pakistani Rupee", "PYG": "Paraguayan Guarani", "QAR": "Qatari Rial", "RSD": "Serbian Dinar", "RUB": "Russian Ruble", "RWF": "Rwandan Franc", "SAR": "Saudi Riyal", "SBD": "Solomon Islands Dollar", "SCR": "Seychellois Rupee", "SDG": "Sudanese Pound", "SHP": "Saint Helena Pound", "SLL": "Sierra Leonean Leone", "SOS": "Somali Shilling", "SRD": "Surinamese Dollar", "STN": "Sao Tome Dobra", "SVC": "Salvadoran Colon", "SYP": "Syrian Pound", "SZL": "Swazi Lilangeni", "TJS": "Tajikistani Somoni", "TMT": "Turkmenistani Manat", "TND": "Tunisian Dinar", "TOP": "Tongan Paanga", "TTD": "Trinidad Dollar", "TWD": "New Taiwan Dollar", "TZS": "Tanzanian Shilling", "UAH": "Ukrainian Hryvnia", "UGX": "Ugandan Shilling", "UYU": "Uruguayan Peso", "UZS": "Uzbekistan Som", "VES": "Venezuelan Bolivar", "VND": "Vietnamese Dong", "VUV": "Vanuatu Vatu", "WST": "Samoan Tala", "XAF": "CFA Franc BEAC", "XCD": "East Caribbean Dollar", "XOF": "CFA Franc BCEAO", "XPF": "CFP Franc", "YER": "Yemeni Rial", "ZMW": "Zambian Kwacha", "ZWL": "Zimbabwean Dollar"};
-var TIER1_CODES  = ["AUD", "BGN", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP", "HKD", "HUF", "IDR", "ILS", "INR", "ISK", "JPY", "KRW", "MXN", "MYR", "NOK", "NZD", "PHP", "PLN", "RON", "SEK", "SGD", "THB", "TRY", "USD", "ZAR"];
 var W            = "fx_eur_usd";
 var API          = "https://api.frankfurter.dev/v2";
+
+// Five-year start date, computed once
+var _5Y_FROM = (function() {
+  var d = new Date();
+  d.setFullYear(d.getFullYear() - 5);
+  return d.toISOString().slice(0, 10);
+})();
 
 // ---------------------------------------------------------------------------
 //  State
 // ---------------------------------------------------------------------------
-// RATES: currency code -> rate vs EUR (EUR always = 1.0)
-// Cross-rate: A/B = RATES[B] / RATES[A]
-var RATES      = {};
-// HIST: currency code -> array of daily rates vs EUR, aligned to DATES
-var HIST       = {};
-// DATES: sorted array of "YYYY-MM-DD" strings for history
-var DATES      = [];
-var histReady  = false;
+// RATES[code] = rate vs EUR (EUR = 1.0 always)
+// Cross-rate A->B = RATES[B] / RATES[A]
+var RATES = {};
+
+// HIST_CACHE[code] = array of daily rates vs EUR, aligned to HIST_DATES
+// EUR is pre-populated as a special case (all 1.0s, same length as HIST_DATES)
+// HIST_DATES = sorted "YYYY-MM-DD" strings; all cached arrays share this index
+var HIST_CACHE = { "EUR": null };  // null sentinel = "always 1.0, fill on demand"
+var HIST_DATES = [];
+
+// In-flight history fetches: histFetching[code] = Promise
+// Prevents duplicate requests when the same currency is requested twice
+var histFetching = {};
+
 var chartBuilt = false;
 var fxChart    = null;
 var per        = 9999;
 var _rawDates  = [];
-var chartOpenPending = false;
 
 // ---------------------------------------------------------------------------
 //  Helpers
@@ -279,8 +246,7 @@ function setOpt(s, v) {
 }
 
 function show(id, on) {
-  var el = $el(id);
-  if (el) el.style.display = on ? "block" : "none";
+  var el = $el(id); if (el) el.style.display = on ? "block" : "none";
 }
 
 function xRate(a, b) {
@@ -289,99 +255,150 @@ function xRate(a, b) {
 }
 
 // ---------------------------------------------------------------------------
-//  Display
-// ---------------------------------------------------------------------------
-function updateDisplay() {
-  var f    = $el("from").value;
-  var t    = $el("to").value;
-  var amt  = parseFloat($el("fromv").value) || 1;
-  var rate = xRate(f, t);
-  var rvalEl = $el("rval");
-
-  if (rate == null) {
-    rvalEl.textContent = "—";
-    $el("rmeta").textContent = "Rate unavailable";
-    return;
-  }
-
-  rvalEl.classList.remove("loading-pulse");
-  var result = amt * rate;
-  var lbl = fmt(amt) + " " + f + " =";
-  if ($el("rlbl"))     $el("rlbl").textContent     = lbl;
-  if ($el("rlbl_mob")) $el("rlbl_mob").textContent = lbl;
-  rvalEl.textContent       = fmt(result);
-  $el("rmeta").textContent = t + "  ·  1 " + f + " = " + fmt(rate) + " " + t;
-  $el("tov").value         = result.toFixed(6);
-}
-
-// ---------------------------------------------------------------------------
-//  Frankfurter v2 response parsing
-//
-//  v2 /rates always returns a JSON ARRAY of objects:
-//    [ { "date": "2024-01-15", "base": "EUR", "quote": "USD", "rate": 1.089 }, ... ]
-//
-//  For latest rates (no date range): one object per quote currency.
-//  For time series (from= supplied): one object per date+quote combination.
+//  v2 response parsers
+//  Both endpoints return the same flat array format:
+//  [ { date, base, quote, rate }, ... ]
 // ---------------------------------------------------------------------------
 
-// Parse latest-rates array -> populate RATES (all vs EUR base)
-function parseLatestRates(arr) {
+function parseLatestInto(arr) {
+  // Merge latest rates into RATES. EUR base -> RATES[quote] = rate.
   RATES["EUR"] = 1.0;
-  for (var i = 0; i < arr.length; i++) {
-    var row = arr[i];
-    RATES[row.quote] = row.rate;
-  }
+  for (var i = 0; i < arr.length; i++) RATES[arr[i].quote] = arr[i].rate;
 }
 
-// Parse time-series array -> populate HIST and DATES
-// Input: flat array of { date, base:"EUR", quote, rate }
-// Output: DATES = sorted unique dates; HIST[currency] = aligned rate array
-function parseHistorySeries(arr) {
-  // Step 1: collect unique sorted dates and build a date->index map
-  var dateSet = {};
-  for (var i = 0; i < arr.length; i++) dateSet[arr[i].date] = true;
-  var sortedDates = Object.keys(dateSet).sort();
+// Merge a time-series array into HIST_CACHE.
+// Aligns new data to HIST_DATES, extending it if necessary.
+// Only stores currencies present in the array.
+function parseHistoryInto(arr) {
+  if (!arr.length) return;
+
+  // Collect all dates in this response
+  var newDateSet = {};
+  for (var i = 0; i < arr.length; i++) newDateSet[arr[i].date] = true;
+  var newDates = Object.keys(newDateSet).sort();
+
+  // Merge with existing HIST_DATES to get the full unified date axis
+  var mergedSet = {};
+  for (var j = 0; j < HIST_DATES.length; j++) mergedSet[HIST_DATES[j]] = true;
+  for (var k = 0; k < newDates.length; k++) mergedSet[newDates[k]] = true;
+  var mergedDates = Object.keys(mergedSet).sort();
+  var n = mergedDates.length;
+
+  // Build an index map for the new date axis
   var dateIdx = {};
-  for (var j = 0; j < sortedDates.length; j++) dateIdx[sortedDates[j]] = j;
+  for (var m = 0; m < n; m++) dateIdx[mergedDates[m]] = m;
 
-  var n = sortedDates.length;
-
-  // Step 2: pre-fill HIST with null arrays for all Tier1 currencies
-  var hist = {};
-  for (var k = 0; k < TIER1_CODES.length; k++) {
-    hist[TIER1_CODES[k]] = new Array(n).fill(null);
-  }
-  // EUR is always 1.0 vs itself
-  hist["EUR"] = new Array(n).fill(1.0);
-
-  // Step 3: fill in rates from the flat array
-  for (var m = 0; m < arr.length; m++) {
-    var row = arr[m];
-    if (hist[row.quote] !== undefined) {
-      hist[row.quote][dateIdx[row.date]] = row.rate;
+  // Re-align all existing cached arrays to the new (potentially longer) axis
+  if (mergedDates.length !== HIST_DATES.length) {
+    var oldIdx = {};
+    for (var o = 0; o < HIST_DATES.length; o++) oldIdx[HIST_DATES[o]] = o;
+    for (var code in HIST_CACHE) {
+      if (HIST_CACHE[code] === null) continue;  // EUR sentinel
+      var old = HIST_CACHE[code];
+      var realigned = new Array(n).fill(null);
+      for (var p = 0; p < HIST_DATES.length; p++) {
+        var newPos = dateIdx[HIST_DATES[p]];
+        if (newPos !== undefined) realigned[newPos] = old[p];
+      }
+      HIST_CACHE[code] = realigned;
     }
   }
 
-  DATES = sortedDates;
-  HIST  = hist;
+  HIST_DATES = mergedDates;
+
+  // Collect which codes appear in this response
+  var codeSeen = {};
+  for (var q = 0; q < arr.length; q++) codeSeen[arr[q].quote] = true;
+
+  // Initialise cache arrays for any newly seen codes
+  for (var code2 in codeSeen) {
+    if (HIST_CACHE[code2] === undefined) HIST_CACHE[code2] = new Array(n).fill(null);
+  }
+
+  // Fill values
+  for (var r = 0; r < arr.length; r++) {
+    var row = arr[r];
+    var idx = dateIdx[row.date];
+    if (idx !== undefined && HIST_CACHE[row.quote] !== undefined) {
+      HIST_CACHE[row.quote][idx] = row.rate;
+    }
+  }
+}
+
+// Return the cached history array for a currency (EUR returns synthetic 1.0 array)
+function getHist(code) {
+  if (code === "EUR") {
+    if (!HIST_DATES.length) return null;
+    // Materialise EUR on demand
+    if (HIST_CACHE["EUR"] === null) {
+      HIST_CACHE["EUR"] = new Array(HIST_DATES.length).fill(1.0);
+    }
+    return HIST_CACHE["EUR"];
+  }
+  return HIST_CACHE[code] || null;
 }
 
 // ---------------------------------------------------------------------------
-//  STAGE 1 — fetch rates for the two default currencies immediately
-//  Fast: only 1-2 quotes requested so the converter lights up quickly.
+//  History fetching — lazy, per-currency, deduplicated
+// ---------------------------------------------------------------------------
+
+// Returns a Promise that resolves when history for `codes` is in HIST_CACHE.
+// Skips codes already cached or in-flight. EUR is always considered cached.
+function ensureHistory(codes) {
+  var needed = codes.filter(function(c) {
+    return c !== "EUR" && HIST_CACHE[c] === undefined && !histFetching[c];
+  });
+
+  if (!needed.length) {
+    // Check if any are still in-flight — return combined promise
+    var inFlight = codes.filter(function(c) { return histFetching[c]; })
+                        .map(function(c) { return histFetching[c]; });
+    return inFlight.length ? Promise.all(inFlight) : Promise.resolve();
+  }
+
+  var quotesParam = needed.join(",");
+  var url = API + "/rates?from=" + _5Y_FROM + "&base=EUR&quotes=" + quotesParam;
+
+  var p = fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(arr) {
+      parseHistoryInto(arr);
+      // Clear in-flight markers
+      for (var i = 0; i < needed.length; i++) delete histFetching[needed[i]];
+    })
+    .catch(function(e) {
+      console.error("[FX] History fetch error for " + needed.join(",") + ":", e);
+      // Mark as failed so we don't retry forever — store empty array as sentinel
+      for (var i = 0; i < needed.length; i++) {
+        if (HIST_CACHE[needed[i]] === undefined) HIST_CACHE[needed[i]] = [];
+        delete histFetching[needed[i]];
+      }
+    });
+
+  // Register the same promise for all currencies in this batch
+  for (var i = 0; i < needed.length; i++) histFetching[needed[i]] = p;
+
+  // Also wait on any already-in-flight fetches for the other requested codes
+  var others = codes.filter(function(c) { return histFetching[c] && needed.indexOf(c) === -1; })
+                    .map(function(c) { return histFetching[c]; });
+  return others.length ? Promise.all([p].concat(others)) : p;
+}
+
+// ---------------------------------------------------------------------------
+//  STAGE 1 — latest rate for default pair only (fast)
 // ---------------------------------------------------------------------------
 function fetchDefaultRates() {
-  // Always need rates vs EUR. If a currency IS EUR, it's already 1.0.
   var needed = [DEFAULT_FROM, DEFAULT_TO].filter(function(c) { return c !== "EUR"; });
   var qs = needed.length ? "?base=EUR&quotes=" + needed.join(",") : "?base=EUR&quotes=USD";
 
   fetch(API + "/rates" + qs)
     .then(function(r) { return r.json(); })
     .then(function(arr) {
-      parseLatestRates(arr);
+      parseLatestInto(arr);
       updateDisplay();
-      // Kick off background stages
-      fetchHistory();
+      // Stage 2 — history for default pair only
+      fetchPairHistory(DEFAULT_FROM, DEFAULT_TO);
+      // Stage 3 — all latest rates for full dropdowns
       fetchAllRates();
     })
     .catch(function(e) {
@@ -393,60 +410,37 @@ function fetchDefaultRates() {
 }
 
 // ---------------------------------------------------------------------------
-//  STAGE 2 — fetch full 5yr daily history for all Tier1 currencies
-//  Runs in background; chart becomes available once this resolves.
+//  STAGE 2 — history for a specific pair (called for default pair on load,
+//            then ad-hoc whenever the user changes a currency)
 // ---------------------------------------------------------------------------
-function fetchHistory() {
-  var from5y = new Date();
-  from5y.setFullYear(from5y.getFullYear() - 5);
-  var fromStr = from5y.toISOString().slice(0, 10);
+function fetchPairHistory(f, t) {
+  var codes = [f, t].filter(function(c) { return c !== "EUR"; });
+  if (!codes.length) {
+    // Both are EUR — nothing to fetch, history trivially available
+    onHistoryReady(f, t);
+    return;
+  }
 
-  // Exclude EUR from quotes — it's the base, already handled as 1.0
-  var quoteCodes = TIER1_CODES.filter(function(c) { return c !== "EUR"; }).join(",");
-  var url = API + "/rates?from=" + fromStr + "&base=EUR&quotes=" + quoteCodes;
+  ensureHistory(codes).then(function() { onHistoryReady(f, t); });
+}
 
-  fetch(url)
-    .then(function(r) { return r.json(); })
-    .then(function(arr) {
-      parseHistorySeries(arr);
-      histReady = true;
-
-      // If user already clicked chart toggle before data arrived, render now
-      if (chartOpenPending) {
-        chartOpenPending = false;
-        var f = $el("from").value, t = $el("to").value;
-        if (isTier1(f) && isTier1(t)) {
-          show("chartNoData", false);
-          show("chartArea", true);
-          if (!chartBuilt) { buildChart(); chartBuilt = true; }
-          else refreshChart();
-        } else {
-          updateChartSection();
-        }
-      }
-    })
-    .catch(function(e) {
-      console.error("[FX] Stage 2 history error:", e);
-      if (chartOpenPending) {
-        chartOpenPending = false;
-        show("chartNoData", true);
-        show("chartArea", false);
-        $el("noDataMsg").textContent = "History unavailable right now.";
-      }
-    });
+// Called once history for the current pair is confirmed ready
+function onHistoryReady(f, t) {
+  // Only act if the current selection still matches what was requested
+  if ($el("from").value !== f || $el("to").value !== t) return;
+  updateChartSection();
+  if (chartBuilt) refreshChart();
 }
 
 // ---------------------------------------------------------------------------
-//  STAGE 3 — fetch ALL currency rates for full dropdown
-//  Runs in background; Tier2 dropdown populates once this resolves.
+//  STAGE 3 — all latest rates (background, for full dropdown population)
 // ---------------------------------------------------------------------------
 function fetchAllRates() {
   fetch(API + "/rates?base=EUR")
     .then(function(r) { return r.json(); })
     .then(function(arr) {
-      parseLatestRates(arr);  // merges into RATES, won't overwrite existing
+      parseLatestInto(arr);
 
-      // Populate Tier2 optgroup now that we know which codes have rates
       var t2grp = document.getElementById(W + "_t2grp");
       if (t2grp) {
         t2grp.label = "Current rate only";
@@ -454,45 +448,84 @@ function fetchAllRates() {
         var t2keys = Object.keys(TIER2).sort();
         for (var i = 0; i < t2keys.length; i++) {
           var c = t2keys[i];
-          if (RATES[c] != null) {
-            html += '<option value="' + c + '">' + c + ' — ' + TIER2[c] + '</option>';
-          }
+          if (RATES[c] != null) html += '<option value="' + c + '">' + c + ' — ' + TIER2[c] + '</option>';
         }
         t2grp.innerHTML = html;
       }
     })
-    .catch(function(e) {
-      console.error("[FX] Stage 3 all-rates error:", e);
-      var t2grp = document.getElementById(W + "_t2grp");
-      if (t2grp) t2grp.label = "More currencies (unavailable)";
-    });
+    .catch(function(e) { console.error("[FX] Stage 3 error:", e); });
+}
+
+// ---------------------------------------------------------------------------
+//  Display
+// ---------------------------------------------------------------------------
+function updateDisplay() {
+  var f    = $el("from").value;
+  var t    = $el("to").value;
+  var amt  = parseFloat($el("fromv").value) || 1;
+  var rate = xRate(f, t);
+  var rv   = $el("rval");
+
+  if (rate == null) {
+    rv.textContent = "—";
+    $el("rmeta").textContent = RATES[f] == null || RATES[t] == null ? "Loading…" : "Rate unavailable";
+    return;
+  }
+  rv.classList.remove("loading-pulse");
+  var result = amt * rate;
+  var lbl = fmt(amt) + " " + f + " =";
+  if ($el("rlbl"))     $el("rlbl").textContent     = lbl;
+  if ($el("rlbl_mob")) $el("rlbl_mob").textContent = lbl;
+  rv.textContent           = fmt(result);
+  $el("rmeta").textContent = t + "  ·  1 " + f + " = " + fmt(rate) + " " + t;
+  $el("tov").value         = result.toFixed(6);
 }
 
 // ---------------------------------------------------------------------------
 //  Converter interactions
 // ---------------------------------------------------------------------------
 window[W + "_fwd"] = function() {
-  var f = $el("from").value, t = $el("to").value;
   var amt = parseFloat($el("fromv").value);
-  var rate = xRate(f, t);
+  var rate = xRate($el("from").value, $el("to").value);
   if (!rate || isNaN(amt)) return;
   $el("tov").value = (amt * rate).toFixed(6);
   updateDisplay();
 };
 
 window[W + "_rev"] = function() {
-  var f = $el("from").value, t = $el("to").value;
   var amt = parseFloat($el("tov").value);
-  var rate = xRate(t, f);
+  var rate = xRate($el("to").value, $el("from").value);
   if (!rate || isNaN(amt)) return;
   $el("fromv").value = (amt * rate).toFixed(6);
   updateDisplay();
 };
 
 window[W + "_go"] = function() {
-  window[W + "_fwd"]();
-  updateChartSection();
-  if (chartBuilt) refreshChart();
+  var f = $el("from").value, t = $el("to").value;
+  updateDisplay();
+  $el("ctitle").textContent = f + "/" + t;
+
+  if (!isTier1(f) || !isTier1(t)) {
+    // Tier2 currency selected — no history available
+    show("chartNoData", true); show("chartArea", false);
+    var missing = [f,t].filter(function(c){return !isTier1(c);}).join(", ");
+    $el("noDataMsg").textContent = "Historical data not available for " + missing + ".";
+    return;
+  }
+
+  var fReady = f === "EUR" || HIST_CACHE[f] !== undefined;
+  var tReady = t === "EUR" || HIST_CACHE[t] !== undefined;
+
+  if (fReady && tReady) {
+    // Both already cached — update chart immediately
+    updateChartSection();
+    if (chartBuilt) refreshChart();
+  } else {
+    // Need to fetch — show loading state in chart area
+    show("chartNoData", true); show("chartArea", false);
+    $el("noDataMsg").textContent = "Loading history…";
+    fetchPairHistory(f, t);
+  }
 };
 
 window[W + "_swap"] = function() {
@@ -506,57 +539,57 @@ window[W + "_swap"] = function() {
 // ---------------------------------------------------------------------------
 function updateChartSection() {
   var f = $el("from").value, t = $el("to").value;
-  if (isTier1(f) && isTier1(t)) {
-    show("chartNoData", false); show("chartArea", true);
-    $el("ctitle").textContent = f + "/" + t;
-  } else {
+  var fH = getHist(f), tH = getHist(t);
+
+  if (!isTier1(f) || !isTier1(t)) {
     show("chartNoData", true); show("chartArea", false);
-    var missing = [f, t].filter(function(c) { return !isTier1(c); }).join(", ");
+    var missing = [f,t].filter(function(c){return !isTier1(c);}).join(", ");
     $el("noDataMsg").textContent = "Historical data not available for " + missing + ".";
+    return;
   }
+  if (!fH || !tH || !fH.length || !tH.length) {
+    show("chartNoData", true); show("chartArea", false);
+    $el("noDataMsg").textContent = "History not available for this pair.";
+    return;
+  }
+  show("chartNoData", false); show("chartArea", true);
+  $el("ctitle").textContent = f + "/" + t;
 }
 
 function series() {
   var f = $el("from").value, t = $el("to").value;
-  if (!DATES.length) return { data: [], n: 0 };
+  var fH = getHist(f), tH = getHist(t);
+  if (!fH || !tH || !HIST_DATES.length) return { data: [], n: 0 };
 
   var n;
   if (per >= 9999) {
-    n = DATES.length;
+    n = HIST_DATES.length;
   } else {
-    var lastDate = new Date(DATES[DATES.length - 1]);
-    var cutoff   = lastDate.getTime() - per * 86400000;
+    var last    = new Date(HIST_DATES[HIST_DATES.length - 1]);
+    var cutoff  = last.getTime() - per * 86400000;
     n = 0;
-    for (var k = DATES.length - 1; k >= 0; k--) {
-      if (new Date(DATES[k]).getTime() >= cutoff) n++;
+    for (var k = HIST_DATES.length - 1; k >= 0; k--) {
+      if (new Date(HIST_DATES[k]).getTime() >= cutoff) n++;
       else break;
     }
     if (n === 0) n = 1;
   }
 
-  var fH = HIST[f], tH = HIST[t];
-  if (!fH || !tH) return { data: [], n: 0 };
-
-  var ds   = DATES.slice(-n);
+  var ds   = HIST_DATES.slice(-n);
   var fs   = fH.slice(-n);
   var ts   = tH.slice(-n);
   var data = fs.map(function(v, i) {
     return (v != null && ts[i] != null) ? +((ts[i] / v).toFixed(5)) : null;
   });
 
-  // Tick label logic — one label type per period, no mixing, no duplicates
   var tMap = {}, lastYr = -1, lastWeek = -1, seenLabel = {};
   var EPOCH = Date.UTC(1970, 0, 1);
-
   for (var i = 0; i < n; i++) {
     var dt   = new Date(ds[i]);
-    var yr   = dt.getUTCFullYear();
-    var mo   = dt.getUTCMonth();
-    var dom  = dt.getUTCDate();
-    var day  = dt.getUTCDay();
-    var ms   = dt.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+    var yr   = dt.getUTCFullYear(), mo = dt.getUTCMonth();
+    var dom  = dt.getUTCDate(),    day = dt.getUTCDay();
+    var ms   = dt.toLocaleString("en-US", {month:"short", timeZone:"UTC"});
     var absW = Math.floor((dt.getTime() - EPOCH) / 604800000);
-
     if (per >= 9999) {
       if (yr !== lastYr) { tMap[i] = String(yr); lastYr = yr; }
     } else if (per >= 365) {
@@ -570,27 +603,24 @@ function series() {
 
   var labels = [];
   for (var j = 0; j < n; j++) labels.push(tMap[j] !== undefined ? tMap[j] : "");
-
   _rawDates = ds;
   return { data: data, labels: labels, n: n };
 }
 
 function buildChart() {
   var ctx = document.getElementById(W + "_c").getContext("2d");
-  var s = series();
-  if (!s.n) return;
+  var s = series(); if (!s.n) return;
   fxChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: s.labels,
       datasets: [{
         data: s.data,
-        borderColor: "#52B788", borderWidth: 1.5,
-        fill: true,
+        borderColor: "#52B788", borderWidth: 1.5, fill: true,
         backgroundColor: function(c) {
-          var g = c.chart.ctx.createLinearGradient(0, 0, 0, 150);
-          g.addColorStop(0, "rgba(82,183,136,0.15)");
-          g.addColorStop(1, "rgba(82,183,136,0)");
+          var g = c.chart.ctx.createLinearGradient(0,0,0,150);
+          g.addColorStop(0,"rgba(82,183,136,0.15)");
+          g.addColorStop(1,"rgba(82,183,136,0)");
           return g;
         },
         pointRadius: 0, pointHoverRadius: 3,
@@ -605,32 +635,22 @@ function buildChart() {
         legend: { display: false },
         tooltip: {
           backgroundColor: "#1E4034", titleColor: "rgba(201,212,197,0.9)",
-          bodyColor: "#fff", titleFont: { size: 10 },
-          bodyFont: { size: 12, weight: "500" },
+          bodyColor: "#fff", titleFont: {size:10}, bodyFont: {size:12, weight:"500"},
           padding: 9, displayColors: false,
           callbacks: {
             title: function(items) { return _rawDates[items[0].dataIndex] || ""; },
             label: function(item) {
               var f = $el("from").value, t = $el("to").value;
-              return item.raw == null ? "—" : " 1 " + f + " = " + item.raw + " " + t;
+              return item.raw == null ? "—" : " 1 "+f+" = "+item.raw+" "+t;
             }
           }
         }
       },
       scales: {
-        x: {
-          type: "category",
-          grid: { display: false }, border: { display: false },
-          ticks: {
-            color: "#8C8C8C", font: { size: 9 },
-            maxRotation: 0, autoSkip: false
-          }
-        },
-        y: {
-          position: "right", grid: { color: "#F2F2F2" },
-          border: { display: false },
-          ticks: { color: "#8C8C8C", font: { size: 9 }, maxTicksLimit: 4 }
-        }
+        x: { type:"category", grid:{display:false}, border:{display:false},
+              ticks:{color:"#8C8C8C", font:{size:9}, maxRotation:0, autoSkip:false} },
+        y: { position:"right", grid:{color:"#F2F2F2"}, border:{display:false},
+              ticks:{color:"#8C8C8C", font:{size:9}, maxTicksLimit:4} }
       }
     }
   });
@@ -638,35 +658,32 @@ function buildChart() {
 
 function refreshChart() {
   if (!fxChart) return;
-  var s = series();
-  if (!s.n) return;
-  fxChart.data.labels   = s.labels;
+  var s = series(); if (!s.n) return;
+  fxChart.data.labels = s.labels;
   fxChart.data.datasets[0].data = s.data;
   fxChart.update();
 }
 
 window[W + "_toggleChart"] = function() {
-  var body   = $el("cbody");
-  var chev   = $el("chev");
+  var body = $el("cbody"), chev = $el("chev");
   var isOpen = body.style.display === "block";
   body.style.display   = isOpen ? "none" : "block";
   chev.style.transform = isOpen ? "" : "rotate(180deg)";
-
   if (!isOpen) {
     var f = $el("from").value, t = $el("to").value;
-    if (!isTier1(f) || !isTier1(t)) { updateChartSection(); return; }
-
-    if (!histReady) {
-      // History still loading — show placeholder, render when it arrives
-      chartOpenPending = true;
-      show("chartNoData", true);
-      show("chartArea", false);
-      $el("noDataMsg").textContent = "Loading history…";
-      return;
-    }
     updateChartSection();
-    if (!chartBuilt) { buildChart(); chartBuilt = true; }
-    else refreshChart();
+    var fReady = f === "EUR" || HIST_CACHE[f] !== undefined;
+    var tReady = t === "EUR" || HIST_CACHE[t] !== undefined;
+    if (isTier1(f) && isTier1(t)) {
+      if (fReady && tReady) {
+        if (!chartBuilt) { buildChart(); chartBuilt = true; }
+        else refreshChart();
+      } else {
+        show("chartNoData", true); show("chartArea", false);
+        $el("noDataMsg").textContent = "Loading history…";
+        fetchPairHistory(f, t);
+      }
+    }
   }
 };
 
@@ -675,7 +692,7 @@ window[W + "_per"] = function(days, btn) {
   var btns = document.querySelectorAll("#fx_eur_usd .fx-pbtn");
   for (var i = 0; i < btns.length; i++) btns[i].classList.remove("on");
   btn.classList.add("on");
-  if (histReady) refreshChart();
+  if (chartBuilt) refreshChart();
 };
 
 // ---------------------------------------------------------------------------
@@ -683,7 +700,7 @@ window[W + "_per"] = function(days, btn) {
 // ---------------------------------------------------------------------------
 setOpt("from", DEFAULT_FROM);
 setOpt("to",   DEFAULT_TO);
-fetchDefaultRates();  // Stage 1 → on success kicks off Stage 2 + 3
+fetchDefaultRates();  // Stage 1 → triggers Stage 2 + 3 on success
 
 })();
 </script>
