@@ -420,7 +420,6 @@
         <button class="fx-pbtn"    onclick="fx_eur_usd_per(180,this)">180D</button>
         <button class="fx-pbtn"    onclick="fx_eur_usd_per(365,this)">1Y</button>
         <button class="fx-pbtn on" onclick="fx_eur_usd_per(1825,this)">5Y</button>
-        <button class="fx-pbtn"    onclick="fx_eur_usd_per(7300,this)" id="fx_eur_usd_btn20y">20Y</button>
       </div>
     </div>
     <div id="fx_eur_usd_chartArea">
@@ -446,169 +445,116 @@ var CURRENCIES   = {"AED": "UAE Dirham", "AFN": "Afghan Afghani", "ALL": "Albani
 var W            = "fx_eur_usd";
 var API          = "https://api.frankfurter.dev/v2";
 
-// Start dates for each history window
-var DATE_5Y  = (function() { var d=new Date(); d.setFullYear(d.getFullYear()-5);  return d.toISOString().slice(0,10); })();
-var DATE_20Y = (function() { var d=new Date(); d.setFullYear(d.getFullYear()-20); return d.toISOString().slice(0,10); })();
+var DATE_5Y = (function() {
+  var d = new Date(); d.setFullYear(d.getFullYear() - 5);
+  return d.toISOString().slice(0, 10);
+})();
 
 // ---- State ----
-// RATES[code] = rate vs EUR (EUR=1.0). Cross-rate A->B = RATES[B]/RATES[A]
-var RATES = {};
-
-// History cache keyed by currency code.
-// Each entry: { dates: [...], values: [...] } — own date axis per currency
-// because different currencies may have different history start dates.
-// When building a chart series we intersect the two currencies' date axes.
-// "EUR" is synthetic: values are all 1.0.
-var HIST = {};   // HIST[code] = { from5y: bool, from20y: bool, dates: [], values: [] }
-
-// In-flight fetch promises, keyed by "CODE:window" e.g. "USD:5y" or "GBP:20y"
-var fetching = {};
-
+var RATES    = {};   // code -> rate vs EUR (EUR=1.0)
+var HIST     = {};   // code -> { dates:[], values:[], from5y:bool }
+var fetching = {};   // dedup in-flight fetches keyed by code
 var chartBuilt = false;
 var fxChart    = null;
-var per        = 1825;   // current period in days (default 5Y)
+var per        = 1825;  // active period in days (default 5Y)
 var _rawDates  = [];
 
 // ---- Helpers ----
-function $el(id) { return document.getElementById(W+"_"+id); }
-function chartOpen() { return $el("cbody").style.display==="block"; }
+function $el(id)  { return document.getElementById(W + "_" + id); }
+function chartOpen() { return $el("cbody").style.display === "block"; }
 
 function fmt(n) {
-  if (n==null||isNaN(n)) return "—";
-  if (n>=10000) return n.toLocaleString("en-US",{maximumFractionDigits:2});
-  if (n>=100)   return n.toFixed(2);
-  if (n>=1)     return n.toFixed(4);
+  if (n == null || isNaN(n)) return "—";
+  if (n >= 10000) return n.toLocaleString("en-US", {maximumFractionDigits: 2});
+  if (n >= 100)   return n.toFixed(2);
+  if (n >= 1)     return n.toFixed(4);
   return n.toFixed(6);
 }
 
-function show(id,on) { var e=$el(id); if(e) e.style.display=on?"block":"none"; }
+function show(id, on) { var e = $el(id); if (e) e.style.display = on ? "block" : "none"; }
 
-function xRate(a,b) {
-  if (RATES[a]==null||RATES[b]==null) return null;
-  return RATES[b]/RATES[a];
-}
-
-// ---- EUR synthetic history ----
-function eurEntry(from20y) {
-  // Generate a synthetic date array of weekdays for the requested window.
-  // We don't know the real Frankfurter date axis for EUR yet (it's the base),
-  // so we generate it on demand from real data once any other currency is fetched.
-  // Simplest: return a sentinel and handle in getHistPair.
-  return { dates:[], values:[], from5y: !from20y, from20y: from20y, synthetic: true };
+function xRate(a, b) {
+  if (RATES[a] == null || RATES[b] == null) return null;
+  return RATES[b] / RATES[a];
 }
 
 // ---- v2 parsers ----
-// v2 returns flat array: [{ date, base, quote, rate }, ...]
 function parseLatestInto(arr) {
   RATES["EUR"] = 1.0;
-  for (var i=0; i<arr.length; i++) RATES[arr[i].quote] = arr[i].rate;
+  for (var i = 0; i < arr.length; i++) RATES[arr[i].quote] = arr[i].rate;
 }
 
-function parseHistoryInto(code, arr, window20y) {
-  // Build sorted date+value arrays for this currency
+function parseHistoryInto(code, arr) {
   var dateMap = {};
-  for (var i=0; i<arr.length; i++) dateMap[arr[i].date] = arr[i].rate;
+  for (var i = 0; i < arr.length; i++) dateMap[arr[i].date] = arr[i].rate;
   var dates  = Object.keys(dateMap).sort();
   var values = dates.map(function(d) { return dateMap[d]; });
-
-  var existing = HIST[code];
-  if (!existing) {
-    // 20Y data covers 5Y too, so from5y is always true
-    HIST[code] = { dates: dates, values: values, from5y: true, from20y: window20y };
-  } else {
-    // Merge: prepend older dates if extending to 20Y
-    var mergedMap = {};
-    for (var j=0; j<existing.dates.length; j++) mergedMap[existing.dates[j]] = existing.values[j];
-    for (var k=0; k<dates.length; k++) mergedMap[dates[k]] = values[k];
-    var merged = Object.keys(mergedMap).sort();
-    HIST[code] = {
-      dates:  merged,
-      values: merged.map(function(d) { return mergedMap[d]; }),
-      from5y:  true,
-      from20y: window20y || existing.from20y
-    };
-  }
+  HIST[code] = { dates: dates, values: values, from5y: true };
 }
 
-// ---- Get aligned series for a pair ----
-// Returns { dates, fromVals, toVals } with a shared date axis (intersection).
+// ---- Get aligned date+value series for a pair ----
+// EUR is synthetic (always 1.0), uses the other currency's date axis.
 function getHistPair(f, t) {
-  var fEntry = HIST[f], tEntry = HIST[t];
-
-  // EUR is synthetic: values = 1.0 on whatever axis the other currency uses
-  if (f === "EUR" && tEntry) {
-    return { dates: tEntry.dates, fromVals: tEntry.dates.map(function(){return 1.0;}), toVals: tEntry.values };
-  }
-  if (t === "EUR" && fEntry) {
-    return { dates: fEntry.dates, fromVals: fEntry.values, toVals: fEntry.dates.map(function(){return 1.0;})};
-  }
-  if (!fEntry || !tEntry) return null;
-
+  var fE = HIST[f], tE = HIST[t];
+  if (f === "EUR" && tE) return { dates: tE.dates, fromVals: tE.dates.map(function() { return 1.0; }), toVals: tE.values };
+  if (t === "EUR" && fE) return { dates: fE.dates, fromVals: fE.values, toVals: fE.dates.map(function() { return 1.0; }) };
+  if (!fE || !tE) return null;
   // Intersect date axes
   var tSet = {};
-  for (var i=0; i<tEntry.dates.length; i++) tSet[tEntry.dates[i]] = tEntry.values[i];
-  var dates=[], fVals=[], tVals=[];
-  for (var j=0; j<fEntry.dates.length; j++) {
-    var d = fEntry.dates[j];
-    if (tSet[d] !== undefined) {
-      dates.push(d); fVals.push(fEntry.values[j]); tVals.push(tSet[d]);
-    }
+  for (var i = 0; i < tE.dates.length; i++) tSet[tE.dates[i]] = tE.values[i];
+  var dates = [], fVals = [], tVals = [];
+  for (var j = 0; j < fE.dates.length; j++) {
+    var d = fE.dates[j];
+    if (tSet[d] !== undefined) { dates.push(d); fVals.push(fE.values[j]); tVals.push(tSet[d]); }
   }
   return { dates: dates, fromVals: fVals, toVals: tVals };
 }
 
-// ---- History fetching ----
-// window: "5y" or "20y"
-function fetchHist(code, window) {
-  if (code === "EUR") return Promise.resolve();  // synthetic, no fetch needed
-  var key = code + ":" + window;
-  if (fetching[key]) return fetching[key];
+// ---- History fetching — lazy, deduplicated, 5Y only ----
+function fetchHist(code) {
+  if (code === "EUR") return Promise.resolve();
+  if (HIST[code] && HIST[code].from5y) return Promise.resolve();
+  if (fetching[code]) return fetching[code];
 
-  var entry = HIST[code];
-  if (window === "5y"  && entry && entry.from5y)  return Promise.resolve();
-  if (window === "20y" && entry && entry.from20y) return Promise.resolve();
-
-  var fromDate = window === "20y" ? DATE_20Y : DATE_5Y;
-  var url = API + "/rates?from=" + fromDate + "&base=EUR&quotes=" + code;
-
-  var p = fetch(url)
+  var p = fetch(API + "/rates?from=" + DATE_5Y + "&base=EUR&quotes=" + code)
     .then(function(r) { return r.json(); })
     .then(function(arr) {
-      parseHistoryInto(code, arr, window === "20y");
-      // Also update RATES if we don't have it yet
-      if (RATES[code] == null && arr.length) RATES[code] = arr[arr.length-1].rate;
-      delete fetching[key];
+      parseHistoryInto(code, arr);
+      if (RATES[code] == null && arr.length) RATES[code] = arr[arr.length - 1].rate;
+      delete fetching[code];
     })
     .catch(function(e) {
-      console.error("[FX] hist fetch error "+key+":", e);
-      // Ensure entry exists so we don't retry forever
-      if (!HIST[code]) HIST[code] = { dates:[], values:[], from5y:true, from20y:true };
-      delete fetching[key];
+      console.error("[FX] hist error " + code + ":", e);
+      if (!HIST[code]) HIST[code] = { dates: [], values: [], from5y: true };
+      delete fetching[code];
     });
 
-  fetching[key] = p;
+  fetching[code] = p;
   return p;
 }
 
-function ensurePairHist(f, t, window) {
-  return Promise.all([fetchHist(f, window), fetchHist(t, window)]);
+function fetchPairHist(f, t) {
+  return Promise.all([fetchHist(f), fetchHist(t)]);
 }
 
 // ---- Stage 1: latest rate for default pair ----
 function fetchDefaultRates() {
-  var needed = [DEFAULT_FROM, DEFAULT_TO].filter(function(c){return c!=="EUR";});
-  var qs = needed.length ? "?base=EUR&quotes="+needed.join(",") : "?base=EUR&quotes=USD";
-  fetch(API+"/rates"+qs)
-    .then(function(r){ return r.json(); })
+  var needed = [DEFAULT_FROM, DEFAULT_TO].filter(function(c) { return c !== "EUR"; });
+  var qs = needed.length ? "?base=EUR&quotes=" + needed.join(",") : "?base=EUR&quotes=USD";
+  fetch(API + "/rates" + qs)
+    .then(function(r) { return r.json(); })
     .then(function(arr) {
       parseLatestInto(arr);
       updateDisplay();
-      // Stage 2: fetch full 20Y history upfront — all period buttons work instantly
-      ensurePairHist(DEFAULT_FROM, DEFAULT_TO, "20y").then(function() {
+      // Stage 2: 5Y history for default pair
+      fetchPairHist(DEFAULT_FROM, DEFAULT_TO).then(function() {
         if (chartOpen()) tryRenderChart();
       });
-      // Stage 3: all current rates (for conversion when user picks any currency)
-      fetchAllRates();
+      // Stage 3: all current rates for full dropdown conversions
+      fetch(API + "/rates?base=EUR")
+        .then(function(r) { return r.json(); })
+        .then(function(arr) { parseLatestInto(arr); })
+        .catch(function(e) { console.error("[FX] all-rates error:", e); });
     })
     .catch(function(e) {
       $el("rval").classList.remove("loading-pulse");
@@ -618,79 +564,76 @@ function fetchDefaultRates() {
     });
 }
 
-// Stage 3: all current rates so any currency pair can convert immediately
-function fetchAllRates() {
-  fetch(API+"/rates?base=EUR")
-    .then(function(r){ return r.json(); })
-    .then(function(arr) { parseLatestInto(arr); })
-    .catch(function(e) { console.error("[FX] all-rates error:", e); });
-}
-
 // ---- Display ----
 function updateDisplay() {
-  var f=$el("from").value, t=$el("to").value;
-  var amt=parseFloat($el("fromv").value)||1;
-  var rate=xRate(f,t);
-  var rv=$el("rval");
-  if (rate==null) {
-    rv.textContent="—";
-    $el("rmeta").textContent=(RATES[f]==null||RATES[t]==null)?"Loading…":"Rate unavailable";
+  var f = $el("from").value, t = $el("to").value;
+  var amt = parseFloat($el("fromv").value) || 1;
+  var rate = xRate(f, t);
+  var rv = $el("rval");
+  if (rate == null) {
+    rv.textContent = "—";
+    $el("rmeta").textContent = (RATES[f] == null || RATES[t] == null) ? "Loading…" : "Rate unavailable";
     return;
   }
   rv.classList.remove("loading-pulse");
-  var result=amt*rate;
-  var lbl=fmt(amt)+" "+f+" =";
-  if($el("rlbl"))     $el("rlbl").textContent=lbl;
-  if($el("rlbl_mob")) $el("rlbl_mob").textContent=lbl;
-  rv.textContent=fmt(result);
-  $el("rmeta").textContent=t+"  ·  1 "+f+" = "+fmt(rate)+" "+t;
-  $el("tov").value=result.toFixed(6);
+  var result = amt * rate;
+  var lbl = fmt(amt) + " " + f + " =";
+  if ($el("rlbl"))     $el("rlbl").textContent     = lbl;
+  if ($el("rlbl_mob")) $el("rlbl_mob").textContent = lbl;
+  rv.textContent           = fmt(result);
+  $el("rmeta").textContent = t + "  ·  1 " + f + " = " + fmt(rate) + " " + t;
+  $el("tov").value         = result.toFixed(6);
 }
 
-// ---- Chart rendering ----
+// ---- Chart ----
+function tickLimit() {
+  if (per >= 1825) return 6;
+  if (per >= 365)  return 7;
+  if (per >= 180)  return 6;
+  if (per >= 90)   return 4;
+  return 5;
+}
+
+function fmtTick(dateStr) {
+  var p = dateStr.split("-");
+  var yr = p[0], mo = parseInt(p[1], 10) - 1, dom = parseInt(p[2], 10);
+  var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  if (per >= 1825) return yr;
+  if (per >= 90)   return M[mo] + " " + yr;
+  return M[mo] + " " + dom;
+}
+
 function tryRenderChart() {
-  var f=$el("from").value, t=$el("to").value;
-  $el("ctitle").textContent=f+"/"+t;
+  var f = $el("from").value, t = $el("to").value;
+  $el("ctitle").textContent = f + "/" + t;
 
   var pair = getHistPair(f, t);
   if (!pair || !pair.dates.length) {
-    show("chartNoData",true); show("chartArea",false);
+    show("chartNoData", true); show("chartArea", false);
     $el("noDataMsg").textContent = "Loading history…";
     return;
   }
 
-  show("chartNoData",false); show("chartArea",true);
+  show("chartNoData", false); show("chartArea", true);
 
-  // Slice to the selected period window
+  // Slice to the selected period
   var startIdx = 0;
-  if (per >= 7300) {
-    // 20Y: use everything in cache (ensurePairHist already fetched 20Y)
-    startIdx = 0;
-  } else if (per >= 1825) {
-    // 5Y: binary-search for first date >= DATE_5Y
+  if (per < 1825) {
+    var lastMs = new Date(pair.dates[pair.dates.length - 1]).getTime();
+    var cutMs  = lastMs - per * 86400000;
     var lo = 0, hi = pair.dates.length - 1;
     while (lo < hi) {
       var mid = (lo + hi) >> 1;
-      if (pair.dates[mid] < DATE_5Y) lo = mid + 1; else hi = mid;
+      if (new Date(pair.dates[mid]).getTime() < cutMs) lo = mid + 1; else hi = mid;
     }
-    startIdx = (pair.dates.length > 0 && pair.dates[lo] >= DATE_5Y) ? lo : 0;
-  } else {
-    // 30D/90D/180D/1Y: slice by calendar days back from the most recent date
-    var lastMs = new Date(pair.dates[pair.dates.length - 1]).getTime();
-    var cutMs  = lastMs - per * 86400000;
-    var lo2 = 0, hi2 = pair.dates.length - 1;
-    while (lo2 < hi2) {
-      var mid2 = (lo2 + hi2) >> 1;
-      if (new Date(pair.dates[mid2]).getTime() < cutMs) lo2 = mid2 + 1; else hi2 = mid2;
-    }
-    startIdx = lo2;
+    startIdx = lo;
   }
 
   var ds    = pair.dates.slice(startIdx);
   var fVals = pair.fromVals.slice(startIdx);
   var tVals = pair.toVals.slice(startIdx);
-  var data  = fVals.map(function(v,i) {
-    return (v!=null && tVals[i]!=null) ? +((tVals[i]/v).toFixed(5)) : null;
+  var data  = fVals.map(function(v, i) {
+    return (v != null && tVals[i] != null) ? +((tVals[i] / v).toFixed(5)) : null;
   });
   _rawDates = ds;
 
@@ -700,34 +643,13 @@ function tryRenderChart() {
   } else {
     fxChart.data.labels = ds.slice();
     fxChart.data.datasets[0].data = data;
-    // Update tick limit and formatter for the new period, then redraw
     fxChart.options.scales.x.ticks.maxTicksLimit = tickLimit();
     fxChart.update();
   }
 }
 
-// How many x-axis ticks to show for each period
-function tickLimit() {
-  if (per >= 7300) return 8;   // 20Y  → ~one per 2-3 years
-  if (per >= 1825) return 6;   // 5Y   → one per year
-  if (per >= 365)  return 7;   // 1Y   → ~every 7 weeks
-  if (per >= 180)  return 6;   // 180D → ~monthly
-  if (per >= 90)   return 4;   // 90D  → ~monthly
-  return 5;                    // 30D  → ~weekly
-}
-
-// Format a "YYYY-MM-DD" string for the x-axis based on current period
-function fmtTick(dateStr) {
-  var p = dateStr.split("-");
-  var yr = p[0], mo = parseInt(p[1],10)-1, dom = parseInt(p[2],10);
-  var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  if (per >= 1825) return yr;             // 5Y / 20Y  → "2022"
-  if (per >= 90)   return M[mo]+" "+yr;  // 90D – 1Y  → "Jan 2024"
-  return M[mo]+" "+dom;                  // 30D        → "Mar 14"
-}
-
 function buildChart(labels, data) {
-  var ctx = document.getElementById(W+"_c").getContext("2d");
+  var ctx = document.getElementById(W + "_c").getContext("2d");
   fxChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -765,12 +687,10 @@ function buildChart(labels, data) {
           padding: 9,
           displayColors: false,
           callbacks: {
-            title: function(items) {
-              return _rawDates[items[0].dataIndex] || "";
-            },
+            title: function(items) { return _rawDates[items[0].dataIndex] || ""; },
             label: function(item) {
               var f = $el("from").value, t = $el("to").value;
-              return item.raw == null ? "—" : " 1 "+f+" = "+item.raw+" "+t;
+              return item.raw == null ? "—" : " 1 " + f + " = " + item.raw + " " + t;
             }
           }
         }
@@ -788,7 +708,6 @@ function buildChart(labels, data) {
             autoSkipPadding: 12,
             maxTicksLimit: tickLimit(),
             callback: function(val) {
-              // In Chart.js 4.x category scale, val is the index — get label via getLabelForValue
               var dateStr = this.getLabelForValue(val);
               return dateStr ? fmtTick(dateStr) : "";
             }
@@ -798,11 +717,7 @@ function buildChart(labels, data) {
           position: "right",
           grid: { color: "#F2F2F2" },
           border: { display: false },
-          ticks: {
-            color: "#8C8C8C",
-            font: { size: 9 },
-            maxTicksLimit: 5
-          }
+          ticks: { color: "#8C8C8C", font: { size: 9 }, maxTicksLimit: 5 }
         }
       }
     }
@@ -810,71 +725,68 @@ function buildChart(labels, data) {
 }
 
 // ---- Interactions ----
-window[W+"_fwd"] = function() {
-  var amt=parseFloat($el("fromv").value), rate=xRate($el("from").value,$el("to").value);
-  if(!rate||isNaN(amt)) return;
-  $el("tov").value=(amt*rate).toFixed(6); updateDisplay();
-};
-window[W+"_rev"] = function() {
-  var amt=parseFloat($el("tov").value), rate=xRate($el("to").value,$el("from").value);
-  if(!rate||isNaN(amt)) return;
-  $el("fromv").value=(amt*rate).toFixed(6); updateDisplay();
+window[W + "_fwd"] = function() {
+  var amt = parseFloat($el("fromv").value), rate = xRate($el("from").value, $el("to").value);
+  if (!rate || isNaN(amt)) return;
+  $el("tov").value = (amt * rate).toFixed(6); updateDisplay();
 };
 
-window[W+"_go"] = function() {
-  var f=$el("from").value, t=$el("to").value;
+window[W + "_rev"] = function() {
+  var amt = parseFloat($el("tov").value), rate = xRate($el("to").value, $el("from").value);
+  if (!rate || isNaN(amt)) return;
+  $el("fromv").value = (amt * rate).toFixed(6); updateDisplay();
+};
+
+window[W + "_go"] = function() {
+  var f = $el("from").value, t = $el("to").value;
   updateDisplay();
   if (!chartOpen()) return;
-  // Check if 20Y data is ready (we always fetch 20Y upfront)
-  var fReady = f==="EUR" || (HIST[f] && HIST[f].from20y);
-  var tReady = t==="EUR" || (HIST[t] && HIST[t].from20y);
+  var fReady = f === "EUR" || (HIST[f] && HIST[f].from5y);
+  var tReady = t === "EUR" || (HIST[t] && HIST[t].from5y);
   if (fReady && tReady) {
     tryRenderChart();
   } else {
-    show("chartNoData",true); show("chartArea",false);
-    $el("noDataMsg").textContent="Loading history…";
-    ensurePairHist(f, t, "20y").then(function() {
-      if ($el("from").value===f && $el("to").value===t) tryRenderChart();
+    show("chartNoData", true); show("chartArea", false);
+    $el("noDataMsg").textContent = "Loading history…";
+    fetchPairHist(f, t).then(function() {
+      if ($el("from").value === f && $el("to").value === t) tryRenderChart();
     });
   }
 };
 
-window[W+"_swap"] = function() {
-  var f=$el("from").value, t=$el("to").value;
-  var fs=$el("from"), ts=$el("to");
-  for(var i=0;i<fs.options.length;i++) if(fs.options[i].value===t){fs.selectedIndex=i;break;}
-  for(var i=0;i<ts.options.length;i++) if(ts.options[i].value===f){ts.selectedIndex=i;break;}
-  window[W+"_go"]();
+window[W + "_swap"] = function() {
+  var f = $el("from").value, t = $el("to").value;
+  var fs = $el("from"), ts = $el("to");
+  for (var i = 0; i < fs.options.length; i++) if (fs.options[i].value === t) { fs.selectedIndex = i; break; }
+  for (var i = 0; i < ts.options.length; i++) if (ts.options[i].value === f) { ts.selectedIndex = i; break; }
+  window[W + "_go"]();
 };
 
-window[W+"_toggleChart"] = function() {
-  var body=$el("cbody"), chev=$el("chev");
-  var isOpen=body.style.display==="block";
-  body.style.display=isOpen?"none":"block";
-  chev.style.transform=isOpen?"":"rotate(180deg)";
-  if (!isOpen) window[W+"_go"]();
+window[W + "_toggleChart"] = function() {
+  var body = $el("cbody"), chev = $el("chev");
+  var isOpen = body.style.display === "block";
+  body.style.display   = isOpen ? "none" : "block";
+  chev.style.transform = isOpen ? "" : "rotate(180deg)";
+  if (!isOpen) window[W + "_go"]();
 };
 
-window[W+"_per"] = function(days, btn) {
-  per=days;
-  var btns=document.querySelectorAll("#fx_eur_usd .fx-pbtn");
-  for(var i=0;i<btns.length;i++) btns[i].classList.remove("on");
+window[W + "_per"] = function(days, btn) {
+  per = days;
+  var btns = document.querySelectorAll("#fx_eur_usd .fx-pbtn");
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("on");
   btn.classList.add("on");
-  // 20Y always loaded upfront — all buttons render instantly
   tryRenderChart();
 };
 
 // ---- Boot ----
-// Sync dropdowns to the config vars at the top of the file
 (function() {
-  var fromSel = $el("from"), toSel = $el("to");
-  for (var i=0; i<fromSel.options.length; i++)
-    if (fromSel.options[i].value === DEFAULT_FROM) { fromSel.selectedIndex=i; break; }
-  for (var i=0; i<toSel.options.length; i++)
-    if (toSel.options[i].value === DEFAULT_TO)   { toSel.selectedIndex=i; break; }
+  var fs = $el("from"), ts = $el("to");
+  for (var i = 0; i < fs.options.length; i++) if (fs.options[i].value === DEFAULT_FROM) { fs.selectedIndex = i; break; }
+  for (var i = 0; i < ts.options.length; i++) if (ts.options[i].value === DEFAULT_TO)   { ts.selectedIndex = i; break; }
 })();
 fetchDefaultRates();
 
 })();
+</script>
 </script>
 </body></html>
