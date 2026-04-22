@@ -10,20 +10,19 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
   function sendHeight() {
-      const height = document.body.scrollHeight;
-      window.parent.postMessage({
-          type: 'resize',
-          height: height
-      }, '*');
+    const height = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type: 'wix-iframe-height', height: height }, '*');
   }
-   // Send height on load
+
+  // Send on load
   window.addEventListener('load', sendHeight);
-  
-  // Send height whenever the window resizes or content changes
+
+  // Send whenever DOM changes (chart expand/collapse, data load, etc.)
+  const observer = new MutationObserver(sendHeight);
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+  // Also send on any resize
   window.addEventListener('resize', sendHeight);
-  // Create an observer to watch for internal element expansions
-  const observer = new ResizeObserver(sendHeight);
-  observer.observe(document.body);
 </script>
 </head>
 <body style="margin:0;padding:16px;background:#F7F5F0">
