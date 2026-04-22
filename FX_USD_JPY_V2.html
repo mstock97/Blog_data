@@ -8,6 +8,25 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    function sendHeight() {
+        const height = document.body.scrollHeight;
+        window.parent.postMessage({
+            type: 'resize',
+            height: height
+        }, '*');
+    }
+
+    // Send height on load
+    window.addEventListener('load', sendHeight);
+    
+    // Send height whenever the window resizes or content changes
+    window.addEventListener('resize', sendHeight);
+
+    // Create an observer to watch for internal element expansions
+    const observer = new ResizeObserver(sendHeight);
+    observer.observe(document.body);
+</script>
 </head>
 <body style="margin:0;padding:16px;background:#F7F5F0">
 <div id="fx_jpy_usd" style="font-family:'DM Sans',sans-serif;font-size:13px;color:#3D3D3D;line-height:1.4;max-width:900px">
